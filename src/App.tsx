@@ -6,7 +6,7 @@ import NotFound from "./pages/NotFound";
 const App = () => (
   <>
     <Toaster />
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.PROD ? "/taran-portfolio" : "/"}>
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="*" element={<NotFound />} />
