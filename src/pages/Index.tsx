@@ -13,12 +13,15 @@ import { Growth } from '@/components/Growth';
 import { Credibility } from '@/components/Credibility';
 import { Writing } from '@/components/Writing';
 import { useEffect, useState } from 'react';
+import { initAnalytics, trackEvent } from '@/lib/analytics';
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     document.title = 'Taran Mamidala | Machine Learning & Software Engineer';
+    initAnalytics();
+    trackEvent({ action: 'page_view', label: 'portfolio_home' });
 
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
@@ -56,10 +59,10 @@ const Index = () => {
           <Skills />
           <Projects />
           <Experience />
+          <Education />
           <Growth />
           <Credibility />
           <Writing />
-          <Education />
           <Contact />
         </main>
         <Footer />

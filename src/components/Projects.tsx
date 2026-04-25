@@ -31,11 +31,12 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { publicAsset } from '@/lib/assets';
+import { trackEvent } from '@/lib/analytics';
 
 type Project = {
   title: string;
   role: string;
-  status: 'Completed' | 'Current';
+  status: 'Completed' | 'Live';
   context: string;
   overview: string;
   technologies: string[];
@@ -43,6 +44,7 @@ type Project = {
   outcome: string;
   icon: LucideIcon;
   coverImage?: string;
+  // Add real project URLs here when they are available. Keep missing GitHub/live links undefined so recruiters do not see dummy buttons.
   githubUrl?: string;
   demoUrl?: string;
 };
@@ -214,8 +216,8 @@ const projects: Project[] = [
   {
     title: 'Distributed Rate Limiter & API Gateway',
     role: 'Software Developer',
-    status: 'Current',
-    context: 'Current portfolio build',
+    status: 'Live',
+    context: 'Active portfolio build',
     overview:
       'High-throughput API gateway with distributed rate limiting using token-bucket and sliding-window algorithms backed by Redis.',
     technologies: ['Go', 'Python', 'Redis', 'Docker', 'Kubernetes', 'gRPC', 'Prometheus'],
@@ -232,8 +234,8 @@ const projects: Project[] = [
   {
     title: 'Microservices E-Commerce Platform',
     role: 'Software Developer',
-    status: 'Current',
-    context: 'Current portfolio build',
+    status: 'Live',
+    context: 'Active portfolio build',
     overview:
       'Event-driven commerce system with separated services for users, products, orders, payments, inventory, notifications, analytics, and search.',
     technologies: ['Java', 'Spring Boot', 'Kafka', 'PostgreSQL', 'Redis', 'Docker', 'AWS ECS'],
@@ -250,8 +252,8 @@ const projects: Project[] = [
   {
     title: 'Real-Time Streaming Data Pipeline',
     role: 'Data Engineer',
-    status: 'Current',
-    context: 'Current portfolio build',
+    status: 'Live',
+    context: 'Active portfolio build',
     overview:
       'Streaming data pipeline for sensor-style events with Kafka topics, Spark Structured Streaming, windowed aggregates, anomaly detection, and lake storage.',
     technologies: ['Kafka', 'Spark', 'Python', 'Parquet', 'PostgreSQL', 'Docker'],
@@ -268,8 +270,8 @@ const projects: Project[] = [
   {
     title: 'Data Lakehouse With Delta Lake',
     role: 'Data Engineer',
-    status: 'Current',
-    context: 'Current portfolio build',
+    status: 'Live',
+    context: 'Active portfolio build',
     overview:
       'Lakehouse architecture with bronze, silver, and gold layers, ACID table behavior, schema evolution, and BI-ready curated datasets.',
     technologies: ['Databricks', 'Delta Lake', 'Spark', 'Python', 'Cloud Storage', 'BI'],
@@ -286,8 +288,8 @@ const projects: Project[] = [
   {
     title: 'SaaS Project Management Platform',
     role: 'Full Stack Developer',
-    status: 'Current',
-    context: 'Current portfolio build',
+    status: 'Live',
+    context: 'Active portfolio build',
     overview:
       'Multi-tenant project management product with RBAC, collaboration workflows, subscription handling, and real-time notifications.',
     technologies: ['React', 'TypeScript', 'Node.js', 'PostgreSQL', 'Redis', 'Stripe'],
@@ -304,8 +306,8 @@ const projects: Project[] = [
   {
     title: 'Real-Time Analytics Dashboard Platform',
     role: 'Full Stack Developer',
-    status: 'Current',
-    context: 'Current portfolio build',
+    status: 'Live',
+    context: 'Active portfolio build',
     overview:
       'Custom dashboard builder with live data updates, chart composition, query controls, exports, and alert-style monitoring.',
     technologies: ['React', 'TypeScript', 'WebSockets', 'Node.js', 'Chart.js', 'PostgreSQL'],
@@ -322,8 +324,8 @@ const projects: Project[] = [
   {
     title: 'End-to-End MLOps Pipeline',
     role: 'Machine Learning Engineer',
-    status: 'Current',
-    context: 'Current portfolio build',
+    status: 'Live',
+    context: 'Active portfolio build',
     overview:
       'Production-style ML pipeline with experiment tracking, data versioning, orchestration, model registry, monitoring, and drift detection.',
     technologies: ['Python', 'MLflow', 'DVC', 'Airflow', 'FastAPI', 'Docker', 'AWS'],
@@ -340,8 +342,8 @@ const projects: Project[] = [
   {
     title: 'Real-Time Fraud Detection System',
     role: 'Machine Learning Engineer',
-    status: 'Current',
-    context: 'Current portfolio build',
+    status: 'Live',
+    context: 'Active portfolio build',
     overview:
       'Low-latency fraud detection service with streaming inference, feature engineering, model explanations, alerting, and monitoring.',
     technologies: ['Python', 'XGBoost', 'Kafka', 'Redis', 'FastAPI', 'SHAP', 'Docker'],
@@ -358,8 +360,8 @@ const projects: Project[] = [
   {
     title: 'Enterprise RAG Knowledge System',
     role: 'AI Engineer',
-    status: 'Current',
-    context: 'Current portfolio build',
+    status: 'Live',
+    context: 'Active portfolio build',
     overview:
       'Retrieval-augmented generation system for multi-source knowledge search with citations, reranking, conversation memory, and feedback loops.',
     technologies: ['Python', 'LangChain', 'OpenAI', 'Vector Database', 'FastAPI', 'PostgreSQL'],
@@ -376,8 +378,8 @@ const projects: Project[] = [
   {
     title: 'Multi-Agent AI Research System',
     role: 'AI Engineer',
-    status: 'Current',
-    context: 'Current portfolio build',
+    status: 'Live',
+    context: 'Active portfolio build',
     overview:
       'Multi-agent research workflow with specialized agents for search, extraction, analysis, validation, and report drafting.',
     technologies: ['Python', 'LangGraph', 'OpenAI', 'Tool Calling', 'Vector Search', 'FastAPI'],
@@ -398,10 +400,10 @@ const ProjectVisual = ({ project }: { project: Project }) => (
     <img
       src={publicAsset(project.coverImage || defaultProjectCover)}
       alt={`${project.title} cover`}
-      className="absolute inset-0 h-full w-full object-cover opacity-75"
+      className="absolute inset-0 h-full w-full object-cover opacity-100"
     />
-    <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/38 to-background/10" />
-    <div className="project-visual__icon">
+    <div className="absolute inset-0 bg-gradient-to-t from-background/72 via-background/18 to-transparent" />
+    <div className="project-visual__icon bg-background/75">
       <project.icon size={32} />
     </div>
     <div className="absolute right-6 top-6 rounded-full border border-primary/20 bg-background/55 px-3 py-1 text-xs font-semibold text-primary backdrop-blur-md">
@@ -410,13 +412,6 @@ const ProjectVisual = ({ project }: { project: Project }) => (
     <div className="absolute bottom-16 left-6 right-6">
       <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">{project.context}</div>
       <div className="mt-2 h-2 w-2/3 rounded-full bg-primary/55 shadow-[0_0_24px_hsl(var(--primary)/0.55)]" />
-    </div>
-    <div className="project-visual__signal" aria-hidden="true">
-      <span />
-      <span />
-      <span />
-      <span />
-      <span />
     </div>
   </div>
 );
@@ -430,7 +425,7 @@ export const Projects = () => {
 
   const orderedProjects = [...projects].sort((a, b) => {
     if (a.status !== b.status) {
-      return a.status === 'Current' ? -1 : 1;
+      return a.status === 'Live' ? -1 : 1;
     }
     return 0;
   });
@@ -457,7 +452,7 @@ export const Projects = () => {
             Selected <span className="gradient-text">Engineering Work</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Current builds first, followed by completed work from systems, data, machine learning, computer vision, analytics, and security.
+            Live builds first, followed by completed work from systems, data, machine learning, computer vision, analytics, and security.
           </p>
         </motion.div>
 
@@ -501,10 +496,10 @@ export const Projects = () => {
                     <Badge className="w-fit bg-primary/10 text-primary border-primary/20 hover:bg-primary/15">
                       {project.role}
                     </Badge>
-                    {project.status === 'Current' && (
+                    {project.status === 'Live' && (
                       <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
                         <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgb(52_211_153)]" />
-                        Current
+                        Live
                       </span>
                     )}
                   </div>
@@ -532,14 +527,22 @@ export const Projects = () => {
                     variant="outline"
                     size="sm"
                     className="flex-1 min-w-32 hover:border-primary/30 hover:text-primary"
-                    onClick={() => setActiveProject(project)}
+                    onClick={() => {
+                      trackEvent({ action: 'open_project_details', label: project.title });
+                      setActiveProject(project);
+                    }}
                   >
                     More Details
                     <ChevronRight size={16} className="ml-1" />
                   </Button>
                   {project.githubUrl && (
                     <Button asChild variant="outline" size="sm" className="flex-1 min-w-28 hover:border-primary/30 hover:text-primary">
-                      <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">
+                      <a
+                        href={project.githubUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => trackEvent({ action: 'open_project_code', label: project.title })}
+                      >
                         <Github size={16} className="mr-2" />
                         Code
                       </a>
@@ -547,7 +550,12 @@ export const Projects = () => {
                   )}
                   {project.demoUrl && (
                     <Button asChild size="sm" className="flex-1 min-w-28 btn-primary">
-                      <a href={project.demoUrl} target="_blank" rel="noopener noreferrer">
+                      <a
+                        href={project.demoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => trackEvent({ action: 'open_project_live', label: project.title })}
+                      >
                         <ExternalLink size={16} className="mr-2" />
                         Demo
                       </a>

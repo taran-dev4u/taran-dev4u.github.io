@@ -57,30 +57,30 @@
   }
 
   .dark {
-    --background: 24 22% 5%;
-    --foreground: 32 25% 96%;
-    --card: 24 18% 9%;
-    --card-foreground: 32 25% 96%;
-    --popover: 24 18% 9%;
-    --popover-foreground: 32 25% 96%;
+    --background: 0 0% 3%;
+    --foreground: 0 0% 96%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 96%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 96%;
     --primary: 26 96% 58%;
-    --primary-foreground: 24 30% 8%;
-    --secondary: 24 15% 14%;
-    --secondary-foreground: 32 25% 96%;
-    --muted: 24 14% 16%;
-    --muted-foreground: 30 12% 70%;
+    --primary-foreground: 0 0% 5%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 0 0% 13%;
+    --muted-foreground: 0 0% 70%;
     --accent: 36 100% 62%;
-    --accent-foreground: 24 30% 8%;
+    --accent-foreground: 0 0% 5%;
     --destructive: 0 62% 30%;
-    --destructive-foreground: 32 25% 96%;
-    --border: 24 16% 22%;
-    --input: 24 16% 18%;
+    --destructive-foreground: 0 0% 96%;
+    --border: 0 0% 19%;
+    --input: 0 0% 16%;
     --ring: 26 96% 58%;
-    --sidebar-background: 24 22% 5%;
-    --sidebar-foreground: 32 25% 96%;
-    --sidebar-accent: 24 15% 14%;
-    --sidebar-accent-foreground: 32 25% 96%;
-    --sidebar-border: 24 16% 22%;
+    --sidebar-background: 0 0% 3%;
+    --sidebar-foreground: 0 0% 96%;
+    --sidebar-accent: 0 0% 10%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 0 0% 19%;
   }
 }
 
@@ -600,17 +600,7 @@
   }
 
   .project-visual::before {
-    content: '';
-    position: absolute;
-    inset: 18px;
-    border-radius: 22px;
-    border: 1px solid hsl(var(--foreground) / 0.08);
-    background-image:
-      linear-gradient(to right, hsl(var(--foreground) / 0.06) 1px, transparent 1px),
-      linear-gradient(to bottom, hsl(var(--foreground) / 0.06) 1px, transparent 1px);
-    background-size: 28px 28px;
-    transform: perspective(620px) rotateX(58deg) rotateZ(-8deg) translateY(18px);
-    opacity: 0.8;
+    content: none;
   }
 
   .project-visual__icon {
@@ -621,32 +611,6 @@
     box-shadow: 0 20px 40px -24px hsl(var(--primary) / 0.7);
   }
 
-  .project-visual__signal {
-    @apply absolute bottom-6 left-6 right-6 grid grid-cols-5 gap-2;
-  }
-
-  .project-visual__signal span {
-    height: 5px;
-    border-radius: 999px;
-    background: linear-gradient(90deg, hsl(var(--accent) / 0.3), hsl(var(--primary) / 0.85));
-    animation: signal-pulse 2.4s ease-in-out infinite;
-  }
-
-  .project-visual__signal span:nth-child(2) {
-    animation-delay: 0.12s;
-  }
-
-  .project-visual__signal span:nth-child(3) {
-    animation-delay: 0.24s;
-  }
-
-  .project-visual__signal span:nth-child(4) {
-    animation-delay: 0.36s;
-  }
-
-  .project-visual__signal span:nth-child(5) {
-    animation-delay: 0.48s;
-  }
 }
 
 @layer utilities {
@@ -750,19 +714,6 @@
     }
   }
 
-  @keyframes signal-pulse {
-    0%,
-    100% {
-      opacity: 0.28;
-      transform: scaleX(0.72);
-    }
-
-    50% {
-      opacity: 1;
-      transform: scaleX(1);
-    }
-  }
-
   @keyframes hand-wave {
     0%,
     100% {
@@ -827,7 +778,6 @@
     .glass-card::before,
     .floating-box,
     .wave-hand,
-    .project-visual__signal span,
     .scroll-cue span {
       animation: none;
       transition: none;
