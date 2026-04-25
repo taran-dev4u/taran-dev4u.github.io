@@ -30,11 +30,11 @@ export const Hero = () => {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
               </span>
-              Open to Work & Contributions
+              Open to work.
             </div>
 
             <h1 className="font-display text-3xl sm:text-5xl lg:text-6xl font-bold mb-4 leading-tight text-balance">
-              <span className="wave-hand" aria-hidden="true">👋</span> Hello, I'm <br className="sm:hidden" />
+              <span className="wave-hand" aria-hidden="true">{'\u{1F44B}'}</span> Hello, I'm <br className="sm:hidden" />
               <span className="gradient-text">Taran Mamidala</span>
             </h1>
 
@@ -57,7 +57,7 @@ export const Hero = () => {
             </p>
 
             <div className="mx-auto flex max-w-[18.5rem] flex-wrap justify-center gap-3 mb-6 sm:max-w-[20rem] lg:mx-0 lg:max-w-none lg:justify-start">
-              {['Software', 'Data', 'Full Stack', 'ML', 'AI'].map((item) => (
+              {['RAG', 'MLOps', 'Vector DBs', 'LLMOps', 'Cloud AI'].map((item) => (
                 <span key={item} className="tech-chip text-xs sm:text-sm">
                   <Sparkles size={13} />
                   {item}
@@ -68,7 +68,7 @@ export const Hero = () => {
             <div className="mx-auto flex max-w-[18.5rem] flex-wrap justify-center gap-4 mb-8 text-xs sm:max-w-[20rem] sm:text-sm text-muted-foreground lg:mx-0 lg:max-w-none lg:justify-start">
               <div className="flex items-center gap-2">
                 <MapPin size={16} className="text-primary" />
-                <span>Buffalo, NY</span>
+                <span>Buffalo, NY · open to relocation</span>
               </div>
               <div className="flex items-center gap-2">
                 <Mail size={16} className="text-primary" />
@@ -136,3 +136,4 @@ export const Hero = () => {
     </section>
   );
 };
+

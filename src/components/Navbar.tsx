@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { Menu, Moon, Music2, Sun, VolumeX, X } from 'lucide-react';
+import { ArrowUp, Menu, Moon, Music2, Sun, VolumeX, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -135,21 +135,11 @@ export const Navbar = () => {
           isScrolled && "rounded-full border border-border/50 bg-background/72 px-4 py-2 shadow-2xl shadow-primary/10 backdrop-blur-xl"
         )}>
           <div className="font-display text-xl font-bold gradient-text shrink-0">
-            Taran.M
+            Taran
           </div>
 
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <div className="mobile-nav-actions flex items-center gap-2 lg:hidden">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10 shrink-0 rounded-full border border-border/60 bg-background/85 text-foreground shadow-lg shadow-primary/10 backdrop-blur-md hover:border-primary/40 hover:text-primary"
-                onClick={toggleMusic}
-                aria-label={musicLabel}
-                title={musicLabel}
-              >
-                {musicEnabled ? <VolumeX size={18} /> : <Music2 size={18} />}
-              </Button>
               <Button
                 variant="ghost"
                 size="icon"
@@ -193,17 +183,6 @@ export const Navbar = () => {
               variant="ghost"
               size="icon"
               className="hidden h-10 w-10 shrink-0 rounded-full border border-border/50 bg-background/60 backdrop-blur-md hover:border-primary/40 hover:text-primary lg:inline-flex"
-              onClick={toggleMusic}
-              aria-label={musicLabel}
-              title={musicLabel}
-            >
-              {musicEnabled ? <VolumeX size={18} /> : <Music2 size={18} />}
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className="hidden h-10 w-10 shrink-0 rounded-full border border-border/50 bg-background/60 backdrop-blur-md hover:border-primary/40 hover:text-primary lg:inline-flex"
               onClick={toggleTheme}
               aria-label={themeLabel}
               title={themeLabel}
@@ -212,6 +191,30 @@ export const Navbar = () => {
             </Button>
           </div>
         </div>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className="fixed bottom-5 left-5 z-50 h-11 w-11 rounded-full border border-border/60 bg-background/85 text-foreground shadow-lg shadow-primary/10 backdrop-blur-md hover:border-primary/40 hover:text-primary"
+          onClick={toggleMusic}
+          aria-label={musicLabel}
+          title={musicLabel}
+        >
+          {musicEnabled ? <VolumeX size={18} /> : <Music2 size={18} />}
+        </Button>
+
+        {isScrolled && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="fixed bottom-5 right-5 z-50 h-11 w-11 rounded-full border border-primary/40 bg-primary text-primary-foreground shadow-lg shadow-primary/20 backdrop-blur-md hover:bg-primary/90"
+            onClick={() => scrollToSection('#hero')}
+            aria-label="Back to top"
+            title="Back to top"
+          >
+            <ArrowUp size={18} />
+          </Button>
+        )}
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (

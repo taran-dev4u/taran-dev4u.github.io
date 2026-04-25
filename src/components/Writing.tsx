@@ -70,6 +70,23 @@ export const Writing = () => {
             </motion.a>
           ))}
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, delay: 0.32 }}
+          className="mt-10 text-center"
+        >
+          <a
+            href="https://medium.com/@taranmamidala"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-secondary"
+          >
+            More
+            <ArrowUpRight size={18} />
+          </a>
+        </motion.div>
       </div>
     </section>
   );

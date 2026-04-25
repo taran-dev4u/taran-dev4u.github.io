@@ -1,11 +1,11 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { Bot, Cloud, DatabaseZap, ShieldCheck, Workflow } from 'lucide-react';
+import { Bot, Cloud, DatabaseZap, Workflow } from 'lucide-react';
 
 const topics = [
   {
-    title: 'RAG, Search, and Knowledge Systems',
-    description: 'Hybrid retrieval, reranking, citations, vector search, and grounded answers for practical AI products.',
+    title: 'RAG and Vector Knowledge Systems',
+    description: 'Hybrid retrieval, reranking, citations, vector databases, and grounded answers for practical AI products.',
     icon: DatabaseZap,
   },
   {
@@ -14,14 +14,9 @@ const topics = [
     icon: Bot,
   },
   {
-    title: 'LLMOps and Model Evaluation',
-    description: 'Prompt/version control, evaluation harnesses, observability, regression tests, cost, and latency tracking.',
+    title: 'LLMOps, Evaluation, and AI Security',
+    description: 'Prompt/version control, evaluation harnesses, observability, regression tests, cost, latency, privacy, and prompt-injection awareness.',
     icon: Workflow,
-  },
-  {
-    title: 'AI Security and Cloud AI',
-    description: 'Prompt-injection awareness, privacy, access control, cloud deployment, and safe automation patterns.',
-    icon: ShieldCheck,
   },
 ];
 
@@ -49,7 +44,7 @@ export const Growth = () => {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-5">
+        <div className="grid md:grid-cols-3 gap-5">
           {topics.map((topic, index) => (
             <motion.div
               key={topic.title}

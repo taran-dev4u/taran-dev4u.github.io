@@ -92,7 +92,7 @@ export const Education = () => {
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-[1fr_0.9fr] gap-8 max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -115,7 +115,7 @@ export const Education = () => {
                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <Calendar size={16} />
-                    <span>Aug 2024 - Dec 2025</span>
+                  <span>Aug 2024 - Dec 2025</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <MapPin size={16} />
@@ -155,24 +155,37 @@ export const Education = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.35 }}
-            className="glass-card p-8 hover:border-primary/30 transition-all duration-300"
+            className="glass-card p-8 hover:border-primary/30 transition-all duration-300 group"
           >
             <div className="flex items-start gap-4 mb-6">
               <div className="brand-mark h-16 w-16 bg-background/70 p-2" aria-label="Vellore Institute of Technology mark">
                 <img src={publicAsset('VIT%20logo.png')} alt="VIT logo" className="max-h-full max-w-full object-contain" />
               </div>
-              <div>
-                <h3 className="font-display text-xl font-bold mb-2">
+              <div className="flex-1">
+                <h3 className="font-display text-xl font-bold mb-2 group-hover:text-primary transition-colors">
                   B.Tech. in Computer Science and Engineering
                 </h3>
                 <h4 className="text-lg font-semibold text-primary mb-3">
-                  Vellore Institute of Technology - AP University
+                  Vellore Institute of Technology
                 </h4>
-                <p className="text-sm text-muted-foreground">
-                  Undergraduate foundation in software engineering, databases, algorithms, analytics, systems, and applied computer science.
-                </p>
+
+                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <Calendar size={16} />
+                    <span>2019 - 2023</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin size={16} />
+                    <span>India</span>
+                  </div>
+                </div>
               </div>
             </div>
+
+            <p className="text-muted-foreground mb-6 leading-relaxed">
+              Undergraduate foundation in software engineering, databases, algorithms, analytics, systems,
+              and applied computer science.
+            </p>
 
             <div className="flex flex-wrap gap-2">
               {displayedUndergrad.map((course) => (

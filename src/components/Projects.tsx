@@ -217,7 +217,7 @@ const projects: Project[] = [
     title: 'Distributed Rate Limiter & API Gateway',
     role: 'Software Developer',
     status: 'Live',
-    context: 'Active portfolio build',
+    context: 'Distributed systems reliability project',
     overview:
       'High-throughput API gateway with distributed rate limiting using token-bucket and sliding-window algorithms backed by Redis.',
     technologies: ['Go', 'Python', 'Redis', 'Docker', 'Kubernetes', 'gRPC', 'Prometheus'],
@@ -235,7 +235,7 @@ const projects: Project[] = [
     title: 'Microservices E-Commerce Platform',
     role: 'Software Developer',
     status: 'Live',
-    context: 'Active portfolio build',
+    context: 'Event-driven backend architecture project',
     overview:
       'Event-driven commerce system with separated services for users, products, orders, payments, inventory, notifications, analytics, and search.',
     technologies: ['Java', 'Spring Boot', 'Kafka', 'PostgreSQL', 'Redis', 'Docker', 'AWS ECS'],
@@ -253,7 +253,7 @@ const projects: Project[] = [
     title: 'Real-Time Streaming Data Pipeline',
     role: 'Data Engineer',
     status: 'Live',
-    context: 'Active portfolio build',
+    context: 'Streaming analytics engineering project',
     overview:
       'Streaming data pipeline for sensor-style events with Kafka topics, Spark Structured Streaming, windowed aggregates, anomaly detection, and lake storage.',
     technologies: ['Kafka', 'Spark', 'Python', 'Parquet', 'PostgreSQL', 'Docker'],
@@ -271,7 +271,7 @@ const projects: Project[] = [
     title: 'Data Lakehouse With Delta Lake',
     role: 'Data Engineer',
     status: 'Live',
-    context: 'Active portfolio build',
+    context: 'Modern lakehouse architecture project',
     overview:
       'Lakehouse architecture with bronze, silver, and gold layers, ACID table behavior, schema evolution, and BI-ready curated datasets.',
     technologies: ['Databricks', 'Delta Lake', 'Spark', 'Python', 'Cloud Storage', 'BI'],
@@ -289,7 +289,7 @@ const projects: Project[] = [
     title: 'SaaS Project Management Platform',
     role: 'Full Stack Developer',
     status: 'Live',
-    context: 'Active portfolio build',
+    context: 'Multi-tenant product engineering project',
     overview:
       'Multi-tenant project management product with RBAC, collaboration workflows, subscription handling, and real-time notifications.',
     technologies: ['React', 'TypeScript', 'Node.js', 'PostgreSQL', 'Redis', 'Stripe'],
@@ -307,7 +307,7 @@ const projects: Project[] = [
     title: 'Real-Time Analytics Dashboard Platform',
     role: 'Full Stack Developer',
     status: 'Live',
-    context: 'Active portfolio build',
+    context: 'Real-time product analytics project',
     overview:
       'Custom dashboard builder with live data updates, chart composition, query controls, exports, and alert-style monitoring.',
     technologies: ['React', 'TypeScript', 'WebSockets', 'Node.js', 'Chart.js', 'PostgreSQL'],
@@ -325,7 +325,7 @@ const projects: Project[] = [
     title: 'End-to-End MLOps Pipeline',
     role: 'Machine Learning Engineer',
     status: 'Live',
-    context: 'Active portfolio build',
+    context: 'Production ML lifecycle project',
     overview:
       'Production-style ML pipeline with experiment tracking, data versioning, orchestration, model registry, monitoring, and drift detection.',
     technologies: ['Python', 'MLflow', 'DVC', 'Airflow', 'FastAPI', 'Docker', 'AWS'],
@@ -343,7 +343,7 @@ const projects: Project[] = [
     title: 'Real-Time Fraud Detection System',
     role: 'Machine Learning Engineer',
     status: 'Live',
-    context: 'Active portfolio build',
+    context: 'Low-latency risk modeling project',
     overview:
       'Low-latency fraud detection service with streaming inference, feature engineering, model explanations, alerting, and monitoring.',
     technologies: ['Python', 'XGBoost', 'Kafka', 'Redis', 'FastAPI', 'SHAP', 'Docker'],
@@ -361,7 +361,7 @@ const projects: Project[] = [
     title: 'Enterprise RAG Knowledge System',
     role: 'AI Engineer',
     status: 'Live',
-    context: 'Active portfolio build',
+    context: 'Enterprise AI knowledge platform project',
     overview:
       'Retrieval-augmented generation system for multi-source knowledge search with citations, reranking, conversation memory, and feedback loops.',
     technologies: ['Python', 'LangChain', 'OpenAI', 'Vector Database', 'FastAPI', 'PostgreSQL'],
@@ -379,7 +379,7 @@ const projects: Project[] = [
     title: 'Multi-Agent AI Research System',
     role: 'AI Engineer',
     status: 'Live',
-    context: 'Active portfolio build',
+    context: 'Agentic AI research workflow project',
     overview:
       'Multi-agent research workflow with specialized agents for search, extraction, analysis, validation, and report drafting.',
     technologies: ['Python', 'LangGraph', 'OpenAI', 'Tool Calling', 'Vector Search', 'FastAPI'],

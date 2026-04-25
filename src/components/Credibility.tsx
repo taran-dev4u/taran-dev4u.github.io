@@ -174,13 +174,20 @@ export const Credibility = () => {
               transition={{ duration: 0.55, delay: index * 0.07 }}
               className="glass-card p-6 sm:p-8"
             >
-              <div className="grid gap-5 lg:grid-cols-[auto_1fr_auto] lg:items-start">
+              <div className="grid gap-5 lg:grid-cols-[auto_1fr] lg:items-start">
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10 text-primary">
                   <item.icon size={28} />
                 </div>
                 <div>
                   <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary">{item.label}</p>
-                  <h3 className="font-display text-2xl font-bold">{item.title}</h3>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <h3 className="font-display text-2xl font-bold">{item.title}</h3>
+                    {/* Replace href with the real public certificate, hackathon, research, or leadership proof link when available. */}
+                    <a href={item.href} className="btn-secondary w-fit whitespace-nowrap text-sm">
+                      {item.linkLabel}
+                      <ExternalLink size={15} />
+                    </a>
+                  </div>
                   <p className="mt-3 leading-relaxed text-muted-foreground">{item.description}</p>
                   <ul className="mt-5 grid gap-2 md:grid-cols-3">
                     {item.details.map((detail) => (
@@ -191,11 +198,6 @@ export const Credibility = () => {
                     ))}
                   </ul>
                 </div>
-                {/* Replace href with the real public certificate, hackathon, research, or leadership proof link when available. */}
-                <a href={item.href} className="btn-secondary whitespace-nowrap text-sm">
-                  {item.linkLabel}
-                  <ExternalLink size={15} />
-                </a>
               </div>
             </motion.article>
           ))}
@@ -221,12 +223,19 @@ export const Credibility = () => {
                 transition={{ duration: 0.5, delay: 0.35 + index * 0.06 }}
                 className="glass-card p-6 sm:p-8"
               >
-                <div className="grid gap-5 lg:grid-cols-[auto_1fr_auto] lg:items-start">
+                <div className="grid gap-5 lg:grid-cols-[auto_1fr] lg:items-start">
                   <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10 text-primary">
                     <item.icon size={24} />
                   </div>
                   <div>
-                    <h4 className="font-display text-2xl font-semibold">{item.title}</h4>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                      <h4 className="font-display text-2xl font-semibold">{item.title}</h4>
+                      {/* Replace href with a real club page, event album, Google Drive proof, or LinkedIn post when available. */}
+                      <a href={item.href} className="btn-secondary w-fit whitespace-nowrap text-sm">
+                        Club reference
+                        <ExternalLink size={15} />
+                      </a>
+                    </div>
                     <p className="mt-1 text-sm font-semibold uppercase tracking-wide text-primary">{item.role}</p>
                     <p className="mt-4 leading-relaxed text-muted-foreground">{item.description}</p>
                     <ul className="mt-5 grid gap-2 md:grid-cols-3">
@@ -238,11 +247,6 @@ export const Credibility = () => {
                       ))}
                     </ul>
                   </div>
-                  {/* Replace href with a real club page, event album, Google Drive proof, or LinkedIn post when available. */}
-                  <a href={item.href} className="btn-secondary whitespace-nowrap text-sm">
-                    Club reference
-                    <ExternalLink size={15} />
-                  </a>
                 </div>
               </motion.article>
             ))}
