@@ -158,6 +158,22 @@
     overflow: hidden;
   }
 
+  .ai-background-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    opacity: 0.78;
+    mix-blend-mode: screen;
+  }
+
+  :root:not(.dark) .ai-background-canvas {
+    opacity: 0.42;
+    mix-blend-mode: multiply;
+  }
+
   .interactive-background::before {
     content: '';
     position: absolute;
