@@ -190,10 +190,10 @@ export const AskTaranAI = () => {
       </Button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-[95] flex items-end justify-center bg-background/45 px-3 pb-3 backdrop-blur-sm sm:items-center sm:px-6 sm:pb-6">
+        <div className="fixed inset-0 z-[95] flex justify-end bg-background/45 backdrop-blur-sm">
           <button className="absolute inset-0" type="button" aria-label="Close Ask Taran AI" onClick={closeAssistant} />
 
-          <section className="glass-card relative flex h-[88vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl sm:h-[82vh]">
+          <section className="glass-card relative flex h-full w-full max-w-[31rem] flex-col overflow-hidden rounded-none border-l border-border/60 sm:max-w-[34rem]">
             <header className="border-b border-border/50 p-4 sm:p-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -258,64 +258,87 @@ export const AskTaranAI = () => {
               )}
             </header>
 
-            <div className="grid min-h-0 flex-1 lg:grid-cols-[1fr_18rem]">
-              <div className="flex min-h-0 flex-col">
-                <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
-                  {messages.map((message) => (
-                    <article
-                      key={message.id}
-                      className={`max-w-[92%] rounded-2xl border p-4 ${
-                        message.role === 'user'
-                          ? 'ml-auto border-primary/35 bg-primary/12'
-                          : 'border-border/50 bg-background/42'
-                      }`}
-                    >
-                      <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-                        {message.role === 'user' ? <MessageSquare size={14} /> : <Sparkles size={14} />}
-                        {message.role === 'user' ? 'Question' : 'Portfolio Answer'}
-                      </div>
-                      <p className="whitespace-pre-line text-sm leading-relaxed text-foreground/90">{message.content}</p>
-
-                      {!!message.citations?.length && (
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          {message.citations.map((citation) => (
-                            <a
-                              key={`${message.id}-${citation.href}-${citation.label}`}
-                              href={citation.href}
-                              onClick={() => {
-                                setIsOpen(false);
-                                trackEvent({ action: 'open_ai_citation', label: citation.label });
-                              }}
-                              className="tech-chip text-xs hover:border-primary/50 hover:text-primary"
-                            >
-                              {citation.label}
-                              <ExternalLink size={12} />
-                            </a>
-                          ))}
-                        </div>
-                      )}
-
-                      {!!message.matchedTopics?.length && (
-                        <div className="mt-3 flex flex-wrap gap-1.5">
-                          {message.matchedTopics.slice(0, 6).map((topic) => (
-                            <span key={`${message.id}-${topic}`} className="rounded-full bg-secondary/60 px-2 py-1 text-[0.68rem] text-muted-foreground">
-                              {topic}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </article>
-                  ))}
-
-                  {isLoading && (
-                    <div className="flex items-center gap-3 rounded-2xl border border-border/50 bg-background/42 p-4 text-sm text-muted-foreground">
-                      <Loader2 size={18} className="animate-spin text-primary" />
-                      Retrieving evidence and preparing a grounded answer...
-                    </div>
-                  )}
+            <div className="flex min-h-0 flex-1 flex-col">
+              <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
+                <div className="rounded-2xl border border-border/50 bg-background/35 p-3">
+                  <h3 className="mb-3 font-display text-sm font-semibold">Suggested Questions</h3>
+                  <div className="flex gap-2 overflow-x-auto pb-1">
+                    {visibleQuestions.map((question) => (
+                      <button
+                        key={question}
+                        type="button"
+                        onClick={() => void sendMessage(question)}
+                        className="min-w-[13rem] rounded-xl border border-border/50 bg-background/45 px-3 py-2 text-left text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                      >
+                        {question}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                <form ref={formRef} onSubmit={handleSubmit} className="border-t border-border/50 p-4 sm:p-5">
+                {messages.map((message) => (
+                  <article
+                    key={message.id}
+                    className={`max-w-[92%] rounded-2xl border p-4 ${
+                      message.role === 'user'
+                        ? 'ml-auto border-primary/35 bg-primary/12'
+                        : 'border-border/50 bg-background/42'
+                    }`}
+                  >
+                    <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+                      {message.role === 'user' ? <MessageSquare size={14} /> : <Sparkles size={14} />}
+                      {message.role === 'user' ? 'Question' : 'Portfolio Answer'}
+                    </div>
+                    <p className="whitespace-pre-line text-sm leading-relaxed text-foreground/90">{message.content}</p>
+
+                    {!!message.citations?.length && (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {message.citations.map((citation) => (
+                          <a
+                            key={`${message.id}-${citation.href}-${citation.label}`}
+                            href={citation.href}
+                            onClick={() => {
+                              setIsOpen(false);
+                              trackEvent({ action: 'open_ai_citation', label: citation.label });
+                            }}
+                            className="tech-chip text-xs hover:border-primary/50 hover:text-primary"
+                          >
+                            {citation.label}
+                            <ExternalLink size={12} />
+                          </a>
+                        ))}
+                      </div>
+                    )}
+
+                    {!!message.matchedTopics?.length && (
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {message.matchedTopics.slice(0, 6).map((topic) => (
+                          <span key={`${message.id}-${topic}`} className="rounded-full bg-secondary/60 px-2 py-1 text-[0.68rem] text-muted-foreground">
+                            {topic}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </article>
+                ))}
+
+                {isLoading && (
+                  <div className="flex items-center gap-3 rounded-2xl border border-border/50 bg-background/42 p-4 text-sm text-muted-foreground">
+                    <Loader2 size={18} className="animate-spin text-primary" />
+                    Retrieving evidence and preparing a grounded answer...
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t border-border/50 bg-background/25 p-4">
+                <div className="mb-3 rounded-2xl border border-primary/20 bg-primary/10 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">How it works</p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    The assistant retrieves portfolio evidence first, then answers with citations. On GitHub Pages backup, it falls back to local grounded retrieval.
+                  </p>
+                </div>
+
+                <form ref={formRef} onSubmit={handleSubmit}>
                   <div className="flex gap-3">
                     <input
                       value={input}
@@ -330,29 +353,6 @@ export const AskTaranAI = () => {
                   </div>
                 </form>
               </div>
-
-              <aside className="hidden border-l border-border/50 bg-background/22 p-4 lg:block">
-                <h3 className="font-display text-lg font-semibold">Suggested Questions</h3>
-                <div className="mt-4 space-y-2">
-                  {visibleQuestions.map((question) => (
-                    <button
-                      key={question}
-                      type="button"
-                      onClick={() => void sendMessage(question)}
-                      className="w-full rounded-xl border border-border/50 bg-background/40 px-3 py-3 text-left text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
-                    >
-                      {question}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="mt-6 rounded-2xl border border-primary/20 bg-primary/10 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">How it works</p>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    The assistant retrieves portfolio evidence first, then answers with citations. On GitHub Pages backup, it falls back to local grounded retrieval.
-                  </p>
-                </div>
-              </aside>
             </div>
           </section>
         </div>

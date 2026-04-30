@@ -8,12 +8,10 @@ import { Education } from '@/components/Education';
 import { Contact } from '@/components/Contact';
 import { Footer } from '@/components/Footer';
 import { InteractiveBackground } from '@/components/InteractiveBackground';
-import { AIBackgroundCanvas } from '@/components/AIBackgroundCanvas';
 import { Preloader } from '@/components/Preloader';
 import { Growth } from '@/components/Growth';
 import { Credibility } from '@/components/Credibility';
 import { Writing } from '@/components/Writing';
-import { PortfolioStrategy } from '@/components/PortfolioStrategy';
 import { AskTaranAI } from '@/components/AskTaranAI';
 import { useEffect, useState } from 'react';
 import { initAnalytics, trackEvent } from '@/lib/analytics';
@@ -53,7 +51,6 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <InteractiveBackground />
-      <AIBackgroundCanvas />
       {isLoading && <Preloader />}
       <div className="relative z-10">
         <Navbar />
@@ -62,7 +59,6 @@ const Index = () => {
           <About />
           <Skills />
           <Projects />
-          <PortfolioStrategy />
           <Experience />
           <Education />
           <Growth />
