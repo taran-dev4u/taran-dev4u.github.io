@@ -23,8 +23,8 @@ npm run dev
 For the Ask Taran AI backend, copy `.env.example` to `.env.local` and set:
 
 ```bash
-OPENAI_API_KEY=your_server_side_key
-OPENAI_MODEL=gpt-5-mini
+GROQ_API_KEY=your_server_side_key
+GROQ_MODEL=llama-3.1-8b-instant
 ```
 
 ## Production Build
@@ -39,8 +39,8 @@ This project is configured for Vercel as the primary deployment. Vercel builds t
 
 Required Vercel environment variables:
 
-- `OPENAI_API_KEY`
-- `OPENAI_MODEL` (optional, defaults to `gpt-5-mini`)
+- `GROQ_API_KEY`
+- `GROQ_MODEL` (optional, defaults to `llama-3.1-8b-instant`)
 - `VITE_GA_MEASUREMENT_ID` or Umami variables if analytics is enabled
 
 GitHub Pages remains a static backup. The workflow in `.github/workflows/deploy.yml`
@@ -53,4 +53,4 @@ In the GitHub repository settings, set Pages source to **GitHub Actions**.
 - The favicon is generated from Taran's `tm.png` logo.
 - The profile image is optimized as WebP for faster loading.
 - Contact form submission opens a prefilled email draft, keeping the implementation simple and transparent.
-- Ask Taran AI retrieves from a structured local portfolio knowledge base first, then calls the OpenAI Responses API only from the serverless route when the API key is configured.
+- Ask Taran AI retrieves from a structured local portfolio knowledge base first, then calls Groq's fast Llama chat API only from the serverless route when the API key is configured.

@@ -37,18 +37,8 @@ const readBody = async (req: any): Promise<ChatRequest> => {
   return raw ? JSON.parse(raw) : {};
 };
 
-const extractOutputText = (payload: any) => {
-  if (typeof payload?.output_text === 'string') return payload.output_text;
-
-  const parts: string[] = [];
-  for (const item of payload?.output || []) {
-    for (const content of item?.content || []) {
-      if (typeof content?.text === 'string') parts.push(content.text);
-    }
-  }
-
-  return parts.join('\n').trim();
-};
+const extractGroqOutputText = (payload: any) =>
+  String(payload?.choices?.[0]?.message?.content || '').trim();
 
 const inferSuggestedQuestions = (mode: ChatMode, selectedRole?: string) => {
   if (mode === 'role_match' && selectedRole) {
@@ -145,10 +135,10 @@ export default async function handler(req: any, res: any) {
     });
   }
 
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return json(res, 503, {
-      error: 'AI backend is not configured.',
+      error: 'Free LLM backend is not configured.',
       fallback: {
         answer: buildLocalPortfolioAnswer(message, matches, { selectedRole }),
         citations,
@@ -159,25 +149,34 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const response = await fetch('https://api.openai.com/v1/responses', {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: process.env.OPENAI_MODEL || 'gpt-5-mini',
-        instructions:
-          'You are Ask Taran AI, a portfolio assistant for recruiters. Answer only from the supplied portfolio context. Be specific, concise, honest, and cite relevant portfolio sections conceptually without markdown footnote syntax.',
-        input: buildPrompt({ message, selectedRole, contextBlocks: matches }),
-        max_output_tokens: 700,
+        model: process.env.GROQ_MODEL || 'llama-3.1-8b-instant',
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You are Ask Taran AI, a portfolio assistant for recruiters. Answer only from the supplied portfolio context. Be specific, concise, honest, and cite relevant portfolio sections conceptually without markdown footnote syntax.',
+          },
+          {
+            role: 'user',
+            content: buildPrompt({ message, selectedRole, contextBlocks: matches }),
+          },
+        ],
+        temperature: 0.35,
+        max_completion_tokens: 700,
       }),
     });
 
     const payload: any = await response.json();
     if (!response.ok) {
       return json(res, 502, {
-        error: payload?.error?.message || 'OpenAI request failed.',
+        error: payload?.error?.message || 'Groq request failed.',
         fallback: {
           answer: buildLocalPortfolioAnswer(message, matches, { selectedRole }),
           citations,
@@ -187,7 +186,7 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    const answer = extractOutputText(payload) || buildLocalPortfolioAnswer(message, matches, { selectedRole });
+    const answer = extractGroqOutputText(payload) || buildLocalPortfolioAnswer(message, matches, { selectedRole });
 
     return json(res, 200, {
       answer,
