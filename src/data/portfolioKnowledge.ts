@@ -257,6 +257,90 @@ export const portfolioKnowledge: PortfolioKnowledgeItem[] = [
     href: '#projects',
   },
   {
+    id: 'project-aviation',
+    title: 'Aviation Accident Analysis',
+    section: 'projects',
+    roleTags: ['Data Engineer', 'Analytics Engineer'],
+    skillTags: ['Python', 'Pandas', 'EDA', 'data cleaning', 'visualization', 'aviation safety'],
+    summary:
+      'Aviation accident analysis project using crash records from 1948 to 2022 with data cleaning, EDA, trend analysis, and safety-focused interpretation.',
+    details: [
+      'The report describes 10 data-cleaning steps and 10 exploratory analysis steps.',
+      'The project studies accident trends, causes, fatalities, weather or technical factors, and location patterns.',
+    ],
+    href: '#projects',
+  },
+  {
+    id: 'project-pintos-user-programs',
+    title: 'Pintos User Programs and System Calls',
+    section: 'projects',
+    roleTags: ['Software Engineer', 'Systems Engineer'],
+    skillTags: ['C', 'Pintos OS', 'system calls', 'process management', 'file descriptors', 'GDB'],
+    summary:
+      'Operating systems project implementing Pintos user-program support, argument passing, syscall handling, pointer validation, process loading, and file descriptor behavior.',
+    details: [
+      'The design document covers command-line parsing, stack setup, parent-child load synchronization, and syscall support.',
+      'The project strengthened systems programming work around kernel/user boundaries and process control.',
+    ],
+    href: '#projects',
+  },
+  {
+    id: 'project-penguins-diamonds-ml',
+    title: 'Penguin Classification and Diamonds Price Prediction',
+    section: 'projects',
+    roleTags: ['Machine Learning Engineer', 'Data Scientist'],
+    skillTags: ['Python', 'Pandas', 'Scikit-learn', 'classification', 'regression', 'feature engineering'],
+    summary:
+      'Machine learning coursework covering data cleaning, feature preparation, classification on penguin records, and regression-style prediction on structured datasets such as diamonds.',
+    details: [
+      'The assignments covered missing values, outliers, encoding, feature selection, normalization, and train-test splitting.',
+      'The work reinforced practical ML habits before model comparison and evaluation.',
+    ],
+    href: '#projects',
+  },
+  {
+    id: 'project-treasure-hunt-rl',
+    title: 'Treasure Hunt Grid World Reinforcement Learning',
+    section: 'projects',
+    roleTags: ['Machine Learning Engineer', 'AI Engineer'],
+    skillTags: ['Python', 'NumPy', 'SARSA', 'Double Q-learning', 'reinforcement learning', 'policy learning'],
+    summary:
+      'A 5x5 treasure-hunt grid-world environment where an agent learns to collect a key, avoid traps, and reach a goal through reward-driven policy learning.',
+    details: [
+      'The report defines 25 states, four movement actions, key/trap/goal rewards, and a clear agent objective.',
+      'The project shows reinforcement learning environment design and comparison of learning behavior.',
+    ],
+    href: '#projects',
+  },
+  {
+    id: 'project-product-review-sentiment',
+    title: 'Online Product Reviews Sentiment Analysis',
+    section: 'projects',
+    roleTags: ['Machine Learning Engineer', 'Full Stack Developer'],
+    skillTags: ['Python', 'BeautifulSoup', 'NLP', 'Random Forest', 'SVM', 'Flask', 'Scikit-learn'],
+    summary:
+      'NLP project for product-review sentiment classification using scraped review data, preprocessing, model comparison, and a Random Forest final model.',
+    details: [
+      'The report compares SVM, Logistic Regression, and Random Forest using accuracy, precision, and recall.',
+      'Random Forest reached 95.0% accuracy in the project report.',
+    ],
+    href: '#projects',
+  },
+  {
+    id: 'project-movie-reviews-db',
+    title: 'Movie Reviews Website Database',
+    section: 'projects',
+    roleTags: ['Full Stack Developer', 'Software Engineer'],
+    skillTags: ['PHP', 'MySQL', 'XAMPP', 'SQL', 'HTML', 'CSS', 'CRUD'],
+    summary:
+      'Database-backed movie and series review website with movie, review, and feedback tables plus PHP pages for details, ratings, and review submission.',
+    details: [
+      'The VIT DBMS report describes movies.php, reviews.php, moviedetails.php, addreview.php, and addmovie.php pages.',
+      'The project demonstrates relational schema design and CRUD-style full-stack development.',
+    ],
+    href: '#projects',
+  },
+  {
     id: 'growth-ai',
     title: 'Currently exploring AI engineering topics',
     section: 'growth',

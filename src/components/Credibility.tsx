@@ -147,7 +147,7 @@ export const Credibility = () => {
 
   return (
     <section id="credibility" className="py-24 relative" ref={ref}>
-      <div className="w-full px-4 sm:px-8 lg:px-12">
+      <div className="section-container">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}

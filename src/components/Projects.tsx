@@ -100,6 +100,24 @@ const projects: Project[] = [
     icon: ImageIcon,
   },
   {
+    title: 'Aviation Accident Analysis: Trends, Causes, and Safety Measures',
+    role: 'Data Engineer',
+    status: 'Completed',
+    context: 'CSE 587 data-intensive computing project',
+    overview:
+      'Large-scale aviation accident analysis using crash records from 1948 to 2022, with structured cleaning, exploratory analysis, trend discovery, and safety-focused interpretation.',
+    technologies: ['Python', 'Pandas', 'Data Cleaning', 'EDA', 'Visualization', 'Kaggle Dataset'],
+    keyFeatures: [
+      'Performed 10 distinct data-cleaning steps and 10 exploratory analysis steps on aviation accident records.',
+      'Studied accident trends, causes, fatalities, aircraft behavior, geography, and operational safety signals.',
+      'Built visual explanations to make historical accident patterns easier to review.',
+      'Connected technical analysis with practical aviation safety and risk-reduction questions.',
+    ],
+    outcome:
+      'Improved my ability to turn messy historical datasets into clear, domain-aware findings for decision making.',
+    icon: BarChart3,
+  },
+  {
     title: 'Pintos Threads and Scheduler',
     role: 'Software Developer',
     status: 'Completed',
@@ -117,6 +135,25 @@ const projects: Project[] = [
       'Improved my systems-level reasoning around scheduling, synchronization, and correctness under constrained APIs.',
     icon: Cpu,
     coverImage: 'pintos.png',
+  },
+  {
+    title: 'Pintos User Programs and System Calls',
+    role: 'Software Developer',
+    status: 'Completed',
+    context: 'CSE 521 operating systems project',
+    overview:
+      'User-program support in Pintos covering command-line argument passing, user stack setup, process loading, syscall handling, pointer validation, file descriptors, and parent-child synchronization.',
+    technologies: ['C', 'Pintos OS', 'System Calls', 'User Programs', 'GDB', 'Linux'],
+    keyFeatures: [
+      'Implemented argument parsing and stack setup for user-space process execution.',
+      'Built syscall support around read, write, open, close, create, remove, exec, and wait behavior.',
+      'Added parent-child loading synchronization and safer user-kernel boundary checks.',
+      'Worked inside a constrained OS codebase while preserving starter-kit boundaries.',
+    ],
+    outcome:
+      'Strengthened my systems programming discipline around process control, memory safety, and kernel/user interfaces.',
+    icon: Cpu,
+    coverImage: 'pintos2.png',
   },
   {
     title: 'Stock Market Database for Real-Time Analysis',
@@ -138,6 +175,44 @@ const projects: Project[] = [
     coverImage: 'stock%20price%20prediction%20project.png',
   },
   {
+    title: 'Penguin Classification Pipeline',
+    role: 'Machine Learning Engineer',
+    status: 'Completed',
+    context: 'CSE 574 introduction to machine learning assignment',
+    overview:
+      'Classification workflow for penguin records covering data cleaning, categorical handling, feature preparation, model training, and evaluation across species and biological measurements.',
+    technologies: ['Python', 'Pandas', 'Scikit-learn', 'EDA', 'Feature Engineering', 'Classification'],
+    keyFeatures: [
+      'Cleaned missing values, duplicates, mismatched formats, and outliers before modeling.',
+      'Prepared species, island, bill measurements, flipper length, body mass, and gender features.',
+      'Applied feature selection, normalization, and train-test splitting for reliable evaluation.',
+      'Compared model behavior using a structured preprocessing pipeline.',
+    ],
+    outcome:
+      'Built a stronger foundation in supervised learning workflows and careful preprocessing before modeling.',
+    icon: BrainCircuit,
+    coverImage: 'penguin_project.png',
+  },
+  {
+    title: 'Diamonds Price Prediction',
+    role: 'Machine Learning Engineer',
+    status: 'Completed',
+    context: 'CSE 574 / statistical modeling coursework',
+    overview:
+      'Regression-focused analysis of diamond pricing using structured feature preparation, scaling, dimensionality reduction, model comparison, and error-based evaluation.',
+    technologies: ['Python', 'Pandas', 'Scikit-learn', 'Regression', 'PCA', 'Visualization'],
+    keyFeatures: [
+      'Prepared structured diamond attributes for regression and dimensionality-reduction experiments.',
+      'Analyzed feature distributions, correlations, scaling behavior, and outlier impact.',
+      'Compared prediction approaches using practical regression metrics.',
+      'Connected statistical preprocessing decisions to model stability and interpretability.',
+    ],
+    outcome:
+      'Improved my regression workflow, feature-analysis habits, and ability to explain model tradeoffs.',
+    icon: LineChart,
+    coverImage: 'diamonds%20project.png',
+  },
+  {
     title: 'Mercedes-Benz Test-Bench Time Prediction',
     role: 'Machine Learning Engineer',
     status: 'Completed',
@@ -154,7 +229,26 @@ const projects: Project[] = [
     outcome:
       'Selected Linear Regression with PCA, reaching 8.23 RMSE, 5.55 MAE, and 0.565 R2 on unseen data.',
     icon: LineChart,
-    coverImage: 'diamonds%20project.png',
+    coverImage: defaultProjectCover,
+  },
+  {
+    title: 'Treasure Hunt Grid World Reinforcement Learning',
+    role: 'Machine Learning Engineer',
+    status: 'Completed',
+    context: 'CSE 574 reinforcement learning assignment',
+    overview:
+      'A 5x5 treasure-hunt grid world where an agent learns to collect a key, avoid traps, and reach the goal using reinforcement learning policies.',
+    technologies: ['Python', 'NumPy', 'SARSA', 'Double Q-Learning', 'Reinforcement Learning', 'Matplotlib'],
+    keyFeatures: [
+      'Defined 25 grid states with start, key, trap, and goal positions.',
+      'Modeled four movement actions and reward signals for key collection, traps, and goal completion.',
+      'Compared learning behavior across SARSA and Double Q-learning style approaches.',
+      'Visualized learned policies, rewards, and exploration behavior.',
+    ],
+    outcome:
+      'Strengthened my understanding of RL environments, reward design, policy learning, and exploration tradeoffs.',
+    icon: Workflow,
+    coverImage: 'qlearning%20project.png',
   },
   {
     title: 'Computer Vision Pipeline Suite',
@@ -174,6 +268,43 @@ const projects: Project[] = [
       'Connected mathematical vision fundamentals with practical image-processing workflows and evaluation constraints.',
     icon: ScanFace,
     coverImage: 'face%20attendence%20project.png',
+  },
+  {
+    title: 'Online Product Reviews Sentiment Analysis',
+    role: 'Machine Learning Engineer',
+    status: 'Completed',
+    context: 'Undergraduate NLP / ML project',
+    overview:
+      'Product-review sentiment classifier using web-scraped review data, text preprocessing, vectorization, model comparison, and a Random Forest final model.',
+    technologies: ['Python', 'BeautifulSoup', 'NLTK', 'Scikit-learn', 'Random Forest', 'Flask'],
+    keyFeatures: [
+      'Collected online product reviews through web scraping and prepared text for sentiment modeling.',
+      'Compared SVM, Logistic Regression, and Random Forest using accuracy, precision, and recall.',
+      'Selected Random Forest after reaching 95.0% accuracy, 0.95 precision, and 0.94 recall in the report.',
+      'Connected NLP modeling with a deployable review-classification workflow.',
+    ],
+    outcome:
+      'Built confidence with end-to-end NLP workflows from collection and cleaning to model evaluation and simple deployment.',
+    icon: BrainCircuit,
+    coverImage: 'spam%20mail%20detection.png',
+  },
+  {
+    title: 'Movie Reviews Website Database',
+    role: 'Full Stack Developer',
+    status: 'Completed',
+    context: 'VIT DBMS project',
+    overview:
+      'Movie and series review website backed by a MySQL database, XAMPP local server setup, PHP pages, ratings, reviews, movie details, and feedback handling.',
+    technologies: ['PHP', 'MySQL', 'XAMPP', 'HTML', 'CSS', 'SQL', 'Database Design'],
+    keyFeatures: [
+      'Created movie, review, and feedback tables with relationships for a review website.',
+      'Built PHP pages for movies, reviews, movie details, adding reviews, and adding movies.',
+      'Supported movie search, details, user ratings, and feedback collection.',
+      'Practiced full-stack database-backed development with local server tooling.',
+    ],
+    outcome:
+      'Reinforced relational schema design, CRUD flows, and PHP/MySQL application structure.',
+    icon: Database,
   },
   {
     title: 'Ireland Hotel Pricing and Ratings Analysis',
@@ -400,18 +531,10 @@ const ProjectVisual = ({ project }: { project: Project }) => (
     <img
       src={publicAsset(project.coverImage || defaultProjectCover)}
       alt={`${project.title} cover`}
-      className="absolute inset-0 h-full w-full object-cover opacity-100"
+      className="absolute inset-0 h-full w-full object-contain p-3"
     />
-    <div className="absolute inset-0 bg-gradient-to-t from-background/72 via-background/18 to-transparent" />
-    <div className="project-visual__icon bg-background/75">
-      <project.icon size={32} />
-    </div>
-    <div className="absolute right-6 top-6 rounded-full border border-primary/20 bg-background/55 px-3 py-1 text-xs font-semibold text-primary backdrop-blur-md">
-      {project.role}
-    </div>
-    <div className="absolute bottom-16 left-6 right-6">
-      <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">{project.context}</div>
-      <div className="mt-2 h-2 w-2/3 rounded-full bg-primary/55 shadow-[0_0_24px_hsl(var(--primary)/0.55)]" />
+    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/82 to-transparent p-4">
+      <div className="line-clamp-1 text-xs uppercase tracking-[0.18em] text-muted-foreground">{project.context}</div>
     </div>
   </div>
 );
@@ -423,12 +546,7 @@ export const Projects = () => {
   const [showAll, setShowAll] = useState(false);
   const [activeProject, setActiveProject] = useState<Project | null>(null);
 
-  const orderedProjects = [...projects].sort((a, b) => {
-    if (a.status !== b.status) {
-      return a.status === 'Live' ? -1 : 1;
-    }
-    return 0;
-  });
+  const orderedProjects = projects;
 
   const filteredProjects = selectedRole === 'All Projects'
     ? orderedProjects
