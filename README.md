@@ -41,7 +41,9 @@ Required Vercel environment variables:
 
 - `GROQ_API_KEY`
 - `GROQ_MODEL` (optional, defaults to `llama-3.1-8b-instant`)
-- `VITE_GA_MEASUREMENT_ID` or Umami variables if analytics is enabled
+- `VITE_GA_MEASUREMENT_ID`, Umami variables, or `VITE_CLARITY_PROJECT_ID` if analytics is enabled
+
+Analytics are configured for anonymous portfolio usage signals only. Use GA4, Umami, or Microsoft Clarity dashboards to view live visitors, visit counts, popular sections, referrers, device/browser information, countries, and assistant/project interaction events. Do not store private visitor identity unless you add an explicit consent flow.
 
 GitHub Pages remains a static backup. The workflow in `.github/workflows/deploy.yml`
 builds the Vite app and deploys the `dist` folder whenever changes are pushed to `main`.

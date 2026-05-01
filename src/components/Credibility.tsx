@@ -301,42 +301,44 @@ export const Credibility = () => {
           ))}
         </div>
 
-        <div className="credential-gallery">
-          {visibleCredentials.map((item, index) => {
-            const Icon = credentialIcons[item.category as keyof typeof credentialIcons] || Award;
+        <div className="credential-gallery-shell glass-card">
+          <div className="credential-gallery">
+            {visibleCredentials.map((item, index) => {
+              const Icon = credentialIcons[item.category as keyof typeof credentialIcons] || Award;
 
-            return (
-            <motion.article
-              key={item.title}
-              initial={{ opacity: 0, y: 24 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.55, delay: index * 0.07 }}
-              className="credential-gallery-card"
-            >
-                <CredentialImage item={item} />
-                <div className="credential-gallery-card__overlay">
-                  <Icon size={28} />
-                  <h3>{item.title}</h3>
-                  <p>{item.category}</p>
-                  <small>{item.issuer_or_event}</small>
-                  <div className="credential-gallery-card__actions">
-                    {item.image && (
-                      <button
-                        type="button"
-                        onClick={() => setZoomedCredential(item)}
-                        aria-label={`Zoom ${item.title}`}
-                      >
-                        <ZoomIn size={18} />
-                      </button>
-                    )}
-                    <a href={item.link || '#contact'} aria-label={`Open ${item.title}`}>
-                      <ExternalLink size={18} />
-                    </a>
+              return (
+              <motion.article
+                key={item.title}
+                initial={{ opacity: 0, y: 24 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.55, delay: index * 0.07 }}
+                className="credential-gallery-card"
+              >
+                  <CredentialImage item={item} />
+                  <div className="credential-gallery-card__overlay">
+                    <Icon size={26} />
+                    <h3>{item.title}</h3>
+                    <p>{item.category}</p>
+                    <small>{item.issuer_or_event}</small>
+                    <div className="credential-gallery-card__actions">
+                      {item.image && (
+                        <button
+                          type="button"
+                          onClick={() => setZoomedCredential(item)}
+                          aria-label={`Zoom ${item.title}`}
+                        >
+                          <ZoomIn size={18} />
+                        </button>
+                      )}
+                      <a href={item.link || '#contact'} aria-label={`Open ${item.title}`}>
+                        <ExternalLink size={18} />
+                      </a>
+                    </div>
                   </div>
-                </div>
-            </motion.article>
-            );
-          })}
+              </motion.article>
+              );
+            })}
+          </div>
         </div>
 
         {!!researchCredentials.length && (

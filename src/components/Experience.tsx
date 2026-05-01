@@ -177,8 +177,8 @@ export const Experience = () => {
               >
                 <span className="experience-timeline__dot" aria-hidden="true" />
                 <div className="grid gap-5 lg:grid-cols-[auto_1fr_auto] lg:items-start">
-                  <div className="experience-logo-frame flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl border border-border/50 bg-background/70 p-4">
-                    <img src={publicAsset(experience.logo)} alt={`${experience.company} logo`} className="max-h-full max-w-full object-contain" />
+                  <div className="experience-logo-frame flex h-32 w-32 items-center justify-center overflow-hidden rounded-2xl border border-border/50 bg-background/70 p-3">
+                    <img src={publicAsset(experience.logo)} alt={`${experience.company} logo`} className="h-full w-full object-contain" />
                   </div>
 
                   <div>
@@ -243,7 +243,7 @@ export const Experience = () => {
                       <div className="flex flex-wrap gap-2">
                         {experience.technologies.map((tech) => (
                           <span key={tech.name} className="tech-logo-chip">
-                            <tech.icon size={20} style={{ color: tech.color }} />
+                            <tech.icon size={23} style={{ color: tech.color }} />
                             {tech.name}
                           </span>
                         ))}

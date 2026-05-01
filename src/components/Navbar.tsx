@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import { ArrowUp, Menu, Moon, Music2, Sun, VolumeX, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import themeMusicUrl from '@/assets/tunetank-vlog-beat-background-349853.mp3';
 
 const navLinks = [
   { href: '#hero', label: 'Home' },
@@ -19,8 +20,7 @@ export const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [musicEnabled, setMusicEnabled] = useState(false);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const audioNodesRef = useRef<Array<OscillatorNode | GainNode>>([]);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const storedTheme = localStorage.getItem('portfolio-theme');
@@ -64,61 +64,30 @@ export const Navbar = () => {
     document.documentElement.classList.toggle('dark', nextTheme === 'dark');
   };
 
-  const stopMusic = () => {
-    audioNodesRef.current.forEach((node) => {
-      if ('stop' in node) {
-        try {
-          node.stop();
-        } catch {
-          // Oscillator may already be stopped.
-        }
-      }
-      if ('disconnect' in node) {
-        node.disconnect();
-      }
-    });
-    audioNodesRef.current = [];
-  };
+  useEffect(() => {
+    return () => {
+      audioRef.current?.pause();
+    };
+  }, []);
 
   const toggleMusic = async () => {
     if (musicEnabled) {
-      stopMusic();
+      audioRef.current?.pause();
       setMusicEnabled(false);
       return;
     }
 
-    const AudioContextClass = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AudioContextClass) return;
-    const audioContext = audioContextRef.current || new AudioContextClass();
-    audioContextRef.current = audioContext;
+    const audio = audioRef.current || new Audio(themeMusicUrl);
+    audioRef.current = audio;
+    audio.loop = true;
+    audio.volume = 0.12;
 
-    if (audioContext.state === 'suspended') {
-      await audioContext.resume();
+    try {
+      await audio.play();
+      setMusicEnabled(true);
+    } catch {
+      setMusicEnabled(false);
     }
-
-    const master = audioContext.createGain();
-    master.gain.value = 0.035;
-    master.connect(audioContext.destination);
-
-    const notes = [130.81, 196, 261.63];
-    const oscillators = notes.map((frequency, index) => {
-      const oscillator = audioContext.createOscillator();
-      const gain = audioContext.createGain();
-      oscillator.type = index === 1 ? 'triangle' : 'sine';
-      oscillator.frequency.value = frequency;
-      gain.gain.value = index === 1 ? 0.18 : 0.12;
-      oscillator.connect(gain);
-      gain.connect(master);
-      oscillator.start();
-      audioNodesRef.current.push(oscillator, gain);
-      return oscillator;
-    });
-
-    audioNodesRef.current.push(master);
-    oscillators.forEach((oscillator, index) => {
-      oscillator.detune.setValueAtTime(index * 2, audioContext.currentTime);
-    });
-    setMusicEnabled(true);
   };
 
   const themeLabel = `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`;

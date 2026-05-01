@@ -175,7 +175,7 @@ export const Education = () => {
                       <span key={course} className="tech-chip">
                         {(() => {
                           const CourseIcon = getCourseIcon(course);
-                          return <CourseIcon size={13} />;
+                          return <CourseIcon size={16} />;
                         })()}
                         {course}
                       </span>
@@ -223,7 +223,7 @@ export const Education = () => {
                 <span key={course} className="tech-chip">
                   {(() => {
                     const CourseIcon = getCourseIcon(course);
-                    return <CourseIcon size={13} />;
+                    return <CourseIcon size={16} />;
                   })()}
                   {course}
                 </span>

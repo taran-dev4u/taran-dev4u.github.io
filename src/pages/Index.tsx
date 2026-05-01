@@ -14,7 +14,7 @@ import { Credibility } from '@/components/Credibility';
 import { Writing } from '@/components/Writing';
 import { AskTaranAI } from '@/components/AskTaranAI';
 import { useEffect, useState } from 'react';
-import { initAnalytics, trackEvent } from '@/lib/analytics';
+import { initAnalytics, trackAnonymousVisitorContext, trackEvent } from '@/lib/analytics';
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -23,6 +23,7 @@ const Index = () => {
     document.title = 'Taran Mamidala | Machine Learning & Software Engineer';
     initAnalytics();
     trackEvent({ action: 'page_view', label: 'portfolio_home' });
+    trackAnonymousVisitorContext();
 
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
