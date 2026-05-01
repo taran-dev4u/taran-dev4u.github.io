@@ -3,7 +3,6 @@ import { TypeWriter } from './TypeWriter';
 import { Button } from './ui/button';
 import { ArrowDown, BrainCircuit, Download, Github, Linkedin, Mail, MapPin, ServerCog, Sparkles } from 'lucide-react';
 import profileImage from '@/assets/profile-taran.webp';
-import { ProfileCNNBackdrop } from './ProfileCNNBackdrop';
 
 const resumeHref = 'https://drive.google.com/file/d/1aE44dipSwImMwkdwGetKQ-LvL5XfJh5Y/view?usp=sharing';
 
@@ -69,7 +68,7 @@ export const Hero = () => {
             <div className="mx-auto flex max-w-[18.5rem] flex-wrap justify-center gap-4 mb-8 text-xs sm:max-w-[20rem] sm:text-sm text-muted-foreground lg:mx-0 lg:max-w-none lg:justify-start">
               <div className="flex items-center gap-2">
                 <MapPin size={16} className="text-primary" />
-                <span>Buffalo, NY - open to relocation</span>
+                <span>Buffalo, NY · open to relocation</span>
               </div>
               <div className="flex items-center gap-2">
                 <Mail size={16} className="text-primary" />
@@ -112,18 +111,19 @@ export const Hero = () => {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="relative flex justify-center"
           >
-            <div className="profile-showcase relative">
-              <ProfileCNNBackdrop />
-              <div className="absolute inset-0 z-[1] bg-gradient-to-r from-primary/25 to-accent/20 rounded-[2rem] blur-2xl scale-105 animate-pulse" />
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/25 to-accent/20 rounded-[2rem] blur-2xl scale-105 animate-pulse" />
+              <div className="absolute inset-[-14px] rounded-[2.25rem] border border-primary/20 animate-slow-spin" />
+              <div className="absolute inset-[-28px] rounded-[2.75rem] border border-accent/15 animate-drift" />
 
-              <div className="profile-frame relative z-[3] w-[15.5rem] h-[20rem] sm:w-[22rem] sm:h-[28rem] rounded-[2rem] overflow-hidden border border-primary/30 shadow-2xl">
+              <div className="profile-frame relative w-[15.5rem] h-[20rem] sm:w-[22rem] sm:h-[28rem] rounded-[2rem] overflow-hidden border border-primary/30 shadow-2xl">
                 <img src={profileImage} alt="Taran Mamidala" className="w-full h-full object-cover object-[50%_24%]" />
               </div>
 
-              <div className="absolute -top-4 -right-4 z-[4] w-16 h-16 bg-primary/10 rounded-2xl border border-primary/20 backdrop-blur-sm flex items-center justify-center">
+              <div className="absolute -top-4 -right-4 w-16 h-16 bg-primary/10 rounded-2xl border border-primary/20 backdrop-blur-sm flex items-center justify-center">
                 <ServerCog size={26} className="text-primary" />
               </div>
-              <div className="absolute -bottom-4 -left-4 z-[4] w-16 h-16 bg-accent/10 rounded-2xl border border-accent/20 backdrop-blur-sm flex items-center justify-center">
+              <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-accent/10 rounded-2xl border border-accent/20 backdrop-blur-sm flex items-center justify-center">
                 <BrainCircuit size={26} className="text-accent" />
               </div>
             </div>

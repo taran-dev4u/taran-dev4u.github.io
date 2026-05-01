@@ -183,7 +183,7 @@ export const AskTaranAI = () => {
         type="button"
         variant="ghost"
         onClick={openAssistant}
-        className="ask-ai-launcher"
+        className="fixed bottom-5 right-5 z-50 h-12 rounded-full border border-primary/35 bg-primary px-4 text-primary-foreground shadow-2xl shadow-primary/25 hover:bg-primary/90"
         aria-label="Ask Taran AI"
       >
         <Sparkles size={17} />
