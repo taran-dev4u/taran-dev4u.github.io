@@ -210,7 +210,7 @@ export const Navbar = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="floating-glass-control fixed bottom-5 right-5 z-50 h-11 w-11"
+            className="floating-glass-control back-to-top-control fixed right-5 z-50 h-11 w-11"
             onClick={() => scrollToSection('#hero')}
             aria-label="Back to top"
             title="Back to top"

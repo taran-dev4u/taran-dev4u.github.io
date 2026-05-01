@@ -69,7 +69,7 @@ export const Hero = () => {
             <div className="mx-auto flex max-w-[18.5rem] flex-wrap justify-center gap-4 mb-8 text-xs sm:max-w-[20rem] sm:text-sm text-muted-foreground lg:mx-0 lg:max-w-none lg:justify-start">
               <div className="flex items-center gap-2">
                 <MapPin size={16} className="text-primary" />
-                <span>Buffalo, NY · open to relocation</span>
+                <span>Buffalo, NY - open to relocation</span>
               </div>
               <div className="flex items-center gap-2">
                 <Mail size={16} className="text-primary" />

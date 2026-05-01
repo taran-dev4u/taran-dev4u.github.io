@@ -48,7 +48,7 @@ export const ProfileCNNBackdrop = () => {
       <div className="cnn-label cnn-label--input">Input</div>
       <div className="cnn-label cnn-label--conv">Convolution + Pooling</div>
       <div className="cnn-label cnn-label--dense">Dense</div>
-      <div className="cnn-label cnn-label--output">Output</div>
+      <div className="cnn-label cnn-label--output">Profile Output</div>
 
       <div className="cnn-input-stack">
         {inputPlanes.map((_, index) => (
