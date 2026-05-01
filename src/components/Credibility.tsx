@@ -30,26 +30,26 @@ type CredentialItem = {
 const fallbackCredentialItems: CredentialItem[] = [
   {
     category: 'Hackathons',
-    title: 'GCC x VIT Hackathon Winner',
-    issuer_or_event: 'GCC x VIT',
-    date: '',
+    title: 'GFG VIT-AP Hacktoberfest 2023',
+    issuer_or_event: 'GFG VIT-AP Student Chapter',
+    date: 'Oct 2023',
     description:
-      'Won a Rs. 25,000 cash prize by building a multi-tenant orchestration platform for GCC. Participated in 7+ hackathons and received recognition in 3 major events.',
-    image: '',
+      'Certificate of participation for GFG VIT-AP Hacktoberfest 2023, organized by the GFG VIT-AP Student Chapter.',
+    image: 'credentials/gfgvitap-hacktoberfest-2023.jpg',
     link: '#contact',
-    tags: ['Hackathon', 'Platform'],
+    tags: ['Hackathon', 'GFG', 'Open Source'],
     priority: 1,
   },
   {
     category: 'Certification',
-    title: 'Google Cloud Gen AI',
-    issuer_or_event: 'Simplilearn',
-    date: '',
+    title: 'Basics of Arduino Programming',
+    issuer_or_event: 'VIT-AP University',
+    date: '2022',
     description:
-      'Certified by Simplilearn with hands-on learning across Generative AI concepts, prompts, LLM workflows, and cloud AI fundamentals.',
-    image: '',
+      'Certificate of completion for a 30-hour value-added course on Basics of Arduino Programming organized by the Department of Computer Science and Engineering.',
+    image: 'credentials/basics-of-arduino-programming.jpg',
     link: '#contact',
-    tags: ['Certification', 'Gen AI'],
+    tags: ['Certification', 'Arduino', 'Embedded Systems'],
     priority: 2,
   },
   {
@@ -70,8 +70,12 @@ const credentialIcons = {
   Hackathons: Trophy,
   Certification: BadgeCheck,
   Certifications: BadgeCheck,
+  Seminar: BadgeCheck,
+  Seminars: BadgeCheck,
   Research: RadioTower,
 };
+
+const credentialFilters = ['All', 'Hackathons', 'Certification', 'Research'];
 
 const leadershipItems = [
   {
@@ -217,6 +221,7 @@ export const Credibility = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
   const [credentials, setCredentials] = useState<CredentialItem[]>(fallbackCredentialItems);
+  const [activeCredentialFilter, setActiveCredentialFilter] = useState('All');
 
   useEffect(() => {
     let cancelled = false;
@@ -242,6 +247,13 @@ export const Credibility = () => {
     [credentials],
   );
 
+  const visibleCredentials = useMemo(
+    () => activeCredentialFilter === 'All'
+      ? sortedCredentials
+      : sortedCredentials.filter((item) => item.category === activeCredentialFilter),
+    [activeCredentialFilter, sortedCredentials],
+  );
+
   return (
     <section id="credibility" className="py-24 relative" ref={ref}>
       <div className="section-container">
@@ -262,8 +274,22 @@ export const Credibility = () => {
           </p>
         </motion.div>
 
-        <div className="space-y-5">
-          {sortedCredentials.map((item, index) => {
+        <div className="credential-filter-bar mb-8">
+          <span>Tags:</span>
+          {credentialFilters.map((filter) => (
+            <button
+              key={filter}
+              type="button"
+              onClick={() => setActiveCredentialFilter(filter)}
+              className={activeCredentialFilter === filter ? 'is-active' : undefined}
+            >
+              {filter}
+            </button>
+          ))}
+        </div>
+
+        <div className="credential-gallery">
+          {visibleCredentials.map((item, index) => {
             const Icon = credentialIcons[item.category as keyof typeof credentialIcons] || Award;
 
             return (
@@ -272,33 +298,20 @@ export const Credibility = () => {
               initial={{ opacity: 0, y: 24 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.55, delay: index * 0.07 }}
-              className="glass-card credential-card p-6 sm:p-8"
+              className="credential-gallery-card"
             >
-              <div className="grid gap-6 lg:grid-cols-[1fr_22rem] lg:items-stretch">
-                <div>
-                  <div className="mb-4 flex items-center gap-4">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10 text-primary">
-                      <Icon size={28} />
-                    </div>
-                    <div>
-                      <p className="mb-1 text-xs font-semibold uppercase tracking-[0.2em] text-primary">{item.category}</p>
-                      <h3 className="font-display text-2xl font-bold">{item.title}</h3>
-                    </div>
-                  </div>
-                  <p className="text-sm font-semibold uppercase tracking-wide text-primary/80">{item.issuer_or_event}</p>
-                  <p className="mt-3 leading-relaxed text-muted-foreground">{item.description}</p>
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    {item.tags.map((tag) => (
-                      <span key={`${item.title}-${tag}`} className="skill-badge text-xs">{tag}</span>
-                    ))}
-                  </div>
-                  <a href={item.link || '#contact'} className="btn-secondary mt-6 w-fit whitespace-nowrap text-sm">
-                    {item.category === 'Research' ? 'View research' : item.category.includes('Hackathon') ? 'View event' : 'View certificate'}
-                    <ExternalLink size={15} />
-                  </a>
-                </div>
                 <CredentialImage item={item} />
-              </div>
+                <div className="credential-gallery-card__overlay">
+                  <Icon size={28} />
+                  <h3>{item.title}</h3>
+                  <p>{item.category}</p>
+                  <small>{item.issuer_or_event}</small>
+                  <div className="credential-gallery-card__actions">
+                    <a href={item.link || '#contact'} aria-label={`Open ${item.title}`}>
+                      <ExternalLink size={18} />
+                    </a>
+                  </div>
+                </div>
             </motion.article>
             );
           })}
