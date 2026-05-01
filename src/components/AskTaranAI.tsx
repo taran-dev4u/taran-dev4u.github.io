@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { Bot, BrainCircuit, ExternalLink, Loader2, MessageSquare, Send, Sparkles, X } from 'lucide-react';
+import { BrainCircuit, ExternalLink, Loader2, MessageSquare, Send, Sparkles, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { trackEvent } from '@/lib/analytics';
@@ -181,11 +181,12 @@ export const AskTaranAI = () => {
     <>
       <Button
         type="button"
+        variant="ghost"
         onClick={openAssistant}
-        className="fixed bottom-20 right-5 z-50 h-12 rounded-full border border-primary/35 bg-primary px-4 text-primary-foreground shadow-2xl shadow-primary/25 hover:bg-primary/90"
+        className="ask-ai-launcher"
         aria-label="Ask Taran AI"
       >
-        <Bot size={18} />
+        <Sparkles size={17} />
         <span className="hidden sm:inline">Ask Taran AI</span>
       </Button>
 
@@ -193,8 +194,8 @@ export const AskTaranAI = () => {
         <div className="fixed inset-0 z-[95] flex justify-end bg-background/45 backdrop-blur-sm">
           <button className="absolute inset-0" type="button" aria-label="Close Ask Taran AI" onClick={closeAssistant} />
 
-          <section className="glass-card relative flex h-full w-full max-w-[31rem] flex-col overflow-hidden rounded-none border-l border-border/60 sm:max-w-[34rem]">
-            <header className="border-b border-border/50 p-4 sm:p-5">
+          <section className="ask-ai-drawer glass-card relative flex h-full w-full max-w-[31rem] flex-col overflow-hidden rounded-none border-l border-border/60 sm:max-w-[34rem]">
+            <header className="ask-ai-drawer__header border-b border-border/50 p-4 sm:p-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="brand-mark h-12 w-12 rounded-xl">
@@ -203,7 +204,7 @@ export const AskTaranAI = () => {
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="font-display text-xl font-bold">Ask Taran AI</h2>
-                      <Badge className="border-emerald-400/25 bg-emerald-500/10 text-emerald-300">
+                      <Badge className="border-primary/30 bg-primary/10 text-primary">
                         Grounded
                       </Badge>
                     </div>
@@ -260,7 +261,7 @@ export const AskTaranAI = () => {
 
             <div className="flex min-h-0 flex-1 flex-col">
               <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
-                <div className="rounded-2xl border border-border/50 bg-background/35 p-3">
+                <div className="ask-ai-suggestions rounded-2xl border border-border/50 bg-background/35 p-3">
                   <h3 className="mb-3 font-display text-sm font-semibold">Suggested Questions</h3>
                   <div className="flex gap-2 overflow-x-auto pb-1">
                     {visibleQuestions.map((question) => (
