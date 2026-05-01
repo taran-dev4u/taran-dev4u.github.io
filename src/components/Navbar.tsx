@@ -71,16 +71,18 @@ export const Navbar = () => {
   }, []);
 
   const toggleMusic = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
     if (musicEnabled) {
-      audioRef.current?.pause();
+      audio.pause();
       setMusicEnabled(false);
       return;
     }
 
-    const audio = audioRef.current || new Audio(themeMusicUrl);
-    audioRef.current = audio;
     audio.loop = true;
-    audio.volume = 0.12;
+    audio.muted = false;
+    audio.volume = 0.18;
 
     try {
       await audio.play();
@@ -174,6 +176,14 @@ export const Navbar = () => {
             {musicEnabled ? <VolumeX size={18} /> : <Music2 size={18} />}
           </span>
         </Button>
+        <audio
+          ref={audioRef}
+          src={themeMusicUrl}
+          loop
+          preload="none"
+          onPlay={() => setMusicEnabled(true)}
+          onPause={() => setMusicEnabled(false)}
+        />
 
         {isScrolled && (
           <Button
