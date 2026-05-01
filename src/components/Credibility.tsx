@@ -12,6 +12,8 @@ import {
   Lightbulb,
   RadioTower,
   Trophy,
+  X,
+  ZoomIn,
 } from 'lucide-react';
 import { publicAsset } from '@/lib/assets';
 
@@ -59,7 +61,7 @@ const fallbackCredentialItems: CredentialItem[] = [
     date: '',
     description:
       'Research work connects atmospheric CO2, satellite datasets, land-use behavior, climate zones, regression modeling, and explainable analysis.',
-    image: '',
+    image: 'research/research_paper_.jpg',
     link: '#contact',
     tags: ['Research', 'Climate Data'],
     priority: 3,
@@ -75,13 +77,13 @@ const credentialIcons = {
   Research: RadioTower,
 };
 
-const credentialFilters = ['All', 'Hackathons', 'Certification', 'Research'];
+const credentialFilters = ['All', 'Hackathons', 'Certification'];
 
 const leadershipItems = [
   {
     title: 'Bioscope Club',
     role: 'Technical Lead, VIT-AP',
-    logo: 'vit_ap_bioscope_club_logo.jpg',
+    logo: 'clubs/vit_ap_bioscope_club_logo.jpg',
     description:
       'Supported the technical side of a movie-making and screening club that organized film festivals, student productions, and creative events. My work focused on website support, coordination with the creative team, and making event information easier for students to access.',
     details: [
@@ -95,7 +97,7 @@ const leadershipItems = [
   {
     title: 'Be A Nerd Club',
     role: 'Technical Team Member',
-    logo: '',
+    logo: 'clubs/Be_A_Nerd.jpg',
     description:
       'Contributed to a curiosity-driven student community focused on practical learning, technical discussions, and hands-on exploration outside regular coursework.',
     details: [
@@ -109,7 +111,7 @@ const leadershipItems = [
   {
     title: 'Q-hub Club',
     role: 'Technical Team Member',
-    logo: 'vit_qhub_club.jpg',
+    logo: 'clubs/vit_qhub_club.jpg',
     description:
       'Worked with a knowledge-sharing student community and supported technical initiatives, website work, and collaborative activities connected to learning and problem solving.',
     details: [
@@ -123,7 +125,7 @@ const leadershipItems = [
   {
     title: 'Academic & Industrial Nano Society',
     role: 'Team Member',
-    logo: '',
+    logo: 'clubs/Academic%20%26%20Industrial%20Nano%20Society.jpg',
     description:
       'Participated in an interdisciplinary student society that connected engineering, science, and industry-style learning through technical events and student activities.',
     details: [
@@ -222,6 +224,7 @@ export const Credibility = () => {
   const isInView = useInView(ref, { once: true, margin: '-100px' });
   const [credentials, setCredentials] = useState<CredentialItem[]>(fallbackCredentialItems);
   const [activeCredentialFilter, setActiveCredentialFilter] = useState('All');
+  const [zoomedCredential, setZoomedCredential] = useState<CredentialItem | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -247,11 +250,21 @@ export const Credibility = () => {
     [credentials],
   );
 
+  const galleryCredentials = useMemo(
+    () => sortedCredentials.filter((item) => item.category !== 'Research'),
+    [sortedCredentials],
+  );
+
+  const researchCredentials = useMemo(
+    () => sortedCredentials.filter((item) => item.category === 'Research'),
+    [sortedCredentials],
+  );
+
   const visibleCredentials = useMemo(
     () => activeCredentialFilter === 'All'
-      ? sortedCredentials
-      : sortedCredentials.filter((item) => item.category === activeCredentialFilter),
-    [activeCredentialFilter, sortedCredentials],
+      ? galleryCredentials
+      : galleryCredentials.filter((item) => item.category === activeCredentialFilter),
+    [activeCredentialFilter, galleryCredentials],
   );
 
   return (
@@ -307,6 +320,15 @@ export const Credibility = () => {
                   <p>{item.category}</p>
                   <small>{item.issuer_or_event}</small>
                   <div className="credential-gallery-card__actions">
+                    {item.image && (
+                      <button
+                        type="button"
+                        onClick={() => setZoomedCredential(item)}
+                        aria-label={`Zoom ${item.title}`}
+                      >
+                        <ZoomIn size={18} />
+                      </button>
+                    )}
                     <a href={item.link || '#contact'} aria-label={`Open ${item.title}`}>
                       <ExternalLink size={18} />
                     </a>
@@ -316,6 +338,52 @@ export const Credibility = () => {
             );
           })}
         </div>
+
+        {!!researchCredentials.length && (
+          <div className="mt-12 space-y-5">
+            <div className="mb-2 flex items-center gap-3">
+              <RadioTower size={26} className="text-primary" />
+              <h3 className="font-display text-3xl font-bold">Research</h3>
+            </div>
+
+            {researchCredentials.map((item, index) => (
+              <motion.article
+                key={item.title}
+                initial={{ opacity: 0, y: 24 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.55, delay: 0.22 + index * 0.08 }}
+                className="credential-research-card glass-card p-6 sm:p-7"
+              >
+                <div className="credential-research-card__content">
+                  <div>
+                    <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-primary">{item.issuer_or_event}</p>
+                    <h4 className="font-display text-2xl font-bold">{item.title}</h4>
+                    <p className="mt-4 leading-relaxed text-muted-foreground">{item.description}</p>
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      {item.tags.map((tag) => (
+                        <span key={tag} className="skill-badge text-xs">{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="credential-research-card__media">
+                    <CredentialImage item={item} />
+                    {item.image && (
+                      <button
+                        type="button"
+                        onClick={() => setZoomedCredential(item)}
+                        className="credential-research-card__zoom"
+                        aria-label={`Zoom ${item.title}`}
+                      >
+                        <ZoomIn size={18} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </motion.article>
+            ))}
+          </div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -348,9 +416,11 @@ export const Credibility = () => {
                   <div>
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                       <h4 className="font-display text-2xl font-semibold">{item.title}</h4>
-                      {/* Replace href with a real club page, event album, Google Drive proof, or LinkedIn post when available. */}
-                      <a href={item.href} className="btn-secondary w-fit whitespace-nowrap text-sm">
-                        Club reference
+                      <a
+                        href={item.href}
+                        className="club-reference-icon"
+                        aria-label={`Open ${item.title} reference`}
+                      >
                         <ExternalLink size={15} />
                       </a>
                     </div>
@@ -371,6 +441,46 @@ export const Credibility = () => {
           </div>
         </motion.div>
       </div>
+
+      {zoomedCredential && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-8">
+          <button
+            type="button"
+            className="absolute inset-0 bg-background/82 backdrop-blur-md"
+            onClick={() => setZoomedCredential(null)}
+            aria-label="Close credential preview"
+          />
+          <motion.div
+            initial={{ opacity: 0, y: 18, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.22 }}
+            className="credential-zoom-modal glass-card"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${zoomedCredential.title} preview`}
+          >
+            <button
+              type="button"
+              onClick={() => setZoomedCredential(null)}
+              className="credential-zoom-modal__close"
+              aria-label="Close"
+            >
+              <X size={18} />
+            </button>
+            <div className="credential-zoom-modal__image">
+              <img
+                src={publicAsset(zoomedCredential.image || '')}
+                alt={`${zoomedCredential.title} certificate`}
+              />
+            </div>
+            <div className="credential-zoom-modal__caption">
+              <p>{zoomedCredential.category}</p>
+              <h3>{zoomedCredential.title}</h3>
+              <span>{zoomedCredential.issuer_or_event}</span>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </section>
   );
 };

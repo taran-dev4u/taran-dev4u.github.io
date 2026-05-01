@@ -44,7 +44,7 @@ const experiences: ExperienceItem[] = [
   {
     title: 'Software Engineer - Web & Data Platforms',
     company: 'iVinGo Solutions Pvt. Ltd.',
-    logo: 'ivingo.png.jpg',
+    logo: 'companies/ivingo.png.jpg',
     tag: 'Full-time',
     location: 'Hyderabad, India / Remote',
     period: 'Jun 2023 - Jul 2024',
@@ -72,7 +72,7 @@ const experiences: ExperienceItem[] = [
   {
     title: 'Research Intern - Data Science',
     company: 'NRSC, Indian Space Research Organisation (ISRO)',
-    logo: 'nrsc.png',
+    logo: 'companies/nrsc.png',
     tag: 'Research',
     location: 'Hyderabad, India',
     period: 'Feb 2023 - Sep 2023',
@@ -100,7 +100,7 @@ const experiences: ExperienceItem[] = [
   {
     title: 'Java Developer Training - Ignite Program',
     company: 'LTI Mindtree',
-    logo: 'LTIMindtree%20-Logo.png',
+    logo: 'companies/LTIMindtree%20-Logo.png',
     tag: 'Internship',
     location: 'Remote / India',
     period: 'Mar 2023 - Jun 2023',

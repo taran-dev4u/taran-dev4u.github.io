@@ -528,14 +528,30 @@ const projects: Project[] = [
 ];
 
 const getProjectTags = (project: Project) => {
+  const title = project.title.toLowerCase();
   const fallbackSubject =
-    project.role === 'Computer Vision' ? 'AI / Vision'
-      : project.role === 'Security' ? 'Security'
-        : project.technologies.find((tech) =>
-          ['RAG', 'MLOps', 'NLP', 'Kafka', 'Pintos OS', 'SQL', 'PyTorch', 'OpenCV', 'LangChain'].some((keyword) =>
-            tech.toLowerCase().includes(keyword.toLowerCase())
-          )
-        );
+    title.includes('co2') || title.includes('climate') ? 'Climate Data'
+      : title.includes('inpainting') ? 'Deep Learning'
+        : title.includes('aviation') ? 'Safety Analytics'
+          : title.includes('pintos') ? 'Operating Systems'
+            : title.includes('stock market') || title.includes('movie reviews') ? 'Database Systems'
+              : title.includes('penguin') || title.includes('diamonds') || title.includes('mercedes') ? 'Predictive Modeling'
+                : title.includes('treasure') ? 'Reinforcement Learning'
+                  : title.includes('computer vision') ? 'Vision Systems'
+                    : title.includes('sentiment') ? 'NLP'
+                      : title.includes('hotel') ? 'Business Analytics'
+                        : title.includes('elgamal') ? 'Cryptography'
+                          : title.includes('rate limiter') ? 'Backend Systems'
+                            : title.includes('microservices') ? 'Distributed Systems'
+                              : title.includes('streaming') ? 'Streaming Data'
+                                : title.includes('lakehouse') ? 'Data Platforms'
+                                  : title.includes('saas') ? 'Product Engineering'
+                                    : title.includes('dashboard') ? 'Analytics Product'
+                                      : title.includes('mlops') ? 'ML Systems'
+                                        : title.includes('fraud') ? 'Risk Modeling'
+                                          : title.includes('rag') ? 'Knowledge Systems'
+                                            : title.includes('agent') ? 'AI Agents'
+                                              : project.role;
 
   return [project.role, project.subject || fallbackSubject].filter(Boolean).slice(0, 2) as string[];
 };
@@ -545,7 +561,7 @@ const ProjectVisual = ({ project }: { project: Project }) => (
     <img
       src={publicAsset(project.coverImage || defaultProjectCover)}
       alt={`${project.title} cover`}
-      className="absolute inset-0 h-full w-full object-contain p-4 sm:p-5"
+      className="absolute inset-0 h-full w-full object-cover"
     />
     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/82 to-transparent p-4">
       <div className="line-clamp-1 text-xs uppercase tracking-[0.18em] text-muted-foreground">{project.context}</div>

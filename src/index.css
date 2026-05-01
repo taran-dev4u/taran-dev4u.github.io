@@ -650,7 +650,7 @@
 
   .ask-ai-panel-shell {
     position: fixed;
-    left: 1.25rem;
+    right: 1.25rem;
     top: 5.75rem;
     bottom: 1.25rem;
     z-index: 95;
@@ -739,16 +739,16 @@
     position: relative;
     display: grid;
     gap: 1.5rem;
-    padding-left: 2rem;
+    padding-left: 3.25rem;
   }
 
   .experience-timeline::before {
     content: '';
     position: absolute;
-    left: 0.55rem;
+    left: 1.25rem;
     top: 0.8rem;
     bottom: 0.8rem;
-    width: 1px;
+    width: 2px;
     background: linear-gradient(180deg, transparent, hsl(var(--primary) / 0.65), hsl(var(--primary) / 0.28), transparent);
     box-shadow: 0 0 18px hsl(var(--primary) / 0.35);
   }
@@ -757,9 +757,19 @@
     position: relative;
   }
 
-  .experience-timeline__dot {
+  .experience-timeline__item::before {
+    content: '';
     position: absolute;
     left: -2rem;
+    top: 2.62rem;
+    height: 1px;
+    width: 2rem;
+    background: linear-gradient(90deg, hsl(var(--primary) / 0.55), hsl(var(--border) / 0.5));
+  }
+
+  .experience-timeline__dot {
+    position: absolute;
+    left: -2.58rem;
     top: 2rem;
     width: 1.15rem;
     height: 1.15rem;
@@ -899,7 +909,8 @@
     margin-top: 0.25rem;
   }
 
-  .credential-gallery-card__actions a {
+  .credential-gallery-card__actions a,
+  .credential-gallery-card__actions button {
     display: grid;
     height: 2.15rem;
     width: 2.15rem;
@@ -911,9 +922,111 @@
     transition: transform 0.25s ease, border-color 0.25s ease;
   }
 
-  .credential-gallery-card__actions a:hover {
+  .credential-gallery-card__actions a:hover,
+  .credential-gallery-card__actions button:hover {
     transform: translateY(-2px);
     border-color: hsl(var(--primary));
+  }
+
+  .credential-research-card__content {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .credential-research-card__content {
+      grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+      align-items: center;
+    }
+  }
+
+  .credential-research-card__media {
+    position: relative;
+  }
+
+  .credential-research-card__media .credential-image-frame {
+    min-height: 11rem;
+    height: 13rem;
+    padding: 0.5rem;
+  }
+
+  .credential-research-card__zoom {
+    position: absolute;
+    right: 0.8rem;
+    bottom: 0.8rem;
+    display: grid;
+    height: 2.25rem;
+    width: 2.25rem;
+    place-items: center;
+    border-radius: 999px;
+    border: 1px solid hsl(var(--primary) / 0.55);
+    color: hsl(var(--primary));
+    background: hsl(var(--background) / 0.78);
+    box-shadow: 0 14px 28px -18px hsl(var(--primary) / 0.85);
+  }
+
+  .credential-zoom-modal {
+    position: relative;
+    width: min(62rem, 96vw);
+    max-height: 90vh;
+    overflow: hidden;
+    padding: 1rem;
+  }
+
+  .credential-zoom-modal__close {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    z-index: 2;
+    display: grid;
+    height: 2.25rem;
+    width: 2.25rem;
+    place-items: center;
+    border-radius: 999px;
+    border: 1px solid hsl(var(--border) / 0.6);
+    color: hsl(var(--foreground));
+    background: hsl(var(--background) / 0.72);
+  }
+
+  .credential-zoom-modal__image {
+    display: flex;
+    max-height: calc(90vh - 8rem);
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 0.8rem;
+    background: hsl(var(--background) / 0.55);
+  }
+
+  .credential-zoom-modal__image img {
+    max-height: calc(90vh - 8rem);
+    width: 100%;
+    object-fit: contain;
+  }
+
+  .credential-zoom-modal__caption {
+    padding: 0.95rem 0.3rem 0.15rem;
+  }
+
+  .credential-zoom-modal__caption p {
+    font-size: 0.74rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: hsl(var(--primary));
+  }
+
+  .credential-zoom-modal__caption h3 {
+    margin-top: 0.2rem;
+    font-family: 'Sora', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 800;
+  }
+
+  .credential-zoom-modal__caption span {
+    display: block;
+    margin-top: 0.2rem;
+    color: hsl(var(--muted-foreground));
   }
 
   .credential-image-frame {
@@ -949,8 +1062,8 @@
 
   .club-logo-frame {
     display: flex;
-    height: 5.75rem;
-    width: 5.75rem;
+    height: 6.75rem;
+    width: 6.75rem;
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
@@ -960,6 +1073,36 @@
     background: hsl(var(--background) / 0.68);
     color: hsl(var(--primary));
     padding: 0.65rem;
+  }
+
+  .club-reference-icon {
+    display: inline-grid;
+    height: 2.35rem;
+    width: 2.35rem;
+    place-items: center;
+    border-radius: 999px;
+    border: 1px solid hsl(var(--border) / 0.6);
+    color: hsl(var(--primary));
+    background: hsl(var(--background) / 0.52);
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .club-reference-icon:hover {
+    transform: translateY(-2px);
+    border-color: hsl(var(--primary) / 0.55);
+    box-shadow: 0 16px 30px -22px hsl(var(--primary) / 0.8);
+  }
+
+  .education-logo-frame {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 1.15rem;
+    border: 1px solid hsl(var(--border) / 0.55);
+    background: hsl(var(--background) / 0.62);
+    padding: 0.85rem;
   }
 
 }

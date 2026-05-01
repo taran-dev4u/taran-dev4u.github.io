@@ -133,8 +133,8 @@ export const Education = () => {
             className="glass-card p-8 hover:border-primary/30 transition-all duration-300 group"
           >
             <div className="flex items-start gap-4 mb-6">
-              <div className="brand-mark h-24 w-24 bg-background/70 p-3" aria-label="University at Buffalo mark">
-                <img src={publicAsset('University_at_Buffalo_logo.svg.png')} alt="University at Buffalo logo" className="max-h-full max-w-full object-contain" />
+              <div className="education-logo-frame h-24 w-24" aria-label="University at Buffalo mark">
+                <img src={publicAsset('education/University_at_Buffalo_logo.svg.png')} alt="University at Buffalo logo" className="max-h-full max-w-full object-contain" />
               </div>
 
               <div className="flex-1">
@@ -193,8 +193,8 @@ export const Education = () => {
             className="glass-card p-8 hover:border-primary/30 transition-all duration-300 group"
           >
             <div className="flex items-start gap-4 mb-6">
-              <div className="brand-mark h-24 w-24 bg-background/70 p-3" aria-label="Vellore Institute of Technology mark">
-                <img src={publicAsset('VIT%20logo.png')} alt="VIT logo" className="max-h-full max-w-full object-contain" />
+              <div className="education-logo-frame h-24 w-24" aria-label="Vellore Institute of Technology mark">
+                <img src={publicAsset('education/VIT%20logo.png')} alt="VIT logo" className="max-h-full max-w-full object-contain" />
               </div>
               <div className="flex-1">
                 <h3 className="font-display text-xl font-bold mb-2 group-hover:text-primary transition-colors">
