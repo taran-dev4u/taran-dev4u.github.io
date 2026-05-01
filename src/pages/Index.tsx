@@ -61,9 +61,9 @@ const Index = () => {
           <Projects />
           <Experience />
           <Education />
-          <Growth />
           <Credibility />
           <Writing />
+          <Growth />
           <Contact />
         </main>
         <AskTaranAI />

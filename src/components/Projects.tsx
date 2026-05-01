@@ -38,6 +38,7 @@ type Project = {
   role: string;
   status: 'Completed' | 'Live';
   context: string;
+  subject?: string;
   overview: string;
   technologies: string[];
   keyFeatures: string[];
@@ -526,12 +527,25 @@ const projects: Project[] = [
   },
 ];
 
+const getProjectTags = (project: Project) => {
+  const fallbackSubject =
+    project.role === 'Computer Vision' ? 'AI / Vision'
+      : project.role === 'Security' ? 'Security'
+        : project.technologies.find((tech) =>
+          ['RAG', 'MLOps', 'NLP', 'Kafka', 'Pintos OS', 'SQL', 'PyTorch', 'OpenCV', 'LangChain'].some((keyword) =>
+            tech.toLowerCase().includes(keyword.toLowerCase())
+          )
+        );
+
+  return [project.role, project.subject || fallbackSubject].filter(Boolean).slice(0, 2) as string[];
+};
+
 const ProjectVisual = ({ project }: { project: Project }) => (
   <div className="project-visual">
     <img
       src={publicAsset(project.coverImage || defaultProjectCover)}
       alt={`${project.title} cover`}
-      className="absolute inset-0 h-full w-full object-contain p-3"
+      className="absolute inset-0 h-full w-full object-contain p-4 sm:p-5"
     />
     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/82 to-transparent p-4">
       <div className="line-clamp-1 text-xs uppercase tracking-[0.18em] text-muted-foreground">{project.context}</div>
@@ -611,9 +625,19 @@ export const Projects = () => {
 
                 <CardHeader>
                   <div className="flex items-center justify-between gap-3">
-                    <Badge className="w-fit bg-primary/10 text-primary border-primary/20 hover:bg-primary/15">
-                      {project.role}
-                    </Badge>
+                    <div className="flex flex-wrap gap-2">
+                      {getProjectTags(project).map((tag, tagIndex) => (
+                        <Badge
+                          key={`${project.title}-${tag}`}
+                          className={tagIndex === 0
+                            ? 'w-fit bg-primary/10 text-primary border-primary/20 hover:bg-primary/15'
+                            : 'w-fit bg-secondary/70 text-muted-foreground border-border/50 hover:bg-secondary/80'
+                          }
+                        >
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
                     {project.status === 'Live' && (
                       <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
                         <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgb(52_211_153)]" />

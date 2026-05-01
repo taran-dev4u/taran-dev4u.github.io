@@ -56,6 +56,7 @@ export const AskTaranAI = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState('Grounded portfolio assistant');
   const formRef = useRef<HTMLFormElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
 
   const defaultQuestions = useMemo(() => {
     if (mode === 'role_match') {
@@ -82,6 +83,15 @@ export const AskTaranAI = () => {
   useEffect(() => {
     setServerQuestions([]);
   }, [mode, selectedRole]);
+
+  useEffect(() => {
+    const messagesNode = messagesRef.current;
+    if (!messagesNode) return;
+    messagesNode.scrollTo({
+      top: messagesNode.scrollHeight,
+      behavior: 'smooth',
+    });
+  }, [messages, isLoading]);
 
   const openAssistant = () => {
     setIsOpen(true);
@@ -183,7 +193,7 @@ export const AskTaranAI = () => {
         type="button"
         variant="ghost"
         onClick={openAssistant}
-        className="fixed bottom-5 right-5 z-50 h-12 rounded-full border border-primary/35 bg-primary px-4 text-primary-foreground shadow-2xl shadow-primary/25 hover:bg-primary/90"
+        className="ask-ai-launcher"
         aria-label="Ask Taran AI"
       >
         <Sparkles size={17} />
@@ -191,10 +201,8 @@ export const AskTaranAI = () => {
       </Button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-[95] flex justify-end bg-background/45 backdrop-blur-sm">
-          <button className="absolute inset-0" type="button" aria-label="Close Ask Taran AI" onClick={closeAssistant} />
-
-          <section className="ask-ai-drawer glass-card relative flex h-full w-full max-w-[31rem] flex-col overflow-hidden rounded-none border-l border-border/60 sm:max-w-[34rem]">
+        <div className="ask-ai-panel-shell">
+          <section className="ask-ai-drawer glass-card relative flex h-full w-full flex-col overflow-hidden">
             <header className="ask-ai-drawer__header border-b border-border/50 p-4 sm:p-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -260,7 +268,7 @@ export const AskTaranAI = () => {
             </header>
 
             <div className="flex min-h-0 flex-1 flex-col">
-              <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
+              <div ref={messagesRef} className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
                 <div className="ask-ai-suggestions rounded-2xl border border-border/50 bg-background/35 p-3">
                   <h3 className="mb-3 font-display text-sm font-semibold">Suggested Questions</h3>
                   <div className="flex gap-2 overflow-x-auto pb-1">

@@ -49,7 +49,7 @@ const experiences: ExperienceItem[] = [
     location: 'Hyderabad, India / Remote',
     period: 'Jun 2023 - Jul 2024',
     description:
-      'Built backend integrations, application features, and data workflows for production software and reporting use cases.',
+      'Owned practical engineering work across backend services, database-backed product features, deployment workflows, and reporting pipelines for production-facing use cases.',
     keyWork: [
       'Developed API-backed workflows and database-driven features for product teams.',
       'Worked on data ingestion, cleaning, transformation, validation, and reporting improvements.',
@@ -77,7 +77,7 @@ const experiences: ExperienceItem[] = [
     location: 'Hyderabad, India',
     period: 'Feb 2023 - Sep 2023',
     description:
-      'Worked on atmospheric CO2 and LULC modeling using satellite datasets, geospatial analysis, regression, and explainability.',
+      'Delivered research-grade data science work across satellite data processing, geospatial modeling, regression analysis, explainability, and reproducible climate reporting.',
     keyWork: [
       'Processed and validated large satellite datasets for climate and land-use analysis.',
       'Built modeling and reporting workflows that connected data science with remote-sensing research.',
@@ -105,7 +105,7 @@ const experiences: ExperienceItem[] = [
     location: 'Remote / India',
     period: 'Mar 2023 - Jun 2023',
     description:
-      'Completed a structured 9-week development program across Java, databases, web technologies, Git, TypeScript, and Angular.',
+      'Completed intensive enterprise engineering training across Java, databases, web technologies, version control, TypeScript, Angular, and delivery practices.',
     keyWork: [
       'Practiced backend, frontend, database, and version-control fundamentals in a professional training environment.',
       'Built stronger habits around Agile delivery, reviews, and enterprise-style implementation.',
@@ -163,7 +163,7 @@ export const Experience = () => {
           </p>
         </motion.div>
 
-        <div className="space-y-6 max-w-5xl mx-auto">
+        <div className="experience-timeline max-w-5xl mx-auto">
           {experiences.map((experience, index) => {
             const isOpen = openItems.has(experience.company);
 
@@ -173,10 +173,11 @@ export const Experience = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.7, delay: 0.12 * index }}
-                className="glass-card p-6 sm:p-7"
+                className="experience-timeline__item glass-card p-6 sm:p-7"
               >
+                <span className="experience-timeline__dot" aria-hidden="true" />
                 <div className="grid gap-5 lg:grid-cols-[auto_1fr_auto] lg:items-start">
-                  <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-border/50 bg-background/70 p-3">
+                  <div className="experience-logo-frame flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl border border-border/50 bg-background/70 p-4">
                     <img src={publicAsset(experience.logo)} alt={`${experience.company} logo`} className="max-h-full max-w-full object-contain" />
                   </div>
 
@@ -242,7 +243,7 @@ export const Experience = () => {
                       <div className="flex flex-wrap gap-2">
                         {experience.technologies.map((tech) => (
                           <span key={tech.name} className="tech-logo-chip">
-                            <tech.icon size={17} style={{ color: tech.color }} />
+                            <tech.icon size={20} style={{ color: tech.color }} />
                             {tech.name}
                           </span>
                         ))}

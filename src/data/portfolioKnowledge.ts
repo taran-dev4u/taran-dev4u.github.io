@@ -116,7 +116,7 @@ export const portfolioKnowledge: PortfolioKnowledgeItem[] = [
     roleTags: ['Machine Learning Engineer', 'AI Engineer', 'Data Engineer', 'Software Engineer'],
     skillTags: ['Algorithms', 'Computer Security', 'Machine Learning', 'Data Intensive Computing', 'Operating Systems', 'Deep Learning', 'Computer Vision'],
     summary:
-      'Taran is pursuing an M.S. in Computer Science and Engineering at University at Buffalo, SUNY, from Aug 2024 to Dec 2025 with a listed GPA of 3.8/4.0.',
+      'Taran is pursuing an M.S. in Computer Science and Engineering at University at Buffalo, SUNY, from Aug 2024 to Dec 2025.',
     details: [
       'Graduate coursework includes Algorithms, Computer Security, Intro Machine Learning, Data Intensive Computing, Operating Systems, Databases, Deep Learning, Statistical Data Mining, Web Analytics, and Computer Vision.',
       'This supports roles across AI engineering, ML engineering, data engineering, systems, and backend software.',

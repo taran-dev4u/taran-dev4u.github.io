@@ -219,7 +219,7 @@ export const Skills = () => {
                     className="tech-logo-chip"
                     title={skill.name}
                   >
-                    <skill.icon size={18} style={{ color: skill.color }} />
+                    <skill.icon size={24} style={{ color: skill.color }} />
                     <span>{skill.name}</span>
                   </motion.span>
                 ))}

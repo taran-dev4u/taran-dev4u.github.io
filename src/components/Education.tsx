@@ -1,6 +1,23 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef, useState } from 'react';
-import { Calendar, ChevronRight, GraduationCap, MapPin } from 'lucide-react';
+import {
+  BarChart3,
+  Binary,
+  BookOpenCheck,
+  BrainCircuit,
+  Calendar,
+  ChevronRight,
+  Code2,
+  Cpu,
+  Database,
+  GraduationCap,
+  Languages,
+  LineChart,
+  LockKeyhole,
+  MapPin,
+  Network,
+  Smartphone,
+} from 'lucide-react';
 import { publicAsset } from '@/lib/assets';
 
 const graduateTerms = [
@@ -66,6 +83,22 @@ const undergraduateCourses = [
   'Economics for Engineers',
 ];
 
+const getCourseIcon = (course: string) => {
+  const normalized = course.toLowerCase();
+  if (normalized.includes('machine learning') || normalized.includes('artificial intelligence') || normalized.includes('deep learning') || normalized.includes('natural language')) return BrainCircuit;
+  if (normalized.includes('database') || normalized.includes('query') || normalized.includes('data models')) return Database;
+  if (normalized.includes('security') || normalized.includes('cryptography') || normalized.includes('blockchain')) return LockKeyhole;
+  if (normalized.includes('operating') || normalized.includes('computer organization') || normalized.includes('architecture')) return Cpu;
+  if (normalized.includes('network')) return Network;
+  if (normalized.includes('web') || normalized.includes('java') || normalized.includes('programming') || normalized.includes('software') || normalized.includes('capstone')) return Code2;
+  if (normalized.includes('mobile')) return Smartphone;
+  if (normalized.includes('analytics') || normalized.includes('mining') || normalized.includes('statistics')) return BarChart3;
+  if (normalized.includes('algorithm') || normalized.includes('structures') || normalized.includes('computation') || normalized.includes('competitive')) return Binary;
+  if (normalized.includes('linear') || normalized.includes('calculus')) return LineChart;
+  if (normalized.includes('communication') || normalized.includes('french') || normalized.includes('english')) return Languages;
+  return BookOpenCheck;
+};
+
 export const Education = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
@@ -100,7 +133,7 @@ export const Education = () => {
             className="glass-card p-8 hover:border-primary/30 transition-all duration-300 group"
           >
             <div className="flex items-start gap-4 mb-6">
-              <div className="brand-mark h-16 w-16 bg-background/70 p-2" aria-label="University at Buffalo mark">
+              <div className="brand-mark h-24 w-24 bg-background/70 p-3" aria-label="University at Buffalo mark">
                 <img src={publicAsset('University_at_Buffalo_logo.svg.png')} alt="University at Buffalo logo" className="max-h-full max-w-full object-contain" />
               </div>
 
@@ -126,9 +159,8 @@ export const Education = () => {
             </div>
 
             <p className="text-muted-foreground mb-6 leading-relaxed">
-              GPA: <strong className="text-foreground">3.8/4.0</strong>. Coursework covers algorithms,
-              systems, security, databases, ML, deep learning, computer vision, data-intensive computing,
-              statistical mining, and web analytics.
+              Coursework covers algorithms, systems, security, databases, ML, deep learning, computer vision,
+              data-intensive computing, statistical mining, and web analytics.
             </p>
 
             <div className="space-y-5">
@@ -141,7 +173,10 @@ export const Education = () => {
                   <div className="flex flex-wrap gap-2">
                     {term.courses.map((course) => (
                       <span key={course} className="tech-chip">
-                        <GraduationCap size={13} />
+                        {(() => {
+                          const CourseIcon = getCourseIcon(course);
+                          return <CourseIcon size={13} />;
+                        })()}
                         {course}
                       </span>
                     ))}
@@ -158,7 +193,7 @@ export const Education = () => {
             className="glass-card p-8 hover:border-primary/30 transition-all duration-300 group"
           >
             <div className="flex items-start gap-4 mb-6">
-              <div className="brand-mark h-16 w-16 bg-background/70 p-2" aria-label="Vellore Institute of Technology mark">
+              <div className="brand-mark h-24 w-24 bg-background/70 p-3" aria-label="Vellore Institute of Technology mark">
                 <img src={publicAsset('VIT%20logo.png')} alt="VIT logo" className="max-h-full max-w-full object-contain" />
               </div>
               <div className="flex-1">
@@ -170,10 +205,6 @@ export const Education = () => {
                 </h4>
 
                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <Calendar size={16} />
-                    <span>2019 - 2023</span>
-                  </div>
                   <div className="flex items-center gap-2">
                     <MapPin size={16} />
                     <span>India</span>
@@ -190,7 +221,10 @@ export const Education = () => {
             <div className="flex flex-wrap gap-2">
               {displayedUndergrad.map((course) => (
                 <span key={course} className="tech-chip">
-                  <GraduationCap size={13} />
+                  {(() => {
+                    const CourseIcon = getCourseIcon(course);
+                    return <CourseIcon size={13} />;
+                  })()}
                   {course}
                 </span>
               ))}

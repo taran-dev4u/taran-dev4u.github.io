@@ -195,19 +195,22 @@ export const Navbar = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="fixed bottom-5 left-5 z-50 h-11 w-11 rounded-full border border-border/60 bg-background/85 text-foreground shadow-lg shadow-primary/10 backdrop-blur-md hover:border-primary/40 hover:text-primary"
+          className={cn("music-cd-button", musicEnabled && "is-playing")}
           onClick={toggleMusic}
           aria-label={musicLabel}
           title={musicLabel}
         >
-          {musicEnabled ? <VolumeX size={18} /> : <Music2 size={18} />}
+          <span className="music-cd-button__disc" />
+          <span className="music-cd-button__icon">
+            {musicEnabled ? <VolumeX size={18} /> : <Music2 size={18} />}
+          </span>
         </Button>
 
         {isScrolled && (
           <Button
             variant="ghost"
             size="icon"
-            className="fixed bottom-20 right-5 z-50 h-11 w-11 rounded-full border border-primary/40 bg-primary text-primary-foreground shadow-lg shadow-primary/20 backdrop-blur-md hover:bg-primary/90"
+            className="floating-glass-control fixed bottom-20 right-5 z-50 h-11 w-11"
             onClick={() => scrollToSection('#hero')}
             aria-label="Back to top"
             title="Back to top"
