@@ -81,6 +81,7 @@ const projects: Project[] = [
     outcome:
       'Strengthened my ability to connect climate science, data processing, modeling, and clear technical storytelling.',
     icon: RadioTower,
+    githubUrl: 'https://github.com/taran-dev4u/satellite-co2-climate-analytics',
   },
   {
     title: 'Enhanced Image Inpainting With Transformer-GAN',
@@ -99,6 +100,7 @@ const projects: Project[] = [
     outcome:
       'Built deeper intuition for modern vision architectures, loss design, and model evaluation beyond accuracy alone.',
     icon: ImageIcon,
+    githubUrl: 'https://github.com/taran-dev4u/transformer-gan-image-restoration',
   },
   {
     title: 'Aviation Accident Analysis: Trends, Causes, and Safety Measures',
@@ -117,6 +119,27 @@ const projects: Project[] = [
     outcome:
       'Improved my ability to turn messy historical datasets into clear, domain-aware findings for decision making.',
     icon: BarChart3,
+    githubUrl: 'https://github.com/taran-dev4u/aviation-accident-risk-analytics',
+  },
+  {
+    title: 'Spark Text Processing Word Count',
+    role: 'Data Engineer',
+    status: 'Completed',
+    context: 'GitHub data-engineering lab',
+    subject: 'Distributed Text Processing',
+    overview:
+      'Compact distributed text-processing workflow using Spark-style transformations for word count, normalization, stopword handling, sorted frequency output, and result interpretation.',
+    technologies: ['Apache Spark', 'Python', 'RDDs', 'Text Processing', 'Stopword Filtering', 'Frequency Analysis'],
+    keyFeatures: [
+      'Loaded multiple text files as a corpus and tokenized them into countable terms.',
+      'Applied case normalization, punctuation handling, and stopword filtering to reduce noisy output.',
+      'Mapped and reduced terms into frequency counts, then sorted results for interpretation.',
+      'Documented the core pattern behind larger distributed text pipelines in a concise repo.',
+    ],
+    outcome:
+      'Shows hands-on comfort with distributed data-processing fundamentals before scaling into larger Spark pipelines.',
+    icon: Workflow,
+    githubUrl: 'https://github.com/taran-dev4u/spark-text-processing-wordcount',
   },
   {
     title: 'Pintos Threads and Scheduler',
@@ -136,6 +159,7 @@ const projects: Project[] = [
       'Improved my systems-level reasoning around scheduling, synchronization, and correctness under constrained APIs.',
     icon: Cpu,
     coverImage: 'pintos.png',
+    githubUrl: 'https://github.com/taran-dev4u/pintos-kernel-systems-lab',
   },
   {
     title: 'Pintos User Programs and System Calls',
@@ -155,6 +179,7 @@ const projects: Project[] = [
       'Strengthened my systems programming discipline around process control, memory safety, and kernel/user interfaces.',
     icon: Cpu,
     coverImage: 'pintos2.png',
+    githubUrl: 'https://github.com/taran-dev4u/pintos-kernel-systems-lab',
   },
   {
     title: 'Stock Market Database for Real-Time Analysis',
@@ -174,6 +199,7 @@ const projects: Project[] = [
       'Built a stronger foundation in database design, query planning, and data integrity for real-world domains.',
     icon: Database,
     coverImage: 'stock%20price%20prediction%20project.png',
+    githubUrl: 'https://github.com/taran-dev4u/stock-market-transaction-analytics-db',
   },
   {
     title: 'Penguin Classification Pipeline',
@@ -193,6 +219,7 @@ const projects: Project[] = [
       'Built a stronger foundation in supervised learning workflows and careful preprocessing before modeling.',
     icon: BrainCircuit,
     coverImage: 'penguin_project.png',
+    githubUrl: 'https://github.com/taran-dev4u/machine-learning-foundations-lab',
   },
   {
     title: 'Diamonds Price Prediction',
@@ -212,6 +239,7 @@ const projects: Project[] = [
       'Improved my regression workflow, feature-analysis habits, and ability to explain model tradeoffs.',
     icon: LineChart,
     coverImage: 'diamonds%20project.png',
+    githubUrl: 'https://github.com/taran-dev4u/machine-learning-foundations-lab',
   },
   {
     title: 'Mercedes-Benz Test-Bench Time Prediction',
@@ -231,6 +259,27 @@ const projects: Project[] = [
       'Selected Linear Regression with PCA, reaching 8.23 RMSE, 5.55 MAE, and 0.565 R2 on unseen data.',
     icon: LineChart,
     coverImage: defaultProjectCover,
+    githubUrl: 'https://github.com/taran-dev4u/mercedes-benz-test-time-forecasting',
+  },
+  {
+    title: 'R Statistical Mining With PCA and Clustering',
+    role: 'Data Engineer',
+    status: 'Completed',
+    context: 'EAS 507 statistical data mining coursework',
+    subject: 'Statistical Mining',
+    overview:
+      'R-based statistical data mining project covering exploratory visualization, distribution checks, PCA, clustering, anomaly review, and interpretation-focused modeling.',
+    technologies: ['R', 'PCA', 'K-Means', 'Clustering', 'Visualization', 'Statistical Learning'],
+    keyFeatures: [
+      'Inspected datasets with pair plots, histograms, distribution checks, and exploratory summaries.',
+      'Applied PCA to reduce dimensionality while explaining variance and component behavior.',
+      'Compared clustering outputs after considering scaling, context, and outlier behavior.',
+      'Focused on interpreting statistical results instead of only running algorithms.',
+    ],
+    outcome:
+      'Strengthened statistical modeling judgment around scaling, dimensionality reduction, clustering, and anomaly-aware analysis.',
+    icon: LineChart,
+    githubUrl: 'https://github.com/taran-dev4u/r-statistical-mining-pca-clustering',
   },
   {
     title: 'Treasure Hunt Grid World Reinforcement Learning',
@@ -250,6 +299,7 @@ const projects: Project[] = [
       'Strengthened my understanding of RL environments, reward design, policy learning, and exploration tradeoffs.',
     icon: Workflow,
     coverImage: 'qlearning%20project.png',
+    githubUrl: 'https://github.com/taran-dev4u/treasure-grid-reinforcement-learning',
   },
   {
     title: 'Computer Vision Pipeline Suite',
@@ -269,6 +319,7 @@ const projects: Project[] = [
       'Connected mathematical vision fundamentals with practical image-processing workflows and evaluation constraints.',
     icon: ScanFace,
     coverImage: 'face%20attendence%20project.png',
+    githubUrl: 'https://github.com/taran-dev4u/computer-vision-geometry-stitching-detection',
   },
   {
     title: 'Online Product Reviews Sentiment Analysis',
@@ -288,6 +339,47 @@ const projects: Project[] = [
       'Built confidence with end-to-end NLP workflows from collection and cleaning to model evaluation and simple deployment.',
     icon: BrainCircuit,
     coverImage: 'spam%20mail%20detection.png',
+    githubUrl: 'https://github.com/taran-dev4u/ecommerce-review-sentiment-analytics',
+  },
+  {
+    title: 'Bayesian Biomonitoring Early Warning',
+    role: 'Machine Learning Engineer',
+    status: 'Completed',
+    context: 'Undergraduate probabilistic ML project',
+    subject: 'Probabilistic Modeling',
+    overview:
+      'Probabilistic biomonitoring project using Bayesian networks to represent uncertainty, connect monitoring variables, and reason about early warning signals.',
+    technologies: ['Python', 'Bayesian Networks', 'pgmpy', 'Probabilistic Modeling', 'Pandas', 'Inference'],
+    keyFeatures: [
+      'Framed biomonitoring as an uncertainty-aware reasoning problem instead of a simple threshold check.',
+      'Defined monitoring variables, dependency structure, and welfare-state interpretation.',
+      'Prepared the project for conditional probability tables and inference examples.',
+      'Connected biological monitoring concepts with practical probabilistic ML modeling.',
+    ],
+    outcome:
+      'Added depth in uncertainty modeling, graphical models, and explainable reasoning for risk-oriented ML systems.',
+    icon: BrainCircuit,
+    githubUrl: 'https://github.com/taran-dev4u/bayesian-biomonitoring-early-warning',
+  },
+  {
+    title: 'PyTorch ML/DL Modeling Lab',
+    role: 'Machine Learning Engineer',
+    status: 'Completed',
+    context: 'Deep learning architecture lab',
+    subject: 'Deep Learning',
+    overview:
+      'Consolidated modeling lab covering preprocessing, neural networks, CNNs, RNNs, LSTMs, autoencoders, transformers, and Vision Transformer experiments.',
+    technologies: ['PyTorch', 'CNN', 'RNN', 'LSTM', 'Autoencoders', 'Transformers', 'ViT'],
+    keyFeatures: [
+      'Organized multiple model families into one coherent deep-learning practice repo.',
+      'Covered both image and sequence modeling patterns across supervised and representation-learning tasks.',
+      'Practiced model setup, training loops, optimization behavior, and architecture comparison.',
+      'Connected coursework experiments to reusable ML engineering habits.',
+    ],
+    outcome:
+      'Strengthened architecture-level intuition across modern deep learning workflows beyond one isolated model.',
+    icon: BrainCircuit,
+    githubUrl: 'https://github.com/taran-dev4u/pytorch-ml-dl-modeling-lab',
   },
   {
     title: 'Movie Reviews Website Database',
@@ -306,6 +398,47 @@ const projects: Project[] = [
     outcome:
       'Reinforced relational schema design, CRUD flows, and PHP/MySQL application structure.',
     icon: Database,
+    githubUrl: 'https://github.com/taran-dev4u/movie-series-review-dbms',
+  },
+  {
+    title: 'Raspberry Pi Internet Radio Station',
+    role: 'Software Developer',
+    status: 'Completed',
+    context: 'Embedded systems / IoT project',
+    subject: 'Embedded / IoT',
+    overview:
+      'Embedded systems project that configures a Raspberry Pi as an internet radio device with operating-system image setup, Wi-Fi configuration, and streaming audio playback.',
+    technologies: ['Raspberry Pi', 'Linux', 'Pi MusicBox', 'Wi-Fi', 'Audio Streaming', 'SD Card Imaging'],
+    keyFeatures: [
+      'Prepared the Raspberry Pi image and SD-card workflow for the device setup.',
+      'Configured networking so the device could connect and access internet radio streams.',
+      'Documented hardware, software, and playback workflow for repeatable setup.',
+      'Connected embedded configuration, networking, and media playback into one working system.',
+    ],
+    outcome:
+      'Shows practical comfort with hardware-oriented software setup, Linux-style configuration, and networked device workflows.',
+    icon: RadioTower,
+    githubUrl: 'https://github.com/taran-dev4u/raspberry-pi-internet-radio-station',
+  },
+  {
+    title: 'Arduino LPG Leakage Detector With SMS Alert',
+    role: 'Software Developer',
+    status: 'Completed',
+    context: 'Arduino safety-system project',
+    subject: 'Embedded / IoT',
+    overview:
+      'Safety-focused embedded project using Arduino UNO, an MQ-5 gas sensor, buzzer alarm, and SIM900A GSM module to detect LPG leakage and send alerts.',
+    technologies: ['Arduino', 'C++', 'MQ-5 Sensor', 'SIM900A GSM', 'Buzzer', 'Embedded Systems'],
+    keyFeatures: [
+      'Read gas concentration changes from an MQ-5 sensor and triggered an alarm response.',
+      'Used Arduino UNO to coordinate sensor readings, buzzer behavior, and GSM alert flow.',
+      'Designed the workflow for LPG leakage detection with audible and SMS-style notification paths.',
+      'Documented cost and component choices for a practical low-cost safety device.',
+    ],
+    outcome:
+      'Adds a concrete embedded systems example with sensor integration, hardware control, and safety-oriented alerting.',
+    icon: ShieldCheck,
+    githubUrl: 'https://github.com/taran-dev4u/Arduino-LPG-detector',
   },
   {
     title: 'Ireland Hotel Pricing and Ratings Analysis',
@@ -344,6 +477,7 @@ const projects: Project[] = [
     outcome:
       'Reinforced applied cryptography concepts and precision in algorithmic Java code.',
     icon: ShieldCheck,
+    githubUrl: 'https://github.com/taran-dev4u/elgamal-digital-signature-implementation',
   },
   {
     title: 'Distributed Rate Limiter & API Gateway',

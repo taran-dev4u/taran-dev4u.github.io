@@ -341,6 +341,90 @@ export const portfolioKnowledge: PortfolioKnowledgeItem[] = [
     href: '#projects',
   },
   {
+    id: 'project-spark-wordcount',
+    title: 'Spark Text Processing Word Count',
+    section: 'projects',
+    roleTags: ['Data Engineer', 'Analytics Engineer'],
+    skillTags: ['Apache Spark', 'Python', 'RDDs', 'text processing', 'word count', 'frequency analysis'],
+    summary:
+      'Distributed text-processing workflow using Spark-style transformations for word count, normalization, stopword handling, and frequency analysis.',
+    details: [
+      'The project loads text as a corpus, tokenizes terms, normalizes case and punctuation, filters stop words, maps and reduces frequency counts, and sorts output for interpretation.',
+      'It is intentionally compact but demonstrates the core data-engineering pattern behind larger distributed text pipelines.',
+    ],
+    href: '#projects',
+  },
+  {
+    id: 'project-r-statistical-mining',
+    title: 'R Statistical Mining With PCA and Clustering',
+    section: 'projects',
+    roleTags: ['Data Engineer', 'Machine Learning Engineer', 'Data Scientist'],
+    skillTags: ['R', 'PCA', 'clustering', 'K-means', 'visualization', 'statistical learning'],
+    summary:
+      'R-based statistical data mining project covering exploratory visualization, PCA, clustering, anomaly review, and interpretation-focused modeling.',
+    details: [
+      'The project uses distribution checks, scaling awareness, PCA, clustering outputs, and anomaly review to keep statistical interpretation grounded.',
+      'It supports data and ML roles by showing judgment around when methods are meaningful, not just how to run them.',
+    ],
+    href: '#projects',
+  },
+  {
+    id: 'project-bayesian-biomonitoring',
+    title: 'Bayesian Biomonitoring Early Warning',
+    section: 'projects',
+    roleTags: ['Machine Learning Engineer', 'AI Engineer', 'Research'],
+    skillTags: ['Bayesian networks', 'probabilistic modeling', 'pgmpy', 'inference', 'early warning'],
+    summary:
+      'Probabilistic biomonitoring project using Bayesian networks to represent uncertainty and reason about early warning signals.',
+    details: [
+      'The project frames biomonitoring as uncertainty-aware reasoning across monitoring variables, dependency structure, and welfare-state interpretation.',
+      'It adds evidence of graphical-model thinking and explainable probabilistic ML.',
+    ],
+    href: '#projects',
+  },
+  {
+    id: 'project-pytorch-modeling-lab',
+    title: 'PyTorch ML/DL Modeling Lab',
+    section: 'projects',
+    roleTags: ['Machine Learning Engineer', 'AI Engineer'],
+    skillTags: ['PyTorch', 'CNN', 'RNN', 'LSTM', 'autoencoders', 'transformers', 'Vision Transformer'],
+    summary:
+      'Consolidated modeling lab covering preprocessing, neural networks, CNNs, RNNs, LSTMs, autoencoders, transformers, and ViT experiments.',
+    details: [
+      'The lab groups multiple model families into one architecture-practice repository.',
+      'It demonstrates training-loop practice, model comparison, optimization behavior, and architecture-level intuition across image and sequence tasks.',
+    ],
+    href: '#projects',
+  },
+  {
+    id: 'project-raspberry-pi-radio',
+    title: 'Raspberry Pi Internet Radio Station',
+    section: 'projects',
+    roleTags: ['Software Engineer', 'Embedded Systems', 'IoT'],
+    skillTags: ['Raspberry Pi', 'Linux', 'Pi MusicBox', 'Wi-Fi', 'audio streaming', 'network setup'],
+    summary:
+      'Embedded systems project configuring a Raspberry Pi as an internet radio device with image setup, Wi-Fi configuration, and streaming audio playback.',
+    details: [
+      'The project connects hardware setup, operating-system image preparation, networking, and media playback into a repeatable device workflow.',
+      'It shows practical comfort with Linux-style configuration and networked embedded systems.',
+    ],
+    href: '#projects',
+  },
+  {
+    id: 'project-arduino-lpg-detector',
+    title: 'Arduino LPG Leakage Detector With SMS Alert',
+    section: 'projects',
+    roleTags: ['Software Engineer', 'Embedded Systems', 'IoT'],
+    skillTags: ['Arduino', 'C++', 'MQ-5 sensor', 'SIM900A GSM', 'buzzer', 'safety system'],
+    summary:
+      'Safety-focused embedded project using Arduino UNO, an MQ-5 gas sensor, buzzer alarm, and GSM module to detect LPG leakage and send alerts.',
+    details: [
+      'The system reads gas concentration changes, triggers an audible alarm, and uses GSM alerting for LPG leakage notification.',
+      'It adds a concrete sensor-integration project with hardware control and safety-oriented design.',
+    ],
+    href: '#projects',
+  },
+  {
     id: 'growth-ai',
     title: 'Currently exploring AI engineering topics',
     section: 'growth',
