@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { ArrowDown, BrainCircuit, Download, Github, Linkedin, Mail, MapPin, ServerCog, Sparkles } from 'lucide-react';
 import profileImage from '@/assets/profile-taran.webp';
 
-const resumeHref = 'https://drive.google.com/file/d/1aE44dipSwImMwkdwGetKQ-LvL5XfJh5Y/view?usp=sharing';
+const resumeHref = 'https://drive.google.com/file/d/1W9V4bXnt9ak7zhB6SuiUaN6mYrFPqI5u/view?usp=sharing';
 
 export const Hero = () => {
   return (
