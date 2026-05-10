@@ -65,6 +65,8 @@ export const portfolioKnowledge: PortfolioKnowledgeItem[] = [
     ],
     href: '#skills',
   },
+  // iVinGo is intentionally hidden from Ask Taran AI. Uncomment this block if you want the assistant to reference it later.
+  /*
   {
     id: 'experience-ivingo',
     title: 'Software Engineer - Web and Data Platforms at iVinGo Solutions',
@@ -80,6 +82,7 @@ export const portfolioKnowledge: PortfolioKnowledgeItem[] = [
     ],
     href: '#experience',
   },
+  */
   {
     id: 'experience-nrsc',
     title: 'Research Intern - Data Science at NRSC / ISRO',
@@ -421,6 +424,76 @@ export const portfolioKnowledge: PortfolioKnowledgeItem[] = [
     details: [
       'The system reads gas concentration changes, triggers an audible alarm, and uses GSM alerting for LPG leakage notification.',
       'It adds a concrete sensor-integration project with hardware control and safety-oriented design.',
+    ],
+    href: '#projects',
+  },
+  {
+    id: 'project-leetcode-learning-archive',
+    title: 'Algorithm Practice and LeetCode Learning Archive',
+    section: 'projects',
+    roleTags: ['Software Engineer', 'Backend Engineer'],
+    skillTags: ['Java', 'Python', 'data structures', 'algorithms', 'LeetCode', 'problem solving'],
+    summary:
+      'A GitHub algorithms and interview-prep archive organized across arrays, strings, dynamic programming, graphs, trees, matrices, sorting, and daily practice.',
+    details: [
+      'The repository groups solved problems and notes by topic so patterns are easier to revisit before interviews.',
+      'It supports software engineering interviews by showing repeated practice across core data structures and algorithms.',
+    ],
+    href: '#projects',
+  },
+  {
+    id: 'project-mobile-app-coursework',
+    title: 'Mobile Application Development Coursework Portfolio',
+    section: 'projects',
+    roleTags: ['Software Engineer', 'Full Stack Developer'],
+    skillTags: ['mobile app development', 'Android concepts', 'Java', 'mobile UI', 'application lifecycle'],
+    summary:
+      'A mobile application development repository collecting lab work and mini-project reports around app screens, UI behavior, lifecycle concepts, and implementation decisions.',
+    details: [
+      'The repository organizes mobile app development coursework and mini-project documentation in one place.',
+      'It adds mobile-development context to Taran’s broader software engineering foundation.',
+    ],
+    href: '#projects',
+  },
+  {
+    id: 'project-data-analytics-coursework',
+    title: 'Data Analytics Coursework Portfolio',
+    section: 'projects',
+    roleTags: ['Data Engineer', 'Analytics Engineer'],
+    skillTags: ['Python', 'data analytics', 'EDA', 'visualization', 'statistics', 'reporting'],
+    summary:
+      'An analytics coursework repository spanning foundational data analytics, advanced data analytics, exploratory analysis, reporting, and Python-based assignments.',
+    details: [
+      'The repository groups foundational, data analytics, and advanced analytics lab work for repeated data-cleaning and visualization practice.',
+      'It complements the larger aviation, Mercedes-Benz, and statistical mining projects with additional analytics evidence.',
+    ],
+    href: '#projects',
+  },
+  {
+    id: 'project-password-generator-web-app',
+    title: 'Password Generator Web Application',
+    section: 'projects',
+    roleTags: ['Full Stack Developer', 'Software Engineer'],
+    skillTags: ['HTML', 'CSS', 'JavaScript', 'jQuery', 'web security', 'client-side logic'],
+    summary:
+      'A browser-based password generator project built with HTML, CSS, JavaScript, and jQuery, including multiple pages and client-side interaction logic.',
+    details: [
+      'The project includes home, about, feedback, styling, and utility behavior for a security-themed web application.',
+      'It adds a concrete frontend utility project to the portfolio’s software and web development evidence.',
+    ],
+    href: '#projects',
+  },
+  {
+    id: 'project-competitive-programming-archive',
+    title: 'Competitive Programming Lab Archive',
+    section: 'projects',
+    roleTags: ['Software Engineer', 'Backend Engineer'],
+    skillTags: ['algorithms', 'competitive programming', 'problem solving', 'complexity analysis', 'implementation practice'],
+    summary:
+      'A competitive programming coursework archive collecting lab reports and problem-solving exercises focused on algorithmic thinking and implementation discipline.',
+    details: [
+      'The archive supports interview readiness by reinforcing constraints, logic, implementation, and verification practice.',
+      'It provides additional evidence of long-term algorithmic work beyond one isolated project.',
     ],
     href: '#projects',
   },

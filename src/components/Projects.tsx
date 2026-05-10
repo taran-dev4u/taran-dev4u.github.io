@@ -52,6 +52,25 @@ type Project = {
 
 const defaultProjectCover = 'default%20project%20cover%20photo.png';
 
+const remoteCover = (photoId: string) =>
+  `https://images.unsplash.com/${photoId}?auto=format&fit=crop&w=1200&q=82`;
+
+const projectCoverImages = {
+  ai: remoteCover('photo-1677442136019-21780ecad995'),
+  algorithms: remoteCover('photo-1515879218367-8466d910aaa4'),
+  analytics: remoteCover('photo-1551288049-bebda4e38f71'),
+  aviation: remoteCover('photo-1436491865332-7a61a109cc05'),
+  climate: remoteCover('photo-1446776811953-b23d57bd21aa'),
+  database: remoteCover('photo-1558494949-ef010cbdcc31'),
+  embedded: remoteCover('photo-1518770660439-4636190af475'),
+  finance: remoteCover('photo-1611974789855-9c2a0a7236a3'),
+  mobile: remoteCover('photo-1516321318423-f06f85e504b3'),
+  security: remoteCover('photo-1555949963-aa79dcee981c'),
+  systems: remoteCover('photo-1518779578993-ec3579fee39f'),
+  vision: remoteCover('photo-1535378917042-10a22c95931a'),
+  web: remoteCover('photo-1461749280684-dccba630e2f6'),
+};
+
 const roles = [
   'All Projects',
   'Software Developer',
@@ -62,6 +81,31 @@ const roles = [
   'Computer Vision',
   'Security',
 ];
+
+const resolveProjectImage = (path: string) =>
+  /^https?:\/\//.test(path) ? path : publicAsset(path);
+
+const getProjectCoverSrc = (project: Project) => {
+  if (project.coverImage) return resolveProjectImage(project.coverImage);
+
+  const haystack = `${project.title} ${project.role} ${project.subject || ''} ${project.context}`.toLowerCase();
+
+  if (haystack.includes('co2') || haystack.includes('climate') || haystack.includes('satellite')) return projectCoverImages.climate;
+  if (haystack.includes('inpainting') || haystack.includes('vision') || haystack.includes('face') || haystack.includes('image')) return projectCoverImages.vision;
+  if (haystack.includes('aviation')) return projectCoverImages.aviation;
+  if (haystack.includes('spark') || haystack.includes('analytics') || haystack.includes('data pipeline') || haystack.includes('statistical') || haystack.includes('lakehouse')) return projectCoverImages.analytics;
+  if (haystack.includes('pintos') || haystack.includes('operating systems') || haystack.includes('rate limiter') || haystack.includes('microservices')) return projectCoverImages.systems;
+  if (haystack.includes('stock') || haystack.includes('fraud') || haystack.includes('mercedes') || haystack.includes('price')) return projectCoverImages.finance;
+  if (haystack.includes('database') || haystack.includes('dbms') || haystack.includes('sql') || haystack.includes('movie')) return projectCoverImages.database;
+  if (haystack.includes('password') || haystack.includes('security') || haystack.includes('cryptography') || haystack.includes('elgamal')) return projectCoverImages.security;
+  if (haystack.includes('mobile') || haystack.includes('android')) return projectCoverImages.mobile;
+  if (haystack.includes('leetcode') || haystack.includes('algorithm') || haystack.includes('competitive')) return projectCoverImages.algorithms;
+  if (haystack.includes('raspberry') || haystack.includes('arduino') || haystack.includes('iot') || haystack.includes('embedded')) return projectCoverImages.embedded;
+  if (haystack.includes('rag') || haystack.includes('agent') || haystack.includes('mlops') || haystack.includes('pytorch') || haystack.includes('learning')) return projectCoverImages.ai;
+  if (haystack.includes('web') || haystack.includes('saas') || haystack.includes('dashboard')) return projectCoverImages.web;
+
+  return publicAsset(defaultProjectCover);
+};
 
 const projects: Project[] = [
   {
@@ -219,7 +263,6 @@ const projects: Project[] = [
       'Built a stronger foundation in supervised learning workflows and careful preprocessing before modeling.',
     icon: BrainCircuit,
     coverImage: 'penguin_project.png',
-    githubUrl: 'https://github.com/taran-dev4u/machine-learning-foundations-lab',
   },
   {
     title: 'Diamonds Price Prediction',
@@ -239,7 +282,6 @@ const projects: Project[] = [
       'Improved my regression workflow, feature-analysis habits, and ability to explain model tradeoffs.',
     icon: LineChart,
     coverImage: 'diamonds%20project.png',
-    githubUrl: 'https://github.com/taran-dev4u/machine-learning-foundations-lab',
   },
   {
     title: 'Mercedes-Benz Test-Bench Time Prediction',
@@ -258,7 +300,6 @@ const projects: Project[] = [
     outcome:
       'Selected Linear Regression with PCA, reaching 8.23 RMSE, 5.55 MAE, and 0.565 R2 on unseen data.',
     icon: LineChart,
-    coverImage: defaultProjectCover,
     githubUrl: 'https://github.com/taran-dev4u/mercedes-benz-test-time-forecasting',
   },
   {
@@ -299,7 +340,6 @@ const projects: Project[] = [
       'Strengthened my understanding of RL environments, reward design, policy learning, and exploration tradeoffs.',
     icon: Workflow,
     coverImage: 'qlearning%20project.png',
-    githubUrl: 'https://github.com/taran-dev4u/treasure-grid-reinforcement-learning',
   },
   {
     title: 'Computer Vision Pipeline Suite',
@@ -338,7 +378,6 @@ const projects: Project[] = [
     outcome:
       'Built confidence with end-to-end NLP workflows from collection and cleaning to model evaluation and simple deployment.',
     icon: BrainCircuit,
-    coverImage: 'spam%20mail%20detection.png',
     githubUrl: 'https://github.com/taran-dev4u/ecommerce-review-sentiment-analytics',
   },
   {
@@ -455,9 +494,8 @@ const projects: Project[] = [
       'Kept the work readable for both technical and non-technical viewers.',
     ],
     outcome:
-      'One of my public projects with both code and a live walkthrough available.',
+      'One of my public-facing analytics projects with a live walkthrough available.',
     icon: BarChart3,
-    githubUrl: 'https://github.com/taran-dev4u/ireland-hotel-pricing-ratings-analysis',
     demoUrl: 'https://ireland-hotel-analytics.netlify.app/',
   },
   {
@@ -478,6 +516,106 @@ const projects: Project[] = [
       'Reinforced applied cryptography concepts and precision in algorithmic Java code.',
     icon: ShieldCheck,
     githubUrl: 'https://github.com/taran-dev4u/elgamal-digital-signature-implementation',
+  },
+  {
+    title: 'Algorithm Practice and LeetCode Learning Archive',
+    role: 'Software Developer',
+    status: 'Completed',
+    context: 'GitHub algorithms and interview-prep repository',
+    subject: 'Algorithms',
+    overview:
+      'Structured algorithm-practice archive covering arrays, strings, dynamic programming, graphs, trees, sliding windows, backtracking, matrices, sorting, and daily problem solving.',
+    technologies: ['Java', 'Python', 'Jupyter Notebook', 'Data Structures', 'Algorithms', 'Problem Solving'],
+    keyFeatures: [
+      'Organized solved problems by topic so practice patterns are easier to revisit before interviews.',
+      'Covered matrix traversal, searching, sorting, hashing, linked lists, trees, graphs, dynamic programming, and two-pointer patterns.',
+      'Included notes and supporting notebook work for computer vision and Python practice.',
+      'Built a reusable preparation archive instead of keeping scattered one-off solutions.',
+    ],
+    outcome:
+      'Strengthened interview readiness and core problem-solving habits across data structures and algorithms.',
+    icon: Cpu,
+    githubUrl: 'https://github.com/taran-dev4u/LeetCode_absolute_Learning',
+  },
+  {
+    title: 'Mobile Application Development Coursework Portfolio',
+    role: 'Software Developer',
+    status: 'Completed',
+    context: 'Undergraduate mobile application development repository',
+    subject: 'Mobile Apps',
+    overview:
+      'Collection of mobile application development labs and mini-project reports documenting app screens, UI behavior, lifecycle concepts, and course-based implementation work.',
+    technologies: ['Android Concepts', 'Java', 'Mobile UI', 'Application Lifecycle', 'Course Reports', 'Documentation'],
+    keyFeatures: [
+      'Collected lab work and mini-project reports from mobile application development coursework.',
+      'Documented app-building exercises, interface behavior, and implementation decisions across multiple assignments.',
+      'Kept course artifacts organized in a single GitHub repository for future reference.',
+      'Shows practical exposure to mobile app workflows alongside web and backend projects.',
+    ],
+    outcome:
+      'Added mobile-development context to my broader software engineering foundation.',
+    icon: Layers3,
+    githubUrl: 'https://github.com/taran-dev4u/App-Dev-Works',
+  },
+  {
+    title: 'Data Analytics Coursework Portfolio',
+    role: 'Data Engineer',
+    status: 'Completed',
+    context: 'Undergraduate analytics and data-analysis repository',
+    subject: 'Analytics',
+    overview:
+      'Organized analytics coursework repository spanning foundational data analytics, advanced data analytics, exploratory analysis, reporting, and Python-based analysis assignments.',
+    technologies: ['Python', 'Data Analytics', 'EDA', 'Visualization', 'Statistics', 'Reporting'],
+    keyFeatures: [
+      'Grouped foundational, data analytics, and advanced analytics lab work into a maintainable repository.',
+      'Captured analysis workflows through reports covering exploratory analysis, visual interpretation, and statistical reasoning.',
+      'Practiced translating raw datasets and assignments into structured findings.',
+      'Complements the larger aviation, Mercedes-Benz, and statistical mining projects with additional analytics practice.',
+    ],
+    outcome:
+      'Built repetition in data-cleaning, analysis, visualization, and report-writing workflows.',
+    icon: BarChart3,
+    githubUrl: 'https://github.com/taran-dev4u/Data-analytics',
+  },
+  {
+    title: 'Password Generator Web Application',
+    role: 'Full Stack Developer',
+    status: 'Completed',
+    context: 'GitHub web development project',
+    subject: 'Web Security',
+    overview:
+      'Browser-based password generator project built with HTML, CSS, JavaScript, and jQuery, including multiple pages, styling, feedback flow, and client-side interaction logic.',
+    technologies: ['HTML', 'CSS', 'JavaScript', 'jQuery', 'Responsive UI', 'Client-Side Logic'],
+    keyFeatures: [
+      'Built a multi-page web interface for generating and presenting password-related utility behavior.',
+      'Used JavaScript and jQuery for client-side interaction and page behavior.',
+      'Included supporting pages such as home, about, and feedback flows.',
+      'Practiced web UI structure, styling, and security-themed utility design.',
+    ],
+    outcome:
+      'Improved frontend implementation practice with a concrete browser-based utility project.',
+    icon: ShieldCheck,
+    githubUrl: 'https://github.com/taran-dev4u/WebDev-Projects',
+  },
+  {
+    title: 'Competitive Programming Lab Archive',
+    role: 'Software Developer',
+    status: 'Completed',
+    context: 'Undergraduate competitive programming repository',
+    subject: 'Algorithms',
+    overview:
+      'Competitive programming coursework archive collecting lab reports and problem-solving exercises focused on algorithmic thinking, implementation discipline, and contest-style preparation.',
+    technologies: ['Algorithms', 'Competitive Programming', 'Problem Solving', 'Complexity Analysis', 'Implementation Practice'],
+    keyFeatures: [
+      'Collected multiple competitive-programming lab submissions in one repository.',
+      'Practiced breaking problems into constraints, logic, implementation, and verification steps.',
+      'Supported the same fundamentals used in systems, backend, ML, and data-engineering interviews.',
+      'Provides additional evidence of long-term algorithmic practice beyond one project.',
+    ],
+    outcome:
+      'Strengthened algorithmic reasoning and implementation speed through repeated coursework practice.',
+    icon: Cpu,
+    githubUrl: 'https://github.com/taran-dev4u/CompetitveProgramming',
   },
   {
     title: 'Distributed Rate Limiter & API Gateway',
@@ -690,18 +828,40 @@ const getProjectTags = (project: Project) => {
   return [project.role, project.subject || fallbackSubject].filter(Boolean).slice(0, 2) as string[];
 };
 
-const ProjectVisual = ({ project }: { project: Project }) => (
-  <div className="project-visual">
-    <img
-      src={publicAsset(project.coverImage || defaultProjectCover)}
-      alt={`${project.title} cover`}
-      className="absolute inset-0 h-full w-full object-cover"
-    />
-    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/82 to-transparent p-4">
-      <div className="line-clamp-1 text-xs uppercase tracking-[0.18em] text-muted-foreground">{project.context}</div>
+const ProjectVisual = ({ project }: { project: Project }) => {
+  const [actualLoaded, setActualLoaded] = useState(false);
+  const [actualFailed, setActualFailed] = useState(false);
+  const defaultSrc = publicAsset(defaultProjectCover);
+  const actualSrc = getProjectCoverSrc(project);
+  const shouldLoadActual = actualSrc !== defaultSrc && !actualFailed;
+
+  return (
+    <div className="project-visual">
+      <img
+        src={defaultSrc}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full object-cover"
+        loading="lazy"
+        decoding="async"
+      />
+      {shouldLoadActual && (
+        <img
+          src={actualSrc}
+          alt={`${project.title} cover`}
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${actualLoaded ? 'opacity-100' : 'opacity-0'}`}
+          loading="lazy"
+          decoding="async"
+          onLoad={() => setActualLoaded(true)}
+          onError={() => setActualFailed(true)}
+        />
+      )}
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/82 to-transparent p-4">
+        <div className="line-clamp-1 text-xs uppercase tracking-[0.18em] text-muted-foreground">{project.context}</div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export const Projects = () => {
   const ref = useRef(null);

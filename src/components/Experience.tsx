@@ -41,6 +41,8 @@ type ExperienceItem = {
 };
 
 const experiences: ExperienceItem[] = [
+  // iVinGo is intentionally hidden from the live portfolio. Uncomment this block if you want to restore it later.
+  /*
   {
     title: 'Software Engineer - Web & Data Platforms',
     company: 'iVinGo Solutions Pvt. Ltd.',
@@ -69,6 +71,7 @@ const experiences: ExperienceItem[] = [
       { name: 'Jenkins', icon: SiJenkins, color: '#D24939' },
     ],
   },
+  */
   {
     title: 'Research Intern - Data Science',
     company: 'NRSC, Indian Space Research Organisation (ISRO)',
@@ -159,7 +162,7 @@ export const Experience = () => {
             Professional <span className="gradient-text">Track Record</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Software engineering, data science research, and structured enterprise training across products, data, and ML.
+            Data science research and structured enterprise training across software, data, and ML workflows.
           </p>
         </motion.div>
 
