@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="A US-focused job portal search tool with OPT-aware filters, latest-job search formats, ATS search operators, and smart role expansion.">
-    <title>PortalScout Job Search</title>
+    <meta name="description" content="A US-only OPT-aware job search command center for data, IT, software, analyst, and adjacent professional roles.">
+    <title>US OPT Job Search Command Center</title>
     <link rel="icon" href="assets/portal-scout-mark.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/styles.css">
     <script src="assets/app.js" defer></script>
@@ -16,17 +16,23 @@
       <div class="brand">
         <img src="assets/portal-scout-mark.svg" width="44" height="44" alt="">
         <div>
-          <p class="eyebrow">Direct job discovery</p>
-          <h1>PortalScout Job Search</h1>
+          <p class="eyebrow">US market only</p>
+          <h1>OPT Job Search Command Center</h1>
         </div>
       </div>
-      <button class="ghost-button" type="button" id="themeToggle" aria-label="Toggle color theme">Dark mode</button>
+      <div class="top-actions">
+        <span class="status-pill">Static, no scraping</span>
+        <button class="ghost-button" type="button" id="themeToggle" aria-label="Toggle color theme">Dark mode</button>
+      </div>
     </header>
 
     <main class="app-shell">
       <section class="search-tool" aria-labelledby="searchHeading">
         <div class="section-heading">
-          <h2 id="searchHeading">Search Builder</h2>
+          <div>
+            <p class="eyebrow">Daily search builder</p>
+            <h2 id="searchHeading">Build complete US searches</h2>
+          </div>
           <div class="mini-map" aria-hidden="true">
             <span></span><span></span><span></span><span></span><span></span>
           </div>
@@ -35,7 +41,12 @@
         <form id="searchForm" class="search-form">
           <label class="field field-wide" for="jobTitle">
             <span>Job title</span>
-            <input id="jobTitle" name="job" type="text" autocomplete="off" placeholder="Software engineer, data analyst">
+            <input id="jobTitle" name="job" type="text" autocomplete="off" placeholder="Data analyst, software engineer, business analyst">
+          </label>
+
+          <label class="field" for="profileSelect">
+            <span>Smart profile</span>
+            <select id="profileSelect" name="profile"></select>
           </label>
 
           <label class="field" for="locationSelect">
@@ -51,7 +62,7 @@
           <label class="field" for="sortSelect">
             <span>Result order</span>
             <select id="sortSelect" name="sort">
-              <option value="recommended">Recommended</option>
+              <option value="recommended">Most useful first</option>
               <option value="latest">Newest first</option>
               <option value="direct">Direct apply first</option>
               <option value="coverage">Broad coverage</option>
@@ -64,11 +75,11 @@
               <option value="google">Google</option>
               <option value="duckduckgo">DuckDuckGo</option>
               <option value="bing">Bing</option>
+              <option value="brave">Brave</option>
+              <option value="startpage">Startpage</option>
               <option value="yahoo">Yahoo</option>
               <option value="kagi">Kagi</option>
               <option value="qwant">Qwant</option>
-              <option value="brave">Brave</option>
-              <option value="startpage">Startpage</option>
             </select>
           </label>
 
@@ -118,8 +129,8 @@
           <label class="field" for="authorizationSelect">
             <span>Authorization</span>
             <select id="authorizationSelect" name="authorization">
-              <option value="optBroad">OPT-aware broad</option>
               <option value="none">No auth filter</option>
+              <option value="optBroad">OPT-aware broad</option>
               <option value="currentAuthorized">US work authorized</option>
               <option value="sponsorNeeded">Future sponsorship</option>
               <option value="everify">E-Verify</option>
@@ -129,12 +140,12 @@
 
           <label class="field field-wide" for="includeTerms">
             <span>Must include</span>
-            <input id="includeTerms" name="include" type="text" autocomplete="off" placeholder="Python, healthcare, sponsorship">
+            <input id="includeTerms" name="include" type="text" autocomplete="off" placeholder="Python, SQL, healthcare, sponsorship">
           </label>
 
           <label class="field field-wide" for="excludeTerms">
             <span>Exclude</span>
-            <input id="excludeTerms" name="exclude" type="text" autocomplete="off" placeholder="staffing, unpaid, clearance">
+            <input id="excludeTerms" name="exclude" type="text" autocomplete="off" placeholder="unpaid, clearance, commission only">
           </label>
 
           <div class="action-row">
@@ -144,9 +155,35 @@
         </form>
 
         <details class="advanced-panel" open>
-          <summary>Portal groups</summary>
-          <fieldset id="categoryFilters" class="filter-grid" aria-label="Portal groups"></fieldset>
+          <summary>Source groups</summary>
+          <fieldset id="categoryFilters" class="filter-grid" aria-label="Source groups"></fieldset>
         </details>
+      </section>
+
+      <section class="careers-tool" aria-labelledby="careersHeading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Company careers</p>
+            <h2 id="careersHeading">Open top company career pages</h2>
+          </div>
+          <span class="status-pill" id="companyCount">150 companies</span>
+        </div>
+        <div class="careers-grid">
+          <label class="field" for="companyFilter">
+            <span>Filter companies</span>
+            <input id="companyFilter" type="search" autocomplete="off" placeholder="Type company, category, or tag">
+          </label>
+          <label class="field" for="companySelect">
+            <span>Company dropdown</span>
+            <select id="companySelect"></select>
+          </label>
+          <div class="company-actions">
+            <button class="primary-button" type="button" id="openCompanyButton">Open Careers</button>
+            <button class="secondary-button" type="button" id="searchCompanyButton">Search This Company</button>
+            <button class="secondary-button" type="button" id="favoriteCompanyButton">Favorite</button>
+          </div>
+        </div>
+        <div class="company-card" id="companyCard"></div>
       </section>
 
       <section class="workspace">
@@ -154,7 +191,7 @@
           <div class="metric-row">
             <div>
               <span id="portalCount">0</span>
-              <p>Portals</p>
+              <p>Sources</p>
             </div>
             <div>
               <span id="checkedCount">0</span>
@@ -164,9 +201,15 @@
 
           <div class="panel-block">
             <h2>Actions</h2>
+            <button class="secondary-button full-width" type="button" id="openTopButton" disabled>Open Top 5</button>
             <button class="secondary-button full-width" type="button" id="copyAllButton" disabled>Copy All Links</button>
             <button class="secondary-button full-width" type="button" id="copyCheckedButton" disabled>Copy Checked Links</button>
             <button class="secondary-button full-width" type="button" id="shareButton" disabled>Copy Share Link</button>
+          </div>
+
+          <div class="panel-block" id="profileBlock">
+            <h2>Profile</h2>
+            <p id="profileDescription" class="helper-text"></p>
           </div>
 
           <div class="panel-block" id="relatedBlock" hidden>
@@ -184,7 +227,10 @@
 
         <section class="results-panel" aria-live="polite" aria-labelledby="resultsHeading">
           <div class="results-heading">
-            <h2 id="resultsHeading">Results</h2>
+            <div>
+              <p class="eyebrow">Search links</p>
+              <h2 id="resultsHeading">Results</h2>
+            </div>
             <p id="resultMeta">Ready</p>
           </div>
           <div id="emptyState" class="empty-state">
@@ -193,11 +239,21 @@
           <div id="results" class="results-list"></div>
         </section>
       </section>
+
+      <section class="resources-panel" aria-labelledby="resourcesHeading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">OPT and sponsor research</p>
+            <h2 id="resourcesHeading">Useful US job-search resources</h2>
+          </div>
+        </div>
+        <div id="resourceGrid" class="resource-grid"></div>
+      </section>
     </main>
 
     <footer class="site-footer">
-      <p>Original static job search utility. Not affiliated with the portals listed here.</p>
-      <p><a href="README.md">Project notes</a></p>
+      <p>Static job-search launcher for the US market. It does not scrape, rank, or store job listings.</p>
+      <p>This is job-search tooling, not immigration or legal advice.</p>
     </footer>
   </body>
 </html>
