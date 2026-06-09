@@ -209,6 +209,7 @@ pre {
   margin: 0;
   color: var(--muted);
   font-size: .94rem;
+  overflow-wrap: anywhere;
 }
 
 .mini-map {
@@ -252,7 +253,7 @@ pre {
 
 .search-form {
   display: grid;
-  grid-template-columns: minmax(220px, 2fr) repeat(4, minmax(150px, 1fr)) auto;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 12px;
   align-items: end;
 }
@@ -266,13 +267,16 @@ pre {
   color: var(--muted);
   font-size: .84rem;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .field-wide {
-  min-width: 240px;
+  grid-column: span 2;
+  min-width: 0;
 }
 
 .action-row {
+  grid-column: span 2;
   display: flex;
   gap: 8px;
   align-items: end;
@@ -344,6 +348,7 @@ pre {
   color: var(--ink);
   font-weight: 700;
   font-size: .9rem;
+  overflow-wrap: anywhere;
 }
 
 .filter-chip input {
@@ -473,6 +478,7 @@ pre {
   margin: 0;
   color: var(--muted);
   font-size: .9rem;
+  overflow-wrap: anywhere;
 }
 
 .portal-grid {
@@ -509,6 +515,7 @@ pre {
   display: inline-block;
   font-weight: 800;
   color: var(--ink);
+  overflow-wrap: anywhere;
 }
 
 .portal-meta {
@@ -529,6 +536,7 @@ pre {
   border: 1px solid var(--line);
   font-size: .76rem;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .copy-button {

@@ -1,14 +1,16 @@
 # PortalScout Job Search
 
-PortalScout is an original static job-search utility inspired by public search-operator workflows. It builds fresh search links across ATS systems, general job boards, remote boards, startup boards, public-sector portals, and company career pages.
+PortalScout is an original US-focused static job-search utility inspired by public search-operator workflows. It builds fresh search links across ATS systems, general job boards, remote boards, startup boards, public-sector portals, and company career pages, with OPT-aware search profiles for international students who are work-authorized in the United States.
 
 ## Features
 
 - Multi-title search with comma-separated roles.
 - Freshness filters from past hour through older-than ranges.
 - Google, DuckDuckGo, Bing, Yahoo, Kagi, Qwant, Brave, and Startpage.
-- Location-aware queries for major countries and US hiring markets.
-- All job types by default, with optional remote-friendly, remote-only, or exclude-remote filters.
+- US market default with major US tech and hiring metros.
+- Latest-job ordering for search engines and native LinkedIn, Indeed, and USAJobs searches.
+- Work-setting, title-match, experience, employment-type, include-keyword, and exclude-keyword filters.
+- OPT-aware authorization modes: broad OPT, no auth filter, current US work authorization, future sponsorship, E-Verify, and exact OPT/STEM OPT.
 - More than 50 portal targets across ATS, job board, startup, remote, nonprofit, government, and company career-page categories.
 - Copy-all, copy-checked, checked-progress, shareable URLs, related-title suggestions, and light/dark theme.
 

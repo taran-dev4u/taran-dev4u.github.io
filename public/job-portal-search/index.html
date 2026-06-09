@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="A static advanced job portal search tool that builds fresh search links across ATS platforms, remote boards, startup boards, public-sector portals, and general job boards.">
+    <meta name="description" content="A US-focused job portal search tool with OPT-aware filters, latest-job search formats, ATS search operators, and smart role expansion.">
     <title>PortalScout Job Search</title>
     <link rel="icon" href="assets/portal-scout-mark.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/styles.css">
@@ -20,7 +20,7 @@
           <h1>PortalScout Job Search</h1>
         </div>
       </div>
-      <button class="ghost-button" type="button" id="themeToggle" aria-label="Toggle color theme">Theme</button>
+      <button class="ghost-button" type="button" id="themeToggle" aria-label="Toggle color theme">Dark mode</button>
     </header>
 
     <main class="app-shell">
@@ -38,14 +38,24 @@
             <input id="jobTitle" name="job" type="text" autocomplete="off" placeholder="Software engineer, data analyst">
           </label>
 
+          <label class="field" for="locationSelect">
+            <span>US market</span>
+            <select id="locationSelect" name="location"></select>
+          </label>
+
           <label class="field" for="timeFilter">
             <span>Freshness</span>
             <select id="timeFilter" name="time"></select>
           </label>
 
-          <label class="field" for="locationSelect">
-            <span>Location</span>
-            <select id="locationSelect" name="location"></select>
+          <label class="field" for="sortSelect">
+            <span>Result order</span>
+            <select id="sortSelect" name="sort">
+              <option value="recommended">Recommended</option>
+              <option value="latest">Newest first</option>
+              <option value="direct">Direct apply first</option>
+              <option value="coverage">Broad coverage</option>
+            </select>
           </label>
 
           <label class="field" for="engineSelect">
@@ -63,13 +73,68 @@
           </label>
 
           <label class="field" for="remoteMode">
-            <span>Job type</span>
+            <span>Work setting</span>
             <select id="remoteMode" name="remote">
-              <option value="neutral">All job types</option>
-              <option value="include">Remote-friendly</option>
+              <option value="neutral">All work settings</option>
+              <option value="onsite-hybrid">On-site or hybrid</option>
+              <option value="hybrid">Hybrid</option>
+              <option value="onsite">On-site</option>
               <option value="only">Remote only</option>
               <option value="exclude">Exclude remote</option>
             </select>
+          </label>
+
+          <label class="field" for="matchMode">
+            <span>Title match</span>
+            <select id="matchMode" name="match">
+              <option value="smart">Smart related titles</option>
+              <option value="exact">Exact title only</option>
+            </select>
+          </label>
+
+          <label class="field" for="experienceSelect">
+            <span>Experience</span>
+            <select id="experienceSelect" name="experience">
+              <option value="any">Any level</option>
+              <option value="entry">Entry or new grad</option>
+              <option value="mid">Mid level</option>
+              <option value="senior">Senior or lead</option>
+              <option value="manager">Manager plus</option>
+              <option value="internship">Internship</option>
+            </select>
+          </label>
+
+          <label class="field" for="employmentSelect">
+            <span>Employment</span>
+            <select id="employmentSelect" name="employment">
+              <option value="any">Any employment</option>
+              <option value="fulltime">Full-time</option>
+              <option value="contract">Contract</option>
+              <option value="parttime">Part-time</option>
+              <option value="internship">Internship</option>
+            </select>
+          </label>
+
+          <label class="field" for="authorizationSelect">
+            <span>Authorization</span>
+            <select id="authorizationSelect" name="authorization">
+              <option value="optBroad">OPT-aware broad</option>
+              <option value="none">No auth filter</option>
+              <option value="currentAuthorized">US work authorized</option>
+              <option value="sponsorNeeded">Future sponsorship</option>
+              <option value="everify">E-Verify</option>
+              <option value="optStrict">OPT/STEM OPT exact</option>
+            </select>
+          </label>
+
+          <label class="field field-wide" for="includeTerms">
+            <span>Must include</span>
+            <input id="includeTerms" name="include" type="text" autocomplete="off" placeholder="Python, healthcare, sponsorship">
+          </label>
+
+          <label class="field field-wide" for="excludeTerms">
+            <span>Exclude</span>
+            <input id="excludeTerms" name="exclude" type="text" autocomplete="off" placeholder="staffing, unpaid, clearance">
           </label>
 
           <div class="action-row">
