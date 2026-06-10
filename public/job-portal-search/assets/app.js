@@ -69,7 +69,7 @@ const PROFILE_LABELS = Object.fromEntries(SEARCH_PROFILES.map(profile => [profil
 const PORTAL_ROWS = [
   { id: "linkedinJobs", name: "LinkedIn Jobs", category: "top", native: "linkedinJobs", sites: ["linkedin.com/jobs"], priority: 100, tags: ["native filters", "high reach"], note: "Uses LinkedIn date, experience, job type, work setting, and newest-first filters when selected." },
   { id: "indeed", name: "Indeed", category: "top", native: "indeed", sites: ["indeed.com/jobs"], priority: 99, tags: ["native filters", "high reach"], note: "Uses Indeed query, location, date, remote, and newest sorting when selected." },
-  { id: "directATS", name: "Direct ATS Search", category: "direct", rawSiteQuery: "(site:greenhouse.io OR site:lever.co OR site:ashbyhq.com OR site:myworkdayjobs.com OR site:jobs.smartrecruiters.com OR site:icims.com/jobs OR site:workable.com OR site:jobvite.com)", priority: 98, tags: ["direct apply", "ATS"], note: "Searches the major ATS systems together for fresher direct postings." },
+  { id: "directATS", name: "Direct ATS Search", category: "direct", rawSiteQuery: "(site:greenhouse.io OR site:lever.co OR site:ashbyhq.com OR site:myworkdayjobs.com OR site:pinpointhq.com OR site:recruiting.paylocity.com OR site:keka.com OR site:jobs.workable.com OR site:breezy.hr OR site:wellfound.com OR site:workatastartup.com OR site:oraclecloud.com OR site:recruitee.com OR site:rippling.com OR site:rippling-ats.com OR site:jobs.gusto.com OR site:careerpuck.com OR site:teamtailor.com OR site:jobs.smartrecruiters.com OR site:jobappnetwork.com OR site:homerun.co OR site:gem.com OR site:trakstar.com OR site:catsone.com OR site:applytojob.com OR site:jobvite.com OR site:icims.com OR site:dover.io OR site:notion.site OR site:workforcenow.adp.com OR site:myjobs.adp.com OR site:factorialhr.com OR site:trinethire.com)", priority: 98, tags: ["direct apply", "ATS"], note: "Searches Brian's ATS/source set together for fresher direct postings." },
   { id: "linkedinPosts", name: "LinkedIn Posts", category: "signals", native: "linkedinPosts", sites: ["linkedin.com/search/results/content"], priority: 97, tags: ["hiring posts", "fresh"], note: "Uses LinkedIn content search with hiring keywords and date-posted sorting." },
   { id: "google", name: "Google Jobs Web Search", category: "top", native: "google", priority: 96, tags: ["broad web", "date tools"], note: "Broad Google query across job posts, career pages, and hiring pages." },
   { id: "glassdoor", name: "Glassdoor", category: "general", sites: ["glassdoor.com/Job", "glassdoor.com/job-listing"], priority: 95, tags: ["salary context"] },
@@ -90,6 +90,7 @@ const PORTAL_ROWS = [
   { id: "ladders", name: "Ladders", category: "general", sites: ["theladders.com/job"], priority: 80, tags: ["professional"] },
   { id: "flexjobs", name: "FlexJobs", category: "remote", sites: ["flexjobs.com/search"], priority: 79, tags: ["remote", "hybrid"] },
   { id: "remoteRocketship", name: "Remote Rocketship", category: "remote", native: "remoteRocketship", sites: ["remoterocketship.com"], priority: 78, tags: ["remote tech"] },
+  { id: "remotive", name: "Remotive", category: "remote", native: "remotive", sites: ["remotive.com"], priority: 77.5, tags: ["remote"] },
   { id: "weWorkRemotely", name: "We Work Remotely", category: "remote", native: "weWorkRemotely", sites: ["weworkremotely.com/remote-jobs"], priority: 77, tags: ["remote"] },
   { id: "remoteOk", name: "Remote OK", category: "remote", native: "remoteOk", sites: ["remoteok.com/remote-jobs"], priority: 76, tags: ["remote"] },
   { id: "usajobs", name: "USAJOBS", category: "public", native: "usajobs", sites: ["usajobs.gov/job"], priority: 75, tags: ["public sector"], note: "Some federal roles require citizenship or clearance. Read eligibility carefully." },
@@ -98,16 +99,42 @@ const PORTAL_ROWS = [
   { id: "governmentJobs", name: "GovernmentJobs", category: "public", native: "governmentJobs", sites: ["governmentjobs.com/careers"], priority: 72, tags: ["state/local"] },
   { id: "careersSubdomains", name: "Careers Subdomains", category: "company", rawSiteQuery: "(site:careers.* OR site:*/careers/* OR site:*/career/*)", priority: 71, tags: ["company pages"] },
   { id: "jobsSubdomains", name: "Jobs Subdomains", category: "company", rawSiteQuery: "(site:jobs.* OR site:*/jobs/* OR site:*/job/*)", priority: 70, tags: ["company pages"] },
+  { id: "peopleSubdomains", name: "People Subdomains", category: "company", rawSiteQuery: "(site:people.* OR site:*/people/*)", priority: 69.8, tags: ["company pages"] },
+  { id: "talentSubdomains", name: "Talent Subdomains", category: "company", rawSiteQuery: "(site:talent.* OR site:*/talent/*)", priority: 69.6, tags: ["company pages"] },
+  { id: "otherJobPages", name: "Other Job Pages", category: "company", rawSiteQuery: "(site:*/employment/* OR site:*/opportunities/* OR site:*/openings/* OR site:*/join-us/* OR site:*/work-with-us/*)", priority: 69.4, tags: ["company pages"] },
   { id: "greenhouse", name: "Greenhouse", category: "direct", sites: ["greenhouse.io"], priority: 69, tags: ["ATS"] },
   { id: "lever", name: "Lever", category: "direct", sites: ["lever.co"], priority: 68, tags: ["ATS"] },
   { id: "ashby", name: "Ashby", category: "direct", sites: ["ashbyhq.com"], priority: 67, tags: ["ATS"] },
   { id: "workdayAts", name: "Workday", category: "direct", sites: ["myworkdayjobs.com"], priority: 66, tags: ["ATS"] },
   { id: "smartRecruiters", name: "SmartRecruiters", category: "direct", sites: ["jobs.smartrecruiters.com"], priority: 65, tags: ["ATS"] },
   { id: "icims", name: "iCIMS", category: "direct", sites: ["icims.com/jobs"], priority: 64, tags: ["ATS"] },
-  { id: "myVisaJobs", name: "MyVisaJobs Sponsor Search", category: "research", sites: ["myvisajobs.com"], priority: 63, tags: ["H-1B", "sponsor"] },
-  { id: "h1bData", name: "H1BData", category: "research", sites: ["h1bdata.info"], priority: 62, tags: ["salary", "H-1B"] },
-  { id: "uscisHub", name: "USCIS H-1B Employer Data Hub", category: "research", native: "static", url: "https://www.uscis.gov/tools/reports-and-studies/h-1b-employer-data-hub", priority: 61, tags: ["official", "H-1B"] },
-  { id: "dolOflc", name: "DOL OFLC Disclosure Data", category: "research", native: "static", url: "https://www.dol.gov/agencies/eta/foreign-labor/performance", priority: 60, tags: ["official", "disclosure"] }
+  { id: "pinpoint", name: "Pinpoint", category: "direct", sites: ["pinpointhq.com"], priority: 63.8, tags: ["ATS", "Brian source"] },
+  { id: "paylocity", name: "Paylocity", category: "direct", sites: ["recruiting.paylocity.com"], priority: 63.6, tags: ["ATS", "Brian source"] },
+  { id: "keka", name: "Keka", category: "direct", sites: ["keka.com"], priority: 63.4, tags: ["ATS", "Brian source"] },
+  { id: "workable", name: "Workable", category: "direct", sites: ["jobs.workable.com"], priority: 63.2, tags: ["ATS", "Brian source"] },
+  { id: "breezy", name: "BreezyHR", category: "direct", sites: ["breezy.hr"], priority: 63, tags: ["ATS", "Brian source"] },
+  { id: "oracleCloud", name: "Oracle Cloud", category: "direct", sites: ["oraclecloud.com"], priority: 62.8, tags: ["ATS", "Brian source"] },
+  { id: "recruitee", name: "Recruitee", category: "direct", sites: ["recruitee.com"], priority: 62.6, tags: ["ATS", "Brian source"] },
+  { id: "ripplingAts", name: "Rippling", category: "direct", rawSiteQuery: "(site:rippling.com OR site:rippling-ats.com)", priority: 62.4, tags: ["ATS", "Brian source"] },
+  { id: "gustoJobs", name: "Gusto Jobs", category: "direct", sites: ["jobs.gusto.com"], priority: 62.2, tags: ["ATS", "Brian source"] },
+  { id: "careerPuck", name: "CareerPuck", category: "direct", sites: ["careerpuck.com"], priority: 62, tags: ["ATS", "Brian source"] },
+  { id: "teamtailor", name: "Teamtailor", category: "direct", sites: ["teamtailor.com"], priority: 61.8, tags: ["ATS", "Brian source"] },
+  { id: "talentReef", name: "TalentReef", category: "direct", sites: ["jobappnetwork.com"], priority: 61.6, tags: ["ATS", "Brian source"] },
+  { id: "homerun", name: "Homerun", category: "direct", sites: ["homerun.co"], priority: 61.4, tags: ["ATS", "Brian source"] },
+  { id: "gem", name: "Gem", category: "direct", sites: ["gem.com"], priority: 61.2, tags: ["ATS", "Brian source"] },
+  { id: "trakstar", name: "Trakstar", category: "direct", sites: ["trakstar.com"], priority: 61, tags: ["ATS", "Brian source"] },
+  { id: "cats", name: "Cats", category: "direct", sites: ["catsone.com"], priority: 60.8, tags: ["ATS", "Brian source"] },
+  { id: "jazzhr", name: "JazzHR", category: "direct", sites: ["applytojob.com"], priority: 60.6, tags: ["ATS", "Brian source"] },
+  { id: "jobvite", name: "Jobvite", category: "direct", sites: ["jobvite.com"], priority: 60.4, tags: ["ATS", "Brian source"] },
+  { id: "dover", name: "Dover", category: "direct", sites: ["dover.io"], priority: 60.2, tags: ["ATS", "Brian source"] },
+  { id: "notionCareers", name: "Notion Career Pages", category: "direct", sites: ["notion.site"], priority: 60, tags: ["ATS", "Brian source"] },
+  { id: "adpAts", name: "ADP", category: "direct", rawSiteQuery: "(site:workforcenow.adp.com OR site:myjobs.adp.com)", priority: 59.8, tags: ["ATS", "Brian source"] },
+  { id: "factorial", name: "Factorial", category: "direct", sites: ["factorialhr.com"], priority: 59.6, tags: ["ATS", "Brian source"] },
+  { id: "trinet", name: "TriNet Hire", category: "direct", sites: ["trinethire.com"], priority: 59.4, tags: ["ATS", "Brian source"] },
+  { id: "myVisaJobs", name: "MyVisaJobs Sponsor Search", category: "research", sites: ["myvisajobs.com"], priority: 45, tags: ["H-1B", "sponsor"] },
+  { id: "h1bData", name: "H1BData", category: "research", sites: ["h1bdata.info"], priority: 44, tags: ["salary", "H-1B"] },
+  { id: "uscisHub", name: "USCIS H-1B Employer Data Hub", category: "research", native: "static", url: "https://www.uscis.gov/tools/reports-and-studies/h-1b-employer-data-hub", priority: 43, tags: ["official", "H-1B"] },
+  { id: "dolOflc", name: "DOL OFLC Disclosure Data", category: "research", native: "static", url: "https://www.dol.gov/agencies/eta/foreign-labor/performance", priority: 42, tags: ["official", "disclosure"] }
 ];
 
 const PORTALS = PORTAL_ROWS.map((portal, index) => ({ ...portal, order: index + 1 }));
@@ -175,7 +202,11 @@ const RELATED_TITLE_GROUPS = [
   ["Product Manager", "Product Owner", "Technical Product Manager", "Program Manager", "Project Manager", "Scrum Master"],
   ["QA Engineer", "Software Test Engineer", "Automation Engineer", "SDET", "Quality Engineer"],
   ["UX Designer", "UI Designer", "Product Designer", "UX Researcher", "Content Designer"],
-  ["Financial Analyst", "FP&A Analyst", "Business Operations Analyst", "Revenue Analyst", "Risk Analyst"]
+  ["Financial Analyst", "FP&A Analyst", "Business Operations Analyst", "Revenue Analyst", "Risk Analyst"],
+  ["Video Producer", "Film Editor", "Content Producer", "Content Creator", "Media Manager", "Digital Marketing Specialist", "Multimedia Designer", "Social Media Strategist", "Brand Content Manager", "Video Production Coordinator", "Creative Director"],
+  ["Salesforce Administrator", "Salesforce Developer", "Salesforce Consultant", "Salesforce Business Analyst", "Database Administrator", "IT Systems Administrator"],
+  ["Project Manager", "Program Manager", "Operations Manager", "Team Lead", "Project Coordinator"],
+  ["Scrum Master", "Agile Coach", "Lean Practitioner", "Kanban Coach", "Agile Project Facilitator", "Agile Transformation Lead", "Agile Team Coach", "Iteration Manager", "Scrum"]
 ];
 
 const ACRONYMS = new Set(["AI", "API", "BI", "CRM", "FP&A", "GRC", "HR", "ML", "QA", "SEO", "SOC", "SRE", "SQL", "UI", "UX"]);
@@ -1277,6 +1308,8 @@ function buildSearchUrl(portal, query, title, context) {
       return `https://www.careerbuilder.com/jobs?keywords=${encodeURIComponent(title)}&location=${encodeURIComponent(getNativeLocation(context.location))}`;
     case "remoteRocketship":
       return `https://www.remoterocketship.com/?query=${encodeURIComponent(title)}`;
+    case "remotive":
+      return `https://remotive.com/?query=${encodeURIComponent(title)}`;
     case "weWorkRemotely":
       return `https://weworkremotely.com/remote-jobs/search?term=${encodeURIComponent(title)}`;
     case "remoteOk":
