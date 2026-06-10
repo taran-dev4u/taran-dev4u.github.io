@@ -457,6 +457,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!hydrated) {
     loadPreferences();
   }
+  if (!els.companyRole.value && els.jobTitle.value) {
+    els.companyRole.value = els.jobTitle.value;
+  }
 
   syncProfileDescription();
   syncCompanyCard();
@@ -485,8 +488,11 @@ function cacheElements() {
     includeTerms: document.getElementById("includeTerms"),
     excludeTerms: document.getElementById("excludeTerms"),
     categoryFilters: document.getElementById("categoryFilters"),
+    companyRole: document.getElementById("companyRole"),
     companyFilter: document.getElementById("companyFilter"),
     companySelect: document.getElementById("companySelect"),
+    companyTimeFilter: document.getElementById("companyTimeFilter"),
+    companySortSelect: document.getElementById("companySortSelect"),
     companyCount: document.getElementById("companyCount"),
     companyCard: document.getElementById("companyCard"),
     openCompanyButton: document.getElementById("openCompanyButton"),
@@ -552,6 +558,16 @@ function bindEvents() {
   els.companyFilter.addEventListener("input", () => {
     renderCompanyOptions(els.companyFilter.value);
     syncCompanyCard();
+  });
+  els.companyRole.addEventListener("input", () => {
+    syncCompanyCard();
+    savePreferences();
+  });
+  [els.companyTimeFilter, els.companySortSelect].forEach(control => {
+    control.addEventListener("change", () => {
+      syncCompanyCard();
+      savePreferences();
+    });
   });
   els.companySelect.addEventListener("change", () => {
     syncCompanyCard();
@@ -702,6 +718,9 @@ function loadPreferences() {
   els.jobTitle.value = data.jobTitle || "";
   els.includeTerms.value = data.includeTerms || "";
   els.excludeTerms.value = data.excludeTerms || "";
+  els.companyRole.value = data.companyRole || "";
+  setSelectIfValid(els.companyTimeFilter, data.companyTime || "24hours");
+  setSelectIfValid(els.companySortSelect, data.companySort || "latest");
 
   if (Array.isArray(data.selectedCategories)) {
     setCategorySelection(new Set(data.selectedCategories));
@@ -729,6 +748,9 @@ function savePreferences() {
     authorization: els.authorizationSelect.value,
     includeTerms: els.includeTerms.value,
     excludeTerms: els.excludeTerms.value,
+    companyRole: els.companyRole.value,
+    companyTime: els.companyTimeFilter.value,
+    companySort: els.companySortSelect.value,
     selectedCategories: Array.from(getSelectedCategories()),
     favoriteCompanies: Array.from(state.favoriteCompanies),
     selectedCompany: els.companySelect.value
@@ -1796,6 +1818,7 @@ function syncCompanyCard() {
   const favorite = state.favoriteCompanies.has(company.id);
   els.openCompanyButton.textContent = "Open Careers";
   els.searchCompanyButton.textContent = "Search This Company";
+  els.searchCompanyButton.disabled = !getCompanySearchTitle();
   els.favoriteCompanyButton.hidden = false;
   els.favoriteCompanyButton.disabled = false;
   els.favoriteCompanyButton.textContent = favorite ? "Unfavorite" : "Favorite";
@@ -1839,14 +1862,16 @@ function renderAllCompanyCard() {
   els.favoriteCompanyButton.disabled = true;
 
   const titleText = getCompanySearchTitle();
-  const context = getContext();
-  const rows = getCompanySearchRows(titleText, context);
+  const hasRole = Boolean(titleText);
+  const context = getCompanyContext();
+  const rows = hasRole ? getCompanySearchRows(titleText, context) : state.visibleCompanies.map(company => ({ company, searchUrl: "" }));
+  els.searchCompanyButton.disabled = !hasRole;
 
   const title = document.createElement("div");
   title.className = "company-title";
   const name = document.createElement("h3");
   name.textContent = "All companies";
-  const count = createPill(`${rows.length} links`);
+  const count = createPill(hasRole ? `${rows.length} search links` : `${rows.length} companies`);
   title.append(name, count);
 
   const meta = document.createElement("div");
@@ -1854,11 +1879,13 @@ function renderAllCompanyCard() {
   meta.append(createPill(getLocationLabel(context.location)));
   meta.append(createPill(getTimeLabel(context.time)));
   meta.append(createPill(FILTER_LABELS.authorization[context.authorization]));
-  meta.append(createPill(`Role: ${titleText}`));
+  meta.append(createPill(hasRole ? `Role: ${titleText}` : "Role required"));
 
   const note = document.createElement("p");
   note.className = "company-note";
-  note.textContent = "Every filtered search link below uses the current job title, location, freshness, authorization, include terms, exclude terms, and sort settings.";
+  note.textContent = hasRole
+    ? "Every filtered search link below uses the company search role, location, freshness, authorization, include terms, exclude terms, and sort settings."
+    : "Enter a company search role to create filtered company searches.";
 
   const list = document.createElement("div");
   list.className = "company-link-list";
@@ -1882,13 +1909,20 @@ function renderAllCompanyCard() {
     careers.rel = "noopener";
     careers.textContent = "Careers";
 
-    const search = document.createElement("a");
-    search.href = row.searchUrl;
-    search.target = "_blank";
-    search.rel = "noopener";
-    search.textContent = "Filtered search";
-
-    links.append(careers, search);
+    links.appendChild(careers);
+    if (hasRole) {
+      const search = document.createElement("a");
+      search.href = row.searchUrl;
+      search.target = "_blank";
+      search.rel = "noopener";
+      search.textContent = "Filtered search";
+      links.appendChild(search);
+    } else {
+      const missing = document.createElement("span");
+      missing.className = "company-link-muted";
+      missing.textContent = "Add role";
+      links.appendChild(missing);
+    }
     item.append(companyName, category, links);
     list.appendChild(item);
   });
@@ -1912,7 +1946,11 @@ function openSelectedCompany() {
 function searchSelectedCompany() {
   if (isAllCompaniesSelected()) {
     const title = getCompanySearchTitle();
-    const context = getContext();
+    if (!title) {
+      showToast("Enter a company search role");
+      return;
+    }
+    const context = getCompanyContext();
     const links = getCompanySearchRows(title, context).map(row => row.searchUrl);
     copyLinks(links, "Copied all company search links");
     return;
@@ -1923,7 +1961,11 @@ function searchSelectedCompany() {
     return;
   }
   const title = getCompanySearchTitle();
-  const context = getContext();
+  if (!title) {
+    showToast("Enter a company search role");
+    return;
+  }
+  const context = getCompanyContext();
   window.open(buildCompanySearchUrl(company, title, context), "_blank", "noopener");
 }
 
@@ -1948,7 +1990,15 @@ function toggleFavoriteCompany() {
 }
 
 function getCompanySearchTitle() {
-  return parseTitles(els.jobTitle.value)[0] || "Data Analyst";
+  return parseTitles(els.companyRole.value)[0] || parseTitles(els.jobTitle.value)[0] || "";
+}
+
+function getCompanyContext() {
+  return {
+    ...getContext(),
+    time: els.companyTimeFilter.value,
+    sort: els.companySortSelect.value
+  };
 }
 
 function getCompanySearchRows(title, context) {
@@ -2032,6 +2082,9 @@ function resetSearch() {
   els.authorizationSelect.value = "none";
   els.includeTerms.value = "";
   els.excludeTerms.value = "";
+  els.companyRole.value = "";
+  els.companyTimeFilter.value = "24hours";
+  els.companySortSelect.value = "latest";
   els.companyFilter.value = "";
   setCategorySelection(new Set(DEFAULT_CATEGORY_IDS));
   renderCompanyOptions("");

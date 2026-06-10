@@ -160,32 +160,6 @@
         </details>
       </section>
 
-      <section class="careers-tool" aria-labelledby="careersHeading">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Company careers</p>
-            <h2 id="careersHeading">Open top company career pages</h2>
-          </div>
-          <span class="status-pill" id="companyCount">150 companies</span>
-        </div>
-        <div class="careers-grid">
-          <label class="field" for="companyFilter">
-            <span>Filter companies</span>
-            <input id="companyFilter" type="search" autocomplete="off" placeholder="Type company, category, or tag">
-          </label>
-          <label class="field" for="companySelect">
-            <span>Company dropdown</span>
-            <select id="companySelect"></select>
-          </label>
-          <div class="company-actions">
-            <button class="primary-button" type="button" id="openCompanyButton">Open Careers</button>
-            <button class="secondary-button" type="button" id="searchCompanyButton">Search This Company</button>
-            <button class="secondary-button" type="button" id="favoriteCompanyButton">Favorite</button>
-          </div>
-        </div>
-        <div class="company-card" id="companyCard"></div>
-      </section>
-
       <section class="workspace">
         <aside class="side-panel" aria-label="Search summary">
           <div class="metric-row">
@@ -238,6 +212,59 @@
           </div>
           <div id="results" class="results-list"></div>
         </section>
+      </section>
+
+      <section class="careers-tool" aria-labelledby="careersHeading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Company careers</p>
+            <h2 id="careersHeading">Open top company career pages</h2>
+          </div>
+          <span class="status-pill" id="companyCount">150 companies</span>
+        </div>
+        <div class="careers-grid">
+          <label class="field company-wide" for="companyRole">
+            <span>Company search role</span>
+            <input id="companyRole" type="text" autocomplete="off" placeholder="Entry level data analyst, software engineer">
+          </label>
+          <label class="field company-wide" for="companyFilter">
+            <span>Filter companies</span>
+            <input id="companyFilter" type="search" autocomplete="off" placeholder="Type company, category, or tag">
+          </label>
+          <label class="field company-wide" for="companySelect">
+            <span>Company dropdown</span>
+            <select id="companySelect"></select>
+          </label>
+          <label class="field" for="companyTimeFilter">
+            <span>Company freshness</span>
+            <select id="companyTimeFilter">
+              <option value="all">All</option>
+              <option value="1hour">Past Hour</option>
+              <option value="4hours">Past 4 Hours</option>
+              <option value="8hours">Past 8 Hours</option>
+              <option value="12hours">Past 12 Hours</option>
+              <option value="24hours" selected>Past 24 Hours</option>
+              <option value="48hours">Past 48 Hours</option>
+              <option value="72hours">Past 72 Hours</option>
+              <option value="week">Past Week</option>
+              <option value="month">Past Month</option>
+              <option value="year">Past Year</option>
+            </select>
+          </label>
+          <label class="field" for="companySortSelect">
+            <span>Company order</span>
+            <select id="companySortSelect">
+              <option value="latest" selected>Newest first</option>
+              <option value="recommended">Most useful first</option>
+            </select>
+          </label>
+          <div class="company-actions">
+            <button class="primary-button" type="button" id="openCompanyButton">Open Careers</button>
+            <button class="secondary-button" type="button" id="searchCompanyButton">Search This Company</button>
+            <button class="secondary-button" type="button" id="favoriteCompanyButton">Favorite</button>
+          </div>
+        </div>
+        <div class="company-card" id="companyCard"></div>
       </section>
 
       <section class="resources-panel" aria-labelledby="resourcesHeading">

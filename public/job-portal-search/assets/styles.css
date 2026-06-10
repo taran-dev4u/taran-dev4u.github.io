@@ -400,13 +400,18 @@ pre {
 
 .careers-grid {
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) minmax(260px, 1.4fr) auto;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 12px;
   align-items: end;
 }
 
+.company-wide {
+  grid-column: span 2;
+}
+
 .company-actions {
-  min-width: 390px;
+  grid-column: span 4;
+  min-width: 0;
 }
 
 .company-card {
@@ -474,6 +479,10 @@ pre {
   gap: 10px;
   font-size: .88rem;
   font-weight: 800;
+}
+
+.company-link-muted {
+  color: var(--muted);
 }
 
 .caution {
@@ -739,6 +748,10 @@ pre {
     grid-template-columns: 1fr 1fr;
   }
 
+  .company-wide {
+    grid-column: span 1;
+  }
+
   .company-actions {
     grid-column: 1 / -1;
     min-width: 0;
@@ -796,6 +809,7 @@ pre {
   }
 
   .field-wide,
+  .company-wide,
   .action-row,
   .company-actions {
     grid-column: auto;
