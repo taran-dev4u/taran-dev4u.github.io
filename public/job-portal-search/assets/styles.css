@@ -431,6 +431,51 @@ pre {
   font-size: 1rem;
 }
 
+.company-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: .9rem;
+  line-height: 1.4;
+}
+
+.company-link-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  max-height: 460px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.company-link-row {
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 10px;
+  margin: 0;
+}
+
+.company-link-row strong,
+.company-link-category {
+  overflow-wrap: anywhere;
+}
+
+.company-link-category {
+  color: var(--muted);
+  font-size: .82rem;
+  font-weight: 800;
+}
+
+.company-link-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: .88rem;
+  font-weight: 800;
+}
+
 .caution {
   margin: 0;
   border-left: 3px solid var(--yellow);
@@ -718,7 +763,8 @@ pre {
   }
 
   .portal-grid,
-  .resource-grid {
+  .resource-grid,
+  .company-link-list {
     grid-template-columns: 1fr;
   }
 }

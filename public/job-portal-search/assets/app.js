@@ -2,6 +2,7 @@
 
 const STORAGE_KEY = "optJobCommandCenterPrefs";
 const THEME_KEY = "optJobCommandCenterTheme";
+const ALL_COMPANIES_ID = "__all_companies__";
 
 const CATEGORY_ROWS = [
   ["top", "Top Sources", true],
@@ -738,6 +739,7 @@ function savePreferences() {
 function persistAndMaybeGenerate() {
   savePreferences();
   syncProfileDescription();
+  syncCompanyCard();
   if (hasJobTitle()) {
     generateResults();
   } else {
@@ -1709,7 +1711,7 @@ function updateAddressBar(titles, context) {
 
 function renderCompanyOptions(filterText) {
   const normalized = filterText.trim().toLowerCase();
-  const previousValue = els.companySelect.value;
+  const previousValue = els.companySelect.value || ALL_COMPANIES_ID;
   state.visibleCompanies = COMPANIES.filter(company => {
     if (!normalized) {
       return true;
@@ -1733,6 +1735,11 @@ function renderCompanyOptions(filterText) {
     return;
   }
 
+  const allOption = document.createElement("option");
+  allOption.value = ALL_COMPANIES_ID;
+  allOption.textContent = `All companies (${state.visibleCompanies.length})`;
+  els.companySelect.appendChild(allOption);
+
   const byCategory = new Map();
   state.visibleCompanies.forEach(company => {
     if (!byCategory.has(company.category)) {
@@ -1753,17 +1760,33 @@ function renderCompanyOptions(filterText) {
     els.companySelect.appendChild(group);
   });
 
-  if (state.visibleCompanies.some(company => company.id === previousValue)) {
+  if (previousValue === ALL_COMPANIES_ID) {
+    els.companySelect.value = ALL_COMPANIES_ID;
+  } else if (state.visibleCompanies.some(company => company.id === previousValue)) {
     els.companySelect.value = previousValue;
+  } else {
+    els.companySelect.value = ALL_COMPANIES_ID;
   }
   els.companyCount.textContent = `${state.visibleCompanies.length} of ${COMPANIES.length} companies`;
 }
 
+function isAllCompaniesSelected() {
+  return els.companySelect.value === ALL_COMPANIES_ID;
+}
+
 function getSelectedCompany() {
-  return COMPANIES.find(company => company.id === els.companySelect.value) || state.visibleCompanies[0] || COMPANIES[0];
+  if (isAllCompaniesSelected()) {
+    return null;
+  }
+  return COMPANIES.find(company => company.id === els.companySelect.value) || state.visibleCompanies[0] || null;
 }
 
 function syncCompanyCard() {
+  if (isAllCompaniesSelected()) {
+    renderAllCompanyCard();
+    return;
+  }
+
   const company = getSelectedCompany();
   if (!company) {
     els.companyCard.textContent = "No company selected.";
@@ -1771,6 +1794,10 @@ function syncCompanyCard() {
   }
   els.companySelect.value = company.id;
   const favorite = state.favoriteCompanies.has(company.id);
+  els.openCompanyButton.textContent = "Open Careers";
+  els.searchCompanyButton.textContent = "Search This Company";
+  els.favoriteCompanyButton.hidden = false;
+  els.favoriteCompanyButton.disabled = false;
   els.favoriteCompanyButton.textContent = favorite ? "Unfavorite" : "Favorite";
 
   els.companyCard.innerHTML = "";
@@ -1804,7 +1831,77 @@ function syncCompanyCard() {
   }
 }
 
+function renderAllCompanyCard() {
+  els.companyCard.innerHTML = "";
+  els.openCompanyButton.textContent = "Copy Career Pages";
+  els.searchCompanyButton.textContent = "Copy All Search Links";
+  els.favoriteCompanyButton.hidden = true;
+  els.favoriteCompanyButton.disabled = true;
+
+  const titleText = getCompanySearchTitle();
+  const context = getContext();
+  const rows = getCompanySearchRows(titleText, context);
+
+  const title = document.createElement("div");
+  title.className = "company-title";
+  const name = document.createElement("h3");
+  name.textContent = "All companies";
+  const count = createPill(`${rows.length} links`);
+  title.append(name, count);
+
+  const meta = document.createElement("div");
+  meta.className = "portal-meta";
+  meta.append(createPill(getLocationLabel(context.location)));
+  meta.append(createPill(getTimeLabel(context.time)));
+  meta.append(createPill(FILTER_LABELS.authorization[context.authorization]));
+  meta.append(createPill(`Role: ${titleText}`));
+
+  const note = document.createElement("p");
+  note.className = "company-note";
+  note.textContent = "Every filtered search link below uses the current job title, location, freshness, authorization, include terms, exclude terms, and sort settings.";
+
+  const list = document.createElement("div");
+  list.className = "company-link-list";
+  rows.forEach(row => {
+    const item = document.createElement("article");
+    item.className = "company-link-row";
+
+    const companyName = document.createElement("strong");
+    companyName.textContent = `${row.company.rank}. ${row.company.name}`;
+
+    const category = document.createElement("span");
+    category.className = "company-link-category";
+    category.textContent = row.company.category;
+
+    const links = document.createElement("div");
+    links.className = "company-link-actions";
+
+    const careers = document.createElement("a");
+    careers.href = row.company.careersUrl;
+    careers.target = "_blank";
+    careers.rel = "noopener";
+    careers.textContent = "Careers";
+
+    const search = document.createElement("a");
+    search.href = row.searchUrl;
+    search.target = "_blank";
+    search.rel = "noopener";
+    search.textContent = "Filtered search";
+
+    links.append(careers, search);
+    item.append(companyName, category, links);
+    list.appendChild(item);
+  });
+
+  els.companyCard.append(title, meta, note, list);
+}
+
 function openSelectedCompany() {
+  if (isAllCompaniesSelected()) {
+    copyLinks(state.visibleCompanies.map(company => company.careersUrl), "Copied all company career pages");
+    return;
+  }
+
   const company = getSelectedCompany();
   if (!company) {
     return;
@@ -1813,16 +1910,28 @@ function openSelectedCompany() {
 }
 
 function searchSelectedCompany() {
+  if (isAllCompaniesSelected()) {
+    const title = getCompanySearchTitle();
+    const context = getContext();
+    const links = getCompanySearchRows(title, context).map(row => row.searchUrl);
+    copyLinks(links, "Copied all company search links");
+    return;
+  }
+
   const company = getSelectedCompany();
   if (!company) {
     return;
   }
-  const title = parseTitles(els.jobTitle.value)[0] || "Data Analyst";
+  const title = getCompanySearchTitle();
   const context = getContext();
   window.open(buildCompanySearchUrl(company, title, context), "_blank", "noopener");
 }
 
 function toggleFavoriteCompany() {
+  if (isAllCompaniesSelected()) {
+    return;
+  }
+
   const company = getSelectedCompany();
   if (!company) {
     return;
@@ -1838,13 +1947,24 @@ function toggleFavoriteCompany() {
   syncCompanyCard();
 }
 
+function getCompanySearchTitle() {
+  return parseTitles(els.jobTitle.value)[0] || "Data Analyst";
+}
+
+function getCompanySearchRows(title, context) {
+  return state.visibleCompanies.map(company => ({
+    company,
+    searchUrl: buildCompanySearchUrl(company, title, context)
+  }));
+}
+
 function buildCompanySearchUrl(company, title, context) {
   const query = [
     quoteTerm(title),
     quoteTerm(company.name),
     getLocationQuery(context.location),
-    "(job OR jobs OR careers OR hiring)",
-    `site:${urlToSiteScope(company.careersUrl)}`,
+    "(job OR jobs OR careers OR hiring OR openings)",
+    `site:${urlToSiteHost(company.careersUrl)}`,
     getAuthorizationQuery(context.authorization),
     buildIncludeQuery(context.includeTerms),
     buildExcludeQuery(context.excludeTerms)
@@ -1860,6 +1980,14 @@ function urlToSiteScope(url) {
     return `${host}${path}`;
   } catch (error) {
     return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+  }
+}
+
+function urlToSiteHost(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch (error) {
+    return url.replace(/^https?:\/\//, "").split("/")[0].replace(/^www\./, "");
   }
 }
 
@@ -1907,6 +2035,7 @@ function resetSearch() {
   els.companyFilter.value = "";
   setCategorySelection(new Set(DEFAULT_CATEGORY_IDS));
   renderCompanyOptions("");
+  els.companySelect.value = ALL_COMPANIES_ID;
   syncCompanyCard();
   syncProfileDescription();
   state.results = [];
