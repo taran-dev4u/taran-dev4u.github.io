@@ -733,6 +733,7 @@ function cacheElements() {
     includeTerms: document.getElementById("includeTerms"),
     excludeTerms: document.getElementById("excludeTerms"),
     cautionExcludes: document.getElementById("cautionExcludes"),
+    strictTitle: document.getElementById("strictTitle"),
     categoryFilters: document.getElementById("categoryFilters"),
     companyRole: document.getElementById("companyRole"),
     companyRolePack: document.getElementById("companyRolePack"),
@@ -742,6 +743,10 @@ function cacheElements() {
     companyExperienceSelect: document.getElementById("companyExperienceSelect"),
     companyLocationSelect: document.getElementById("companyLocationSelect"),
     companyRemoteMode: document.getElementById("companyRemoteMode"),
+    companyEmploymentSelect: document.getElementById("companyEmploymentSelect"),
+    companyAuthorizationSelect: document.getElementById("companyAuthorizationSelect"),
+    companyIncludeTerms: document.getElementById("companyIncludeTerms"),
+    companyExcludeTerms: document.getElementById("companyExcludeTerms"),
     companySortSelect: document.getElementById("companySortSelect"),
     companyCategorySelect: document.getElementById("companyCategorySelect"),
     companySponsorTier: document.getElementById("companySponsorTier"),
@@ -762,8 +767,9 @@ function cacheElements() {
     resourceGrid: document.getElementById("resourceGrid"),
     portalCount: document.getElementById("portalCount"),
     checkedCount: document.getElementById("checkedCount"),
-    openTopButton: document.getElementById("openTopButton"),
-    openUncheckedButton: document.getElementById("openUncheckedButton"),
+    openBatchSize: document.getElementById("openBatchSize"),
+    openBatchButton: document.getElementById("openBatchButton"),
+    openAllButton: document.getElementById("openAllButton"),
     exportSettingsButton: document.getElementById("exportSettingsButton"),
     importSettingsButton: document.getElementById("importSettingsButton"),
     copyAllButton: document.getElementById("copyAllButton"),
@@ -812,7 +818,8 @@ function bindEvents() {
     els.experienceSelect,
     els.employmentSelect,
     els.authorizationSelect,
-    els.cautionExcludes
+    els.cautionExcludes,
+    els.strictTitle
   ].forEach(control => control.addEventListener("change", persistAndMaybeGenerate));
 
   [els.jobTitle, els.includeTerms, els.excludeTerms].forEach(input => {
@@ -834,12 +841,20 @@ function bindEvents() {
     syncCompanyCard();
     savePreferences();
   });
+  [els.companyIncludeTerms, els.companyExcludeTerms].forEach(input => {
+    input.addEventListener("change", () => {
+      syncCompanyCard();
+      savePreferences();
+    });
+  });
   [
     els.companyRolePack,
     els.companyTimeFilter,
     els.companyExperienceSelect,
     els.companyLocationSelect,
     els.companyRemoteMode,
+    els.companyEmploymentSelect,
+    els.companyAuthorizationSelect,
     els.companySortSelect,
     els.companyCategorySelect,
     els.companySponsorTier,
@@ -865,8 +880,12 @@ function bindEvents() {
   els.openTopSponsorButton.addEventListener("click", openTopSponsorSearches);
   els.favoriteCompanyButton.addEventListener("click", toggleFavoriteCompany);
 
-  els.openTopButton.addEventListener("click", openTopResults);
-  els.openUncheckedButton.addEventListener("click", openNextUnchecked);
+  els.openBatchButton.addEventListener("click", openNextBatch);
+  els.openAllButton.addEventListener("click", openAllLinks);
+  els.openBatchSize.addEventListener("change", () => {
+    savePreferences();
+    syncBatchControls();
+  });
   els.exportSettingsButton.addEventListener("click", exportSettings);
   els.importSettingsButton.addEventListener("click", importSettings);
   els.copyAllButton.addEventListener("click", () => copyLinks(state.results.map(item => item.url), "Copied all links"));
@@ -1062,6 +1081,9 @@ function hydrateFromUrl() {
   if (params.has("caution")) {
     els.cautionExcludes.checked = params.get("caution") === "1";
   }
+  if (params.has("strict")) {
+    els.strictTitle.checked = params.get("strict") === "1";
+  }
 
   if (params.has("job")) {
     els.jobTitle.value = params.get("job") || "";
@@ -1107,6 +1129,7 @@ function loadPreferences() {
   setSelectIfValid(els.employmentSelect, data.employment || "any");
   setSelectIfValid(els.authorizationSelect, data.authorization || "none");
   els.cautionExcludes.checked = Boolean(data.cautionExcludes);
+  els.strictTitle.checked = Boolean(data.strictTitle);
 
   els.jobTitle.value = data.jobTitle || "";
   els.includeTerms.value = data.includeTerms || "";
@@ -1118,6 +1141,10 @@ function loadPreferences() {
   setSelectIfValid(els.companyExperienceSelect, data.companyExperience || "entry");
   setSelectIfValid(els.companyLocationSelect, data.companyLocation || data.location || "usa");
   setSelectIfValid(els.companyRemoteMode, data.companyRemoteMode || data.remoteMode || "neutral");
+  setSelectIfValid(els.companyEmploymentSelect, data.companyEmployment || "any");
+  setSelectIfValid(els.companyAuthorizationSelect, data.companyAuthorization || "none");
+  els.companyIncludeTerms.value = data.companyInclude || "";
+  els.companyExcludeTerms.value = data.companyExclude || "";
   setSelectIfValid(els.companySortSelect, data.companySort || "latest");
   setSelectIfValid(els.companyCategorySelect, data.companyCategory || "all");
   setSelectIfValid(els.companySponsorTier, data.companySponsorTier || "all");
@@ -1135,6 +1162,7 @@ function loadPreferences() {
   if (data.selectedCompany) {
     setSelectIfValid(els.companySelect, data.selectedCompany);
   }
+  setSelectIfValid(els.openBatchSize, data.openBatchSize || "5");
   // Checked links persist for the current day only, so each morning starts fresh.
   if (Array.isArray(data.checkedKeys) && data.checkedDate === getTodayStamp()) {
     state.checked = new Set(data.checkedKeys);
@@ -1163,6 +1191,7 @@ function savePreferences() {
     includeTerms: els.includeTerms.value,
     excludeTerms: els.excludeTerms.value,
     cautionExcludes: els.cautionExcludes.checked,
+    strictTitle: els.strictTitle.checked,
     companyRole: els.companyRole.value,
     companyFilter: els.companyFilter.value,
     companyRolePack: els.companyRolePack.value,
@@ -1170,6 +1199,10 @@ function savePreferences() {
     companyExperience: els.companyExperienceSelect.value,
     companyLocation: els.companyLocationSelect.value,
     companyRemoteMode: els.companyRemoteMode.value,
+    companyEmployment: els.companyEmploymentSelect.value,
+    companyAuthorization: els.companyAuthorizationSelect.value,
+    companyInclude: els.companyIncludeTerms.value,
+    companyExclude: els.companyExcludeTerms.value,
     companySort: els.companySortSelect.value,
     companyCategory: els.companyCategorySelect.value,
     companySponsorTier: els.companySponsorTier.value,
@@ -1178,6 +1211,7 @@ function savePreferences() {
     favoriteCompanies: Array.from(state.favoriteCompanies),
     pinnedPortals: Array.from(state.pinnedPortals),
     selectedCompany: els.companySelect.value,
+    openBatchSize: els.openBatchSize.value,
     checkedKeys: Array.from(state.checked),
     checkedDate: getTodayStamp()
   };
@@ -1283,7 +1317,7 @@ function generateResults(updateUrl = true) {
     els.results.innerHTML = "";
     const emptyMessage = els.emptyState.querySelector("strong");
     if (emptyMessage) {
-      emptyMessage.textContent = "Ready when you are.";
+      emptyMessage.textContent = "Ready when you are, Taran.";
     }
     setEmptyState(true);
     updateCounts();
@@ -1541,7 +1575,8 @@ function getContext() {
     authorization: els.authorizationSelect.value,
     includeTerms: parseTermList(els.includeTerms.value),
     excludeTerms: parseTermList(els.excludeTerms.value),
-    cautionExcludes: els.cautionExcludes.checked
+    cautionExcludes: els.cautionExcludes.checked,
+    strictTitle: els.strictTitle.checked
   };
 }
 
@@ -1611,8 +1646,7 @@ function updateCounts() {
   els.portalCount.textContent = String(selectedPortals.length);
   els.checkedCount.textContent = String(state.checked.size);
   const hasResults = state.results.length > 0;
-  els.openTopButton.disabled = !hasResults;
-  els.openUncheckedButton.disabled = !hasResults || state.results.every(item => state.checked.has(item.key));
+  syncBatchControls();
   els.copyAllButton.disabled = !hasResults;
   els.copyCheckedButton.disabled = state.checked.size === 0;
   els.shareButton.disabled = !hasResults;
@@ -1727,17 +1761,27 @@ function buildPortalQuery(title, portal, context) {
 }
 
 function buildTitleExpression(title, context) {
+  let expression;
   if (context.matchMode === "exact") {
-    return quoteTerm(title);
+    expression = quoteTerm(title);
+  } else if (!context.hasTypedTitle && getRolePack(context.rolePack).query) {
+    expression = getRolePack(context.rolePack).query;
+  } else {
+    const related = findTitleGroup(title);
+    expression = `(${related.map(quoteTerm).join(" OR ")})`;
   }
-  if (!context.hasTypedTitle) {
-    const pack = getRolePack(context.rolePack);
-    if (pack && pack.query) {
-      return pack.query;
-    }
+  return applyStrictTitle(expression, context);
+}
+
+// Opt-in precision: rewrite quoted titles as intitle:"..." so search-engine
+// results must carry the role in the page title. Off by default so nothing
+// is trimmed unless the user explicitly asks for it. Only used in operator
+// queries; native portal URLs use buildNativeTitleQuery and are unaffected.
+function applyStrictTitle(expression, context) {
+  if (!context.strictTitle) {
+    return expression;
   }
-  const related = findTitleGroup(title);
-  return `(${related.map(quoteTerm).join(" OR ")})`;
+  return expression.replace(/"([^"]+)"/g, 'intitle:"$1"');
 }
 
 function findTitleGroup(title) {
@@ -2388,6 +2432,9 @@ function updateAddressBar(titles, context) {
   if (context.cautionExcludes) {
     params.set("caution", "1");
   }
+  if (context.strictTitle) {
+    params.set("strict", "1");
+  }
   if (state.pinnedPortals.size) {
     params.set("pins", Array.from(state.pinnedPortals).join(","));
   }
@@ -2811,7 +2858,11 @@ function getCompanyContext() {
     sort: els.companySortSelect.value === "latest" ? "latest" : "coverage",
     experience: els.companyExperienceSelect.value,
     location: els.companyLocationSelect.value,
-    remoteMode: els.companyRemoteMode.value
+    remoteMode: els.companyRemoteMode.value,
+    employment: els.companyEmploymentSelect.value,
+    authorization: els.companyAuthorizationSelect.value,
+    includeTerms: mergeUnique(parseTermList(els.includeTerms.value), parseTermList(els.companyIncludeTerms.value)),
+    excludeTerms: mergeUnique(parseTermList(els.excludeTerms.value), parseTermList(els.companyExcludeTerms.value))
   };
 }
 
@@ -2866,27 +2917,57 @@ function urlToSiteHost(url) {
   }
 }
 
-function openTopResults() {
-  state.results.slice(0, 5).forEach(item => {
-    window.open(item.url, "_blank", "noopener");
-  });
-  showToast("Opened top 5 links");
+function getOpenBatchSize() {
+  return parseInt(els.openBatchSize.value, 10) || 5;
 }
 
-function openNextUnchecked() {
-  const next = state.results.filter(item => !state.checked.has(item.key)).slice(0, 5);
-  if (!next.length) {
-    showToast("All links checked");
-    return;
-  }
-  next.forEach(item => {
+function getUncheckedResults() {
+  return state.results.filter(item => !state.checked.has(item.key));
+}
+
+// Keeps the batch button honest: "Open Top N" before anything is checked,
+// "Open Next N" once a batch has been opened, disabled when nothing is left.
+function syncBatchControls() {
+  const unchecked = getUncheckedResults();
+  const size = getOpenBatchSize();
+  const label = state.checked.size === 0 ? "Open Top" : "Open Next";
+  els.openBatchButton.textContent = `${label} ${Math.min(size, unchecked.length) || size}`;
+  els.openBatchButton.disabled = unchecked.length === 0;
+  els.openAllButton.textContent = unchecked.length ? `Open All Links (${unchecked.length})` : "Open All Links";
+  els.openAllButton.disabled = unchecked.length === 0;
+}
+
+function openLinkBatch(items, doneMessage) {
+  items.forEach(item => {
     state.checked.add(item.key);
     window.open(item.url, "_blank", "noopener");
   });
   savePreferences();
   renderResults();
   updateCounts();
-  showToast(`Opened next ${next.length} unchecked links`);
+  const remaining = getUncheckedResults().length;
+  showToast(`${doneMessage}${remaining ? ` - ${remaining} left` : " - all done"}`);
+}
+
+function openNextBatch() {
+  const next = getUncheckedResults().slice(0, getOpenBatchSize());
+  if (!next.length) {
+    showToast("All links opened. Run a new search or uncheck rows.");
+    return;
+  }
+  openLinkBatch(next, `Opened ${next.length} links`);
+}
+
+function openAllLinks() {
+  const unchecked = getUncheckedResults();
+  if (!unchecked.length) {
+    showToast("All links opened. Run a new search or uncheck rows.");
+    return;
+  }
+  if (unchecked.length > 15 && !window.confirm(`This will open ${unchecked.length} tabs at once. Continue?`)) {
+    return;
+  }
+  openLinkBatch(unchecked, `Opened all ${unchecked.length} links`);
 }
 
 function exportSettings() {
@@ -2967,12 +3048,17 @@ function resetSearch() {
   els.includeTerms.value = "";
   els.excludeTerms.value = "";
   els.cautionExcludes.checked = false;
+  els.strictTitle.checked = false;
   els.companyRole.value = "";
   els.companyRolePack.value = DEFAULT_ROLE_PACK_ID;
   els.companyTimeFilter.value = "24hours";
   els.companyExperienceSelect.value = "entry";
   els.companyLocationSelect.value = "usa";
   els.companyRemoteMode.value = "neutral";
+  els.companyEmploymentSelect.value = "any";
+  els.companyAuthorizationSelect.value = "none";
+  els.companyIncludeTerms.value = "";
+  els.companyExcludeTerms.value = "";
   els.companySortSelect.value = "latest";
   els.companyCategorySelect.value = "all";
   els.companySponsorTier.value = "all";
@@ -2988,7 +3074,7 @@ function resetSearch() {
   els.results.innerHTML = "";
   const emptyMessage = els.emptyState.querySelector("strong");
   if (emptyMessage) {
-    emptyMessage.textContent = "Ready when you are.";
+    emptyMessage.textContent = "Ready when you are, Taran.";
   }
   setEmptyState(true);
   updateCounts();

@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="A US-only OPT-aware job search command center for data, IT, software, analyst, and adjacent professional roles.">
-    <title>US OPT Job Search Command Center</title>
+    <meta name="description" content="Taran's personal US job search command center - OPT-aware searches for software, AI, data, analytics, and adjacent roles.">
+    <title>Taran's Job Command Center</title>
     <link rel="icon" href="assets/portal-scout-mark.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/styles.css">
     <script src="assets/app.js" defer></script>
@@ -16,8 +16,8 @@
       <div class="brand">
         <img src="assets/portal-scout-mark.svg" width="44" height="44" alt="">
         <div>
-          <p class="eyebrow">US market only</p>
-          <h1>OPT Job Search Command Center</h1>
+          <p class="eyebrow">Built for Taran - US market only</p>
+          <h1>Taran's Job Command Center</h1>
         </div>
       </div>
       <div class="top-actions">
@@ -39,8 +39,8 @@
       <section class="search-tool" id="dailySearch" aria-labelledby="searchHeading">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Daily search builder</p>
-            <h2 id="searchHeading">Build complete US searches</h2>
+            <p class="eyebrow">Taran's daily search builder</p>
+            <h2 id="searchHeading">Build my US searches</h2>
           </div>
           <div class="mini-map" aria-hidden="true">
             <span></span><span></span><span></span><span></span><span></span>
@@ -170,6 +170,14 @@
             </span>
           </label>
 
+          <label class="field checkbox-field" for="strictTitle">
+            <span>Strict title</span>
+            <span class="checkbox-line">
+              <input id="strictTitle" name="strict" type="checkbox">
+              <span>Role must appear in the page title (intitle:, operator searches only)</span>
+            </span>
+          </label>
+
           <div class="action-row">
             <button class="primary-button" type="submit">Start Search</button>
             <button class="secondary-button" type="button" id="resetButton">Reset</button>
@@ -197,8 +205,17 @@
 
           <div class="panel-block">
             <h2>Actions</h2>
-            <button class="secondary-button full-width" type="button" id="openTopButton" disabled>Open Top 5</button>
-            <button class="secondary-button full-width" type="button" id="openUncheckedButton" disabled>Open Next 5 Unchecked</button>
+            <label class="field" for="openBatchSize">
+              <span>Links per batch</span>
+              <select id="openBatchSize">
+                <option value="5" selected>5 links</option>
+                <option value="10">10 links</option>
+                <option value="15">15 links</option>
+                <option value="20">20 links</option>
+              </select>
+            </label>
+            <button class="secondary-button full-width" type="button" id="openBatchButton" disabled>Open Top 5</button>
+            <button class="secondary-button full-width" type="button" id="openAllButton" disabled>Open All Links</button>
             <button class="secondary-button full-width" type="button" id="copyAllButton" disabled>Copy All Links</button>
             <button class="secondary-button full-width" type="button" id="copyCheckedButton" disabled>Copy Checked Links</button>
             <button class="secondary-button full-width" type="button" id="shareButton" disabled>Copy Share Link</button>
@@ -238,7 +255,7 @@
             <p id="resultMeta">Ready</p>
           </div>
           <div id="emptyState" class="empty-state">
-            <strong>Ready when you are.</strong>
+            <strong>Ready when you are, Taran.</strong>
           </div>
           <div id="results" class="results-list"></div>
         </section>
@@ -247,7 +264,7 @@
       <section class="careers-tool" aria-labelledby="careersHeading">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Company careers</p>
+            <p class="eyebrow">My target companies</p>
             <h2 id="careersHeading">Company and sponsor searches</h2>
           </div>
           <span class="status-pill" id="companyCount">Loading companies</span>
@@ -310,6 +327,35 @@
               <option value="exclude">Exclude remote</option>
             </select>
           </label>
+          <label class="field" for="companyEmploymentSelect">
+            <span>Employment</span>
+            <select id="companyEmploymentSelect">
+              <option value="any" selected>Any employment</option>
+              <option value="fulltime">Full-time</option>
+              <option value="contract">Contract</option>
+              <option value="parttime">Part-time</option>
+              <option value="internship">Internship</option>
+            </select>
+          </label>
+          <label class="field" for="companyAuthorizationSelect">
+            <span>Authorization</span>
+            <select id="companyAuthorizationSelect">
+              <option value="none" selected>No auth filter</option>
+              <option value="optBroad">OPT-aware broad</option>
+              <option value="currentAuthorized">US work authorized</option>
+              <option value="sponsorNeeded">Future sponsorship</option>
+              <option value="everify">E-Verify</option>
+              <option value="optStrict">OPT/STEM OPT exact</option>
+            </select>
+          </label>
+          <label class="field company-wide" for="companyIncludeTerms">
+            <span>Must include</span>
+            <input id="companyIncludeTerms" type="text" autocomplete="off" placeholder="Python, SQL, sponsorship">
+          </label>
+          <label class="field company-wide" for="companyExcludeTerms">
+            <span>Exclude</span>
+            <input id="companyExcludeTerms" type="text" autocomplete="off" placeholder="unpaid, clearance, senior">
+          </label>
           <label class="field" for="companySortSelect">
             <span>Company order</span>
             <select id="companySortSelect">
@@ -360,8 +406,8 @@
       <section class="sponsor-panel" aria-labelledby="sponsorsHeading">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">H1B sponsor layer</p>
-            <h2 id="sponsorsHeading">Top sponsor companies for software, AI, and data</h2>
+            <p class="eyebrow">My H1B sponsor layer</p>
+            <h2 id="sponsorsHeading">Top sponsor companies for my roles</h2>
           </div>
           <span class="status-pill">Workbook-backed</span>
         </div>
@@ -371,8 +417,8 @@
       <section class="resources-panel" aria-labelledby="resourcesHeading">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">OPT and sponsor research</p>
-            <h2 id="resourcesHeading">Useful US job-search resources</h2>
+            <p class="eyebrow">My OPT and sponsor research</p>
+            <h2 id="resourcesHeading">My US job-search resources</h2>
           </div>
         </div>
         <div id="resourceGrid" class="resource-grid"></div>
@@ -380,7 +426,7 @@
     </main>
 
     <footer class="site-footer">
-      <p>Static job-search launcher for the US market. It does not scrape, rank, or store job listings.</p>
+      <p>Taran's personal job-search launcher for the US market. It does not scrape, rank, or store job listings.</p>
       <p>This is job-search tooling, not immigration or legal advice.</p>
     </footer>
   </body>

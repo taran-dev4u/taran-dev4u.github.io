@@ -972,3 +972,132 @@ pre {
     justify-self: start;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Polish layer (2026-06-11): motion, depth, and feedback refinements.
+   Additive only; all colors come from the existing variable system.
+--------------------------------------------------------------------------- */
+
+button,
+input,
+select,
+.portal-row,
+.sponsor-card,
+.resource-card,
+.company-link-row,
+.filter-chip,
+.tag-button,
+.pill {
+  transition: background-color .16s ease, border-color .16s ease,
+    box-shadow .16s ease, transform .16s ease, color .16s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+input:hover:not(:focus),
+select:hover:not(:focus) {
+  border-color: var(--accent);
+}
+
+input:focus,
+select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  outline: none;
+}
+
+.primary-button:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .18);
+}
+
+.secondary-button:not(:disabled):hover,
+.ghost-button:not(:disabled):hover {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
+
+.portal-row:hover,
+.sponsor-card:hover,
+.resource-card:hover,
+.company-link-row:hover {
+  border-color: var(--accent);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .14);
+  transform: translateY(-1px);
+}
+
+.portal-row.checked {
+  border-color: var(--green);
+  background:
+    linear-gradient(0deg, var(--green-soft), var(--green-soft)),
+    var(--surface);
+}
+
+.portal-row.checked .portal-link {
+  color: var(--green);
+}
+
+.portal-row.checked .portal-link::after {
+  content: " ✓";
+  font-weight: 700;
+}
+
+.quick-rail a:hover,
+.quick-rail button:hover {
+  color: var(--accent-strong);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.tag-button:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.filter-chip:hover {
+  border-color: var(--accent);
+}
+
+.filter-chip:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.results-panel,
+.side-panel {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+.results-panel::-webkit-scrollbar,
+.side-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.results-panel::-webkit-scrollbar-thumb,
+.side-panel::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 8px;
+}
+
+.results-panel::-webkit-scrollbar-thumb:hover,
+.side-panel::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+.toast:not(:empty) {
+  border: 1px solid var(--green);
+  background: var(--green-soft);
+  color: var(--ink);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+
+.status-pill {
+  white-space: nowrap;
+}
