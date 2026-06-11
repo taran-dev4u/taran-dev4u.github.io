@@ -39,6 +39,14 @@ const SEARCH_PROFILES = [
     categories: ["top", "direct", "signals", "general", "tech", "company"]
   },
   {
+    id: "dailyQuickApply",
+    label: "Daily Quick Apply",
+    description: "Focused daily flow: only the nine highest-yield apply sources, newest-first within the past 24 hours.",
+    defaults: { time: "24hours", sort: "latest", authorization: "none", precision: "latest24", matchMode: "smart" },
+    categories: ["top", "direct", "signals", "general", "tech"],
+    portals: ["linkedinJobs", "indeed", "directATS", "linkedinPosts", "google", "simplify", "hiringCafe", "builtin", "dice"]
+  },
+  {
     id: "maxCoverage",
     label: "Max Coverage",
     description: "Broadest US search. Keeps authorization filters off so useful results are not hidden.",
@@ -90,14 +98,14 @@ const PORTAL_ROWS = [
   { id: "directATS", name: "Direct ATS Search", category: "direct", rawSiteQuery: "(site:greenhouse.io OR site:lever.co OR site:ashbyhq.com OR site:myworkdayjobs.com OR site:pinpointhq.com OR site:recruiting.paylocity.com OR site:keka.com OR site:jobs.workable.com OR site:breezy.hr OR site:wellfound.com OR site:workatastartup.com OR site:oraclecloud.com OR site:recruitee.com OR site:rippling.com OR site:rippling-ats.com OR site:jobs.gusto.com OR site:careerpuck.com OR site:teamtailor.com OR site:jobs.smartrecruiters.com OR site:jobappnetwork.com OR site:homerun.co OR site:gem.com OR site:trakstar.com OR site:catsone.com OR site:applytojob.com OR site:jobvite.com OR site:icims.com OR site:dover.io OR site:notion.site OR site:workforcenow.adp.com OR site:myjobs.adp.com OR site:factorialhr.com OR site:trinethire.com)", priority: 98, tags: ["direct apply", "ATS"], note: "Searches Brian's ATS/source set together for fresher direct postings." },
   { id: "linkedinPosts", name: "LinkedIn Posts", category: "signals", native: "linkedinPosts", sites: ["linkedin.com/search/results/content"], priority: 97, tags: ["hiring posts", "fresh"], note: "Uses LinkedIn content search with hiring keywords and date-posted sorting." },
   { id: "google", name: "Google Jobs Web Search", category: "top", native: "google", priority: 96, tags: ["broad web", "date tools"], note: "Broad Google query across job posts, career pages, and hiring pages." },
-  { id: "glassdoor", name: "Glassdoor", category: "general", sites: ["glassdoor.com/Job", "glassdoor.com/job-listing"], priority: 95, tags: ["salary context"] },
+  { id: "glassdoor", name: "Glassdoor", category: "general", native: "glassdoor", sites: ["glassdoor.com/Job", "glassdoor.com/job-listing"], priority: 95, tags: ["salary context", "native date filter"] },
   { id: "ziprecruiter", name: "ZipRecruiter", category: "general", native: "ziprecruiter", sites: ["ziprecruiter.com/jobs"], priority: 94, tags: ["general board"] },
   { id: "dice", name: "Dice", category: "general", native: "dice", sites: ["dice.com/jobs"], priority: 93, tags: ["tech board"] },
   { id: "builtin", name: "Built In", category: "tech", native: "builtin", sites: ["builtin.com/jobs", "builtin.com/job"], priority: 92, tags: ["tech cities"] },
   { id: "handshake", name: "Handshake", category: "general", sites: ["joinhandshake.com", "app.joinhandshake.com"], priority: 91, tags: ["students", "new grad"] },
   { id: "simplify", name: "Simplify", category: "tech", native: "simplify", sites: ["simplify.jobs"], priority: 90, tags: ["new grad", "tech"] },
   { id: "hiringCafe", name: "HiringCafe", category: "tech", sites: ["hiring.cafe"], priority: 89, tags: ["fresh listings"] },
-  { id: "wellfound", name: "Wellfound", category: "tech", native: "wellfound", sites: ["wellfound.com/jobs"], priority: 88, tags: ["startups"] },
+  { id: "wellfound", name: "Wellfound", category: "tech", sites: ["wellfound.com/jobs"], priority: 88, tags: ["startups"] },
   { id: "yc", name: "Y Combinator Jobs", category: "tech", native: "yc", sites: ["ycombinator.com/jobs", "workatastartup.com/jobs"], priority: 87, tags: ["startups"] },
   { id: "levels", name: "Levels.fyi Jobs", category: "tech", native: "levels", sites: ["levels.fyi/jobs"], priority: 86, tags: ["tech pay"] },
   { id: "welcome", name: "Welcome to the Jungle", category: "tech", native: "welcome", sites: ["welcometothejungle.com/en/jobs"], priority: 85, tags: ["startups"] },
@@ -231,14 +239,14 @@ const RELATED_TITLE_GROUPS = [
   ["Cloud Engineer", "DevOps Engineer", "Site Reliability Engineer", "Platform Engineer", "Infrastructure Engineer"],
   ["Business Analyst", "Systems Analyst", "Product Analyst", "Operations Analyst", "Business Systems Analyst", "Technical Analyst"],
   ["Cybersecurity Analyst", "Security Engineer", "SOC Analyst", "GRC Analyst", "Cloud Security Engineer", "Application Security Engineer"],
-  ["Product Manager", "Product Owner", "Technical Product Manager", "Program Manager", "Project Manager", "Scrum Master"],
+  ["Product Manager", "Product Owner", "Technical Product Manager"],
   ["QA Engineer", "Software Test Engineer", "Automation Engineer", "SDET", "Quality Engineer"],
   ["UX Designer", "UI Designer", "Product Designer", "UX Researcher", "Content Designer"],
   ["Financial Analyst", "FP&A Analyst", "Business Operations Analyst", "Revenue Analyst", "Risk Analyst"],
   ["Video Producer", "Film Editor", "Content Producer", "Content Creator", "Media Manager", "Digital Marketing Specialist", "Multimedia Designer", "Social Media Strategist", "Brand Content Manager", "Video Production Coordinator", "Creative Director"],
   ["Salesforce Administrator", "Salesforce Developer", "Salesforce Consultant", "Salesforce Business Analyst", "Database Administrator", "IT Systems Administrator"],
-  ["Project Manager", "Program Manager", "Operations Manager", "Team Lead", "Project Coordinator"],
-  ["Scrum Master", "Agile Coach", "Lean Practitioner", "Kanban Coach", "Agile Project Facilitator", "Agile Transformation Lead", "Agile Team Coach", "Iteration Manager", "Scrum"]
+  ["Project Manager", "Program Manager", "Operations Manager", "Team Lead", "Project Coordinator", "Delivery Manager"],
+  ["Scrum Master", "Agile Coach", "Lean Practitioner", "Kanban Coach", "Agile Project Facilitator", "Agile Transformation Lead", "Agile Team Coach", "Iteration Manager"]
 ];
 
 const ROLE_PACKS = [
@@ -689,10 +697,8 @@ document.addEventListener("DOMContentLoaded", () => {
   loadTheme();
   bindEvents();
 
-  const hydrated = hydrateFromUrl();
-  if (!hydrated) {
-    loadPreferences();
-  }
+  loadPreferences();
+  hydrateFromUrl();
   if (!els.companyRole.value && els.jobTitle.value) {
     els.companyRole.value = els.jobTitle.value;
   }
@@ -757,11 +763,15 @@ function cacheElements() {
     portalCount: document.getElementById("portalCount"),
     checkedCount: document.getElementById("checkedCount"),
     openTopButton: document.getElementById("openTopButton"),
+    openUncheckedButton: document.getElementById("openUncheckedButton"),
+    exportSettingsButton: document.getElementById("exportSettingsButton"),
+    importSettingsButton: document.getElementById("importSettingsButton"),
     copyAllButton: document.getElementById("copyAllButton"),
     copyCheckedButton: document.getElementById("copyCheckedButton"),
     shareButton: document.getElementById("shareButton"),
     resetButton: document.getElementById("resetButton"),
     latestOneHourButton: document.getElementById("latestOneHourButton"),
+    quickApplyButton: document.getElementById("quickApplyButton"),
     themeToggle: document.getElementById("themeToggle"),
     results: document.getElementById("results"),
     emptyState: document.getElementById("emptyState"),
@@ -856,6 +866,9 @@ function bindEvents() {
   els.favoriteCompanyButton.addEventListener("click", toggleFavoriteCompany);
 
   els.openTopButton.addEventListener("click", openTopResults);
+  els.openUncheckedButton.addEventListener("click", openNextUnchecked);
+  els.exportSettingsButton.addEventListener("click", exportSettings);
+  els.importSettingsButton.addEventListener("click", importSettings);
   els.copyAllButton.addEventListener("click", () => copyLinks(state.results.map(item => item.url), "Copied all links"));
   els.copyCheckedButton.addEventListener("click", () => {
     const checkedLinks = state.results.filter(item => state.checked.has(item.key)).map(item => item.url);
@@ -864,6 +877,7 @@ function bindEvents() {
   els.shareButton.addEventListener("click", () => copyLinks([window.location.href], "Copied share link"));
   els.resetButton.addEventListener("click", resetSearch);
   els.latestOneHourButton.addEventListener("click", applyLatestOneHourFlow);
+  els.quickApplyButton.addEventListener("click", applyQuickApplyFlow);
   els.themeToggle.addEventListener("click", toggleTheme);
 
   els.pinnedOperators.addEventListener("click", event => {
@@ -1028,26 +1042,36 @@ function hydrateFromUrl() {
     return false;
   }
 
-  setSelectIfValid(els.profileSelect, params.get("profile") || DEFAULT_PROFILE_ID);
-  setSelectIfValid(els.rolePackSelect, params.get("rolePack") || DEFAULT_ROLE_PACK_ID);
+  // Overlay-only: URL params override saved preferences without resetting
+  // anything the link does not mention.
+  setSelectIfValid(els.profileSelect, params.get("profile"));
+  setSelectIfValid(els.rolePackSelect, params.get("rolePack"));
   if (params.get("engine") && TIME_OPTIONS[params.get("engine")]) {
     els.engineSelect.value = params.get("engine");
   }
-  rebuildTimeOptions(els.engineSelect.value, params.get("time") || undefined);
+  rebuildTimeOptions(els.engineSelect.value, params.get("time") || els.timeFilter.value || undefined);
 
-  setSelectIfValid(els.locationSelect, params.get("location") || "usa");
-  setSelectIfValid(els.timeFilter, params.get("time") || els.timeFilter.value);
-  setSelectIfValid(els.sortSelect, params.get("sort") || "coverage");
-  setSelectIfValid(els.remoteMode, params.get("remote") || "neutral");
-  setSelectIfValid(els.matchMode, params.get("match") || "smart");
-  setSelectIfValid(els.experienceSelect, params.get("experience") || "any");
-  setSelectIfValid(els.employmentSelect, params.get("employment") || "any");
-  setSelectIfValid(els.authorizationSelect, params.get("authorization") || "none");
-  els.cautionExcludes.checked = params.get("caution") === "1";
+  setSelectIfValid(els.locationSelect, params.get("location"));
+  setSelectIfValid(els.timeFilter, params.get("time"));
+  setSelectIfValid(els.sortSelect, params.get("sort"));
+  setSelectIfValid(els.remoteMode, params.get("remote"));
+  setSelectIfValid(els.matchMode, params.get("match"));
+  setSelectIfValid(els.experienceSelect, params.get("experience"));
+  setSelectIfValid(els.employmentSelect, params.get("employment"));
+  setSelectIfValid(els.authorizationSelect, params.get("authorization"));
+  if (params.has("caution")) {
+    els.cautionExcludes.checked = params.get("caution") === "1";
+  }
 
-  els.jobTitle.value = params.get("job") || "";
-  els.includeTerms.value = params.get("include") || "";
-  els.excludeTerms.value = params.get("exclude") || "";
+  if (params.has("job")) {
+    els.jobTitle.value = params.get("job") || "";
+  }
+  if (params.has("include")) {
+    els.includeTerms.value = params.get("include") || "";
+  }
+  if (params.has("exclude")) {
+    els.excludeTerms.value = params.get("exclude") || "";
+  }
 
   const groups = params.get("groups");
   if (groups) {
@@ -1111,6 +1135,14 @@ function loadPreferences() {
   if (data.selectedCompany) {
     setSelectIfValid(els.companySelect, data.selectedCompany);
   }
+  // Checked links persist for the current day only, so each morning starts fresh.
+  if (Array.isArray(data.checkedKeys) && data.checkedDate === getTodayStamp()) {
+    state.checked = new Set(data.checkedKeys);
+  }
+}
+
+function getTodayStamp() {
+  return new Date().toISOString().slice(0, 10);
 }
 
 function savePreferences() {
@@ -1145,7 +1177,9 @@ function savePreferences() {
     selectedCategories: Array.from(getSelectedCategories()),
     favoriteCompanies: Array.from(state.favoriteCompanies),
     pinnedPortals: Array.from(state.pinnedPortals),
-    selectedCompany: els.companySelect.value
+    selectedCompany: els.companySelect.value,
+    checkedKeys: Array.from(state.checked),
+    checkedDate: getTodayStamp()
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
 }
@@ -1362,6 +1396,7 @@ function renderPortalRow(item) {
       row.classList.remove("checked");
     }
     updateCounts();
+    savePreferences();
   });
 
   const body = document.createElement("div");
@@ -1375,6 +1410,15 @@ function renderPortalRow(item) {
   link.textContent = item.portal.name;
   link.addEventListener("focus", () => updatePreview(item.title, item.portal, getContext()));
   link.addEventListener("mouseenter", () => updatePreview(item.title, item.portal, getContext()));
+  link.addEventListener("click", () => {
+    if (!state.checked.has(item.key)) {
+      state.checked.add(item.key);
+      checkbox.checked = true;
+      row.classList.add("checked");
+      updateCounts();
+      savePreferences();
+    }
+  });
 
   const summary = document.createElement("p");
   summary.className = "portal-summary";
@@ -1435,22 +1479,6 @@ function getSourceCapability(portal) {
   return null;
 }
 
-function getLegacyPortalScopeLabel(portal) {
-  if (portal.native === "linkedinJobs" || portal.native === "indeed" || portal.native === "usajobs") {
-    return "Native filters";
-  }
-  if (portal.native === "linkedinPosts") {
-    return "Post search";
-  }
-  if (portal.native === "static") {
-    return "Research link";
-  }
-  if (portal.native) {
-    return "Native search";
-  }
-  return "Search operator";
-}
-
 function createPill(text) {
   const pill = document.createElement("span");
   pill.className = "pill";
@@ -1507,6 +1535,7 @@ function getContext() {
     sort: els.sortSelect.value,
     remoteMode: els.remoteMode.value,
     matchMode: els.matchMode.value,
+    hasTypedTitle: parseTitles(els.jobTitle.value).length > 0,
     experience: els.experienceSelect.value,
     employment: els.employmentSelect.value,
     authorization: els.authorizationSelect.value,
@@ -1529,6 +1558,10 @@ function parseTermList(value) {
 }
 
 function getSelectedPortals() {
+  const profile = SEARCH_PROFILES.find(item => item.id === els.profileSelect.value);
+  if (profile && Array.isArray(profile.portals)) {
+    return sortPortals(PORTALS.filter(portal => profile.portals.includes(portal.id)), els.sortSelect.value);
+  }
   const selectedCategories = getSelectedCategories();
   return sortPortals(PORTALS.filter(portal => selectedCategories.has(portal.category)), els.sortSelect.value);
 }
@@ -1579,6 +1612,7 @@ function updateCounts() {
   els.checkedCount.textContent = String(state.checked.size);
   const hasResults = state.results.length > 0;
   els.openTopButton.disabled = !hasResults;
+  els.openUncheckedButton.disabled = !hasResults || state.results.every(item => state.checked.has(item.key));
   els.copyAllButton.disabled = !hasResults;
   els.copyCheckedButton.disabled = state.checked.size === 0;
   els.shareButton.disabled = !hasResults;
@@ -1847,16 +1881,39 @@ function buildSearchUrl(portal, query, title, context) {
       return buildUSAJobsUrl(title, context);
     case "google":
       return buildGoogleUrl(query, context.time, context.sort);
-    case "ziprecruiter":
-      return `https://www.ziprecruiter.com/jobs-search?search=${encodeURIComponent(buildNativeKeywordQuery(title, context))}&location=${encodeURIComponent(getNativeLocation(context.location))}`;
-    case "dice":
-      return `https://www.dice.com/jobs?q=${encodeURIComponent(buildNativeKeywordQuery(title, context))}&location=${encodeURIComponent(getNativeLocation(context.location))}`;
+    case "glassdoor": {
+      const params = new URLSearchParams();
+      params.set("sc.keyword", buildNativeKeywordQuery(title, context));
+      const fromAge = getGlassdoorFromAge(context.time);
+      if (fromAge) {
+        params.set("fromAge", fromAge);
+      }
+      return `https://www.glassdoor.com/Job/jobs.htm?${params.toString()}`;
+    }
+    case "ziprecruiter": {
+      const params = new URLSearchParams();
+      params.set("search", buildNativeKeywordQuery(title, context));
+      params.set("location", getNativeLocation(context.location));
+      const days = getZipRecruiterDays(context.time);
+      if (days) {
+        params.set("days", days);
+      }
+      return `https://www.ziprecruiter.com/jobs-search?${params.toString()}`;
+    }
+    case "dice": {
+      const params = new URLSearchParams();
+      params.set("q", buildNativeKeywordQuery(title, context));
+      params.set("location", getNativeLocation(context.location));
+      const posted = getDicePostedDate(context.time);
+      if (posted) {
+        params.set("filters.postedDate", posted);
+      }
+      return `https://www.dice.com/jobs?${params.toString()}`;
+    }
     case "builtin":
       return `https://builtin.com/jobs?search=${encodeURIComponent(title)}&location=${encodeURIComponent(getNativeLocation(context.location))}`;
     case "simplify":
       return `https://simplify.jobs/jobs?query=${encodeURIComponent(buildNativeKeywordQuery(title, context))}`;
-    case "wellfound":
-      return `https://wellfound.com/jobs`;
     case "yc":
       return `https://www.ycombinator.com/jobs?query=${encodeURIComponent(title)}`;
     case "levels":
@@ -2091,11 +2148,59 @@ function getLinkedInFunctionParam(title, context) {
 
 function getIndeedFromAge(time) {
   const map = {
+    "1hour": "1",
+    "4hours": "1",
+    "8hours": "1",
+    "12hours": "1",
+    "24hours": "1",
+    "48hours": "2",
+    "72hours": "3",
+    week: "7",
+    month: "30"
+  };
+  return map[time] || "";
+}
+
+function getGlassdoorFromAge(time) {
+  const map = {
+    "1hour": "1",
+    "4hours": "1",
+    "8hours": "1",
+    "12hours": "1",
     "24hours": "1",
     "48hours": "3",
     "72hours": "3",
     week: "7",
-    month: "14"
+    month: "30"
+  };
+  return map[time] || "";
+}
+
+function getZipRecruiterDays(time) {
+  const map = {
+    "1hour": "1",
+    "4hours": "1",
+    "8hours": "1",
+    "12hours": "1",
+    "24hours": "1",
+    "48hours": "5",
+    "72hours": "5",
+    week: "10",
+    month: "30"
+  };
+  return map[time] || "";
+}
+
+function getDicePostedDate(time) {
+  const map = {
+    "1hour": "ONE",
+    "4hours": "ONE",
+    "8hours": "ONE",
+    "12hours": "ONE",
+    "24hours": "ONE",
+    "48hours": "THREE",
+    "72hours": "THREE",
+    week: "SEVEN"
   };
   return map[time] || "";
 }
@@ -2768,6 +2873,46 @@ function openTopResults() {
   showToast("Opened top 5 links");
 }
 
+function openNextUnchecked() {
+  const next = state.results.filter(item => !state.checked.has(item.key)).slice(0, 5);
+  if (!next.length) {
+    showToast("All links checked");
+    return;
+  }
+  next.forEach(item => {
+    state.checked.add(item.key);
+    window.open(item.url, "_blank", "noopener");
+  });
+  savePreferences();
+  renderResults();
+  updateCounts();
+  showToast(`Opened next ${next.length} unchecked links`);
+}
+
+function exportSettings() {
+  savePreferences();
+  const payload = localStorage.getItem(STORAGE_KEY) || "{}";
+  copyLinks([payload], "Copied settings JSON. Paste it in Import Settings on another browser.");
+}
+
+function importSettings() {
+  const raw = window.prompt("Paste settings JSON exported from another browser:");
+  if (!raw || !raw.trim()) {
+    return;
+  }
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new Error("not an object");
+    }
+  } catch (error) {
+    showToast("Invalid settings JSON");
+    return;
+  }
+  localStorage.setItem(STORAGE_KEY, raw.trim());
+  window.location.replace(window.location.pathname);
+}
+
 async function copyLinks(links, message) {
   if (!links.length) {
     return;
@@ -2786,6 +2931,15 @@ function showToast(message) {
   showToast.timeout = setTimeout(() => {
     els.toast.textContent = "";
   }, 2200);
+}
+
+function applyQuickApplyFlow() {
+  els.profileSelect.value = "dailyQuickApply";
+  applyProfile("dailyQuickApply");
+  syncProfileDescription();
+  generateResults();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  showToast("Daily Quick Apply ready");
 }
 
 function applyLatestOneHourFlow() {
@@ -2872,3 +3026,4 @@ function slugify(value) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 }
+

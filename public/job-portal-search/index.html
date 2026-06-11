@@ -30,6 +30,7 @@
       <nav class="quick-rail" aria-label="Command center views">
         <a href="#searchHeading">Daily Search</a>
         <button type="button" id="latestOneHourButton">Latest 1h</button>
+        <button type="button" id="quickApplyButton">Quick Apply</button>
         <a href="#careersHeading">Companies</a>
         <a href="#sponsorsHeading">H1B Sponsors</a>
         <a href="#resourcesHeading">Resources</a>
@@ -197,9 +198,12 @@
           <div class="panel-block">
             <h2>Actions</h2>
             <button class="secondary-button full-width" type="button" id="openTopButton" disabled>Open Top 5</button>
+            <button class="secondary-button full-width" type="button" id="openUncheckedButton" disabled>Open Next 5 Unchecked</button>
             <button class="secondary-button full-width" type="button" id="copyAllButton" disabled>Copy All Links</button>
             <button class="secondary-button full-width" type="button" id="copyCheckedButton" disabled>Copy Checked Links</button>
             <button class="secondary-button full-width" type="button" id="shareButton" disabled>Copy Share Link</button>
+            <button class="secondary-button full-width" type="button" id="exportSettingsButton">Export Settings</button>
+            <button class="secondary-button full-width" type="button" id="importSettingsButton">Import Settings</button>
           </div>
 
           <div class="panel-block" id="pinnedBlock" hidden>
@@ -246,7 +250,7 @@
             <p class="eyebrow">Company careers</p>
             <h2 id="careersHeading">Company and sponsor searches</h2>
           </div>
-          <span class="status-pill" id="companyCount">150 companies</span>
+          <span class="status-pill" id="companyCount">Loading companies</span>
         </div>
         <div class="careers-grid">
           <label class="field company-wide" for="companyRole">
