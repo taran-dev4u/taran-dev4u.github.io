@@ -32,7 +32,6 @@
         <button type="button" id="latestOneHourButton">Latest 1h</button>
         <a href="#careersHeading">Companies</a>
         <a href="#sponsorsHeading">H1B Sponsors</a>
-        <a href="#trackerHeading">Tracker</a>
         <a href="#resourcesHeading">Resources</a>
       </nav>
 
@@ -61,18 +60,6 @@
           <label class="field" for="profileSelect">
             <span>Smart profile</span>
             <select id="profileSelect" name="profile"></select>
-          </label>
-
-          <label class="field" for="precisionSelect">
-            <span>Coverage mode</span>
-            <select id="precisionSelect" name="precision">
-              <option value="coverage">Max Coverage</option>
-              <option value="latest1">Latest 1h</option>
-              <option value="latest24">Latest 24h</option>
-              <option value="optSponsor">OPT/Sponsor Research</option>
-              <option value="direct">Direct ATS</option>
-              <option value="exact">Exact Role</option>
-            </select>
           </label>
 
           <label class="field" for="locationSelect">
@@ -215,6 +202,11 @@
             <button class="secondary-button full-width" type="button" id="shareButton" disabled>Copy Share Link</button>
           </div>
 
+          <div class="panel-block" id="pinnedBlock" hidden>
+            <h2>Pinned Operators</h2>
+            <div id="pinnedOperators" class="tag-list"></div>
+          </div>
+
           <div class="panel-block" id="profileBlock">
             <h2>Profile</h2>
             <p id="profileDescription" class="helper-text"></p>
@@ -339,24 +331,12 @@
               <option value="curated">Curated/no filing data</option>
             </select>
           </label>
-          <label class="field" for="companyMinFilings">
-            <span>Min H1B filings</span>
-            <input id="companyMinFilings" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-          </label>
           <label class="field" for="companyKind">
             <span>Employer type</span>
             <select id="companyKind">
               <option value="all" selected>Direct and vendors</option>
               <option value="direct">Direct employers</option>
               <option value="vendor">Staffing/vendors</option>
-            </select>
-          </label>
-          <label class="field" for="companyCautionFlag">
-            <span>Caution flags</span>
-            <select id="companyCautionFlag">
-              <option value="all" selected>Show all</option>
-              <option value="clean">No caution flag</option>
-              <option value="caution">Caution flagged</option>
             </select>
           </label>
           <div class="company-actions">
@@ -382,57 +362,6 @@
           <span class="status-pill">Workbook-backed</span>
         </div>
         <div id="sponsorGrid" class="sponsor-grid"></div>
-      </section>
-
-      <section class="tracker-panel" aria-labelledby="trackerHeading">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Local tracker</p>
-            <h2 id="trackerHeading">Application follow-up board</h2>
-          </div>
-          <span class="status-pill" id="trackerCount">0 saved</span>
-        </div>
-        <form id="trackerForm" class="tracker-form">
-          <label class="field" for="trackerCompany">
-            <span>Company</span>
-            <input id="trackerCompany" type="text" autocomplete="off" placeholder="Company">
-          </label>
-          <label class="field" for="trackerRole">
-            <span>Role</span>
-            <input id="trackerRole" type="text" autocomplete="off" placeholder="Role title">
-          </label>
-          <label class="field" for="trackerStatus">
-            <span>Status</span>
-            <select id="trackerStatus">
-              <option value="wishlist">Wishlist</option>
-              <option value="applied">Applied</option>
-              <option value="interview">Interview</option>
-              <option value="follow-up">Follow-up</option>
-              <option value="rejected">Rejected</option>
-            </select>
-          </label>
-          <label class="field" for="trackerSource">
-            <span>Source</span>
-            <input id="trackerSource" type="text" autocomplete="off" placeholder="LinkedIn, careers page, referral">
-          </label>
-          <label class="field field-wide" for="trackerLink">
-            <span>Job link</span>
-            <input id="trackerLink" type="url" autocomplete="off" placeholder="https://">
-          </label>
-          <label class="field" for="trackerFollowUp">
-            <span>Follow-up</span>
-            <input id="trackerFollowUp" type="date">
-          </label>
-          <label class="field tracker-notes" for="trackerNotes">
-            <span>Notes</span>
-            <input id="trackerNotes" type="text" autocomplete="off" placeholder="Recruiter, referral, next step">
-          </label>
-          <div class="tracker-actions">
-            <button class="primary-button" type="submit">Save Job</button>
-            <button class="secondary-button" type="button" id="copyTrackerButton">Copy CSV</button>
-          </div>
-        </form>
-        <div id="trackerList" class="tracker-list"></div>
       </section>
 
       <section class="resources-panel" aria-labelledby="resourcesHeading">

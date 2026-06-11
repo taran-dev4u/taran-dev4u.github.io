@@ -2,10 +2,9 @@
 
 const STORAGE_KEY = "optJobCommandCenterPrefs";
 const THEME_KEY = "optJobCommandCenterTheme";
-const TRACKER_KEY = "optJobCommandCenterTracker";
 const ALL_COMPANIES_ID = "__all_companies__";
 const DEFAULT_PROFILE_ID = "softwareAiDataEntryOpt";
-const DEFAULT_ROLE_PACK_ID = "software-ai-data";
+const DEFAULT_ROLE_PACK_ID = "all-role-families";
 const CAUTION_EXCLUDE_TERMS = ["unpaid", "commission only", "clearance", "US citizenship required", "must be a US citizen"];
 
 const CATEGORY_ROWS = [
@@ -29,14 +28,14 @@ const SEARCH_PROFILES = [
     id: "softwareAiDataEntryOpt",
     label: "Software / AI / Data - Entry OPT",
     description: "Personal default for US-wide entry/new-grad software, AI, and data searches. Keeps coverage broad and uses OPT/sponsor wording as companion research.",
-    defaults: { time: "all", sort: "coverage", authorization: "none", experience: "entry", rolePack: "software-ai-data", precision: "coverage", matchMode: "smart" },
+    defaults: { time: "all", sort: "coverage", authorization: "none", experience: "entry", rolePack: "all-role-families", precision: "coverage", matchMode: "smart" },
     categories: DEFAULT_CATEGORY_IDS
   },
   {
     id: "latest1",
     label: "Latest 1h",
     description: "Urgent apply flow for postings from the last hour on sources with reliable date filters.",
-    defaults: { time: "1hour", sort: "latest", authorization: "none", experience: "entry", rolePack: "software-ai-data", precision: "latest1", matchMode: "smart" },
+    defaults: { time: "1hour", sort: "latest", authorization: "none", experience: "entry", rolePack: "all-role-families", precision: "latest1", matchMode: "smart" },
     categories: ["top", "direct", "signals", "general", "tech", "company"]
   },
   {
@@ -225,9 +224,12 @@ const LOCATIONS = [
 ];
 
 const RELATED_TITLE_GROUPS = [
-  ["Software Engineer", "Software Developer", "Full Stack Developer", "Frontend Developer", "Backend Developer", "Platform Engineer", "DevOps Engineer", "Site Reliability Engineer", "Application Developer", "Cloud Engineer"],
-  ["Data Analyst", "Business Intelligence Analyst", "Analytics Engineer", "Data Scientist", "Machine Learning Engineer", "Data Engineer", "Power BI Developer", "Reporting Analyst", "SQL Analyst"],
-  ["Business Analyst", "Systems Analyst", "Product Analyst", "Operations Analyst", "Business Systems Analyst", "Data Analyst", "Technical Analyst"],
+  ["Software Engineer", "Software Developer", "Full Stack Developer", "Frontend Developer", "Backend Developer", "Application Developer", "Web Developer"],
+  ["Machine Learning Engineer", "ML Engineer", "AI Engineer", "Applied Scientist", "Data Scientist", "Research Engineer", "AI Data Engineer"],
+  ["Data Engineer", "Analytics Engineer", "ETL Developer", "BI Engineer", "Data Platform Engineer"],
+  ["Data Analyst", "Business Intelligence Analyst", "Reporting Analyst", "SQL Analyst", "Power BI Developer", "Tableau Developer"],
+  ["Cloud Engineer", "DevOps Engineer", "Site Reliability Engineer", "Platform Engineer", "Infrastructure Engineer"],
+  ["Business Analyst", "Systems Analyst", "Product Analyst", "Operations Analyst", "Business Systems Analyst", "Technical Analyst"],
   ["Cybersecurity Analyst", "Security Engineer", "SOC Analyst", "GRC Analyst", "Cloud Security Engineer", "Application Security Engineer"],
   ["Product Manager", "Product Owner", "Technical Product Manager", "Program Manager", "Project Manager", "Scrum Master"],
   ["QA Engineer", "Software Test Engineer", "Automation Engineer", "SDET", "Quality Engineer"],
@@ -240,6 +242,14 @@ const RELATED_TITLE_GROUPS = [
 ];
 
 const ROLE_PACKS = [
+  {
+    id: "all-role-families",
+    label: "All Target Role Families - Max Coverage",
+    primary: "Software Engineer",
+    titles: ["Software Engineer", "Software Developer", "AI Engineer", "Machine Learning Engineer", "Data Scientist", "Data Engineer", "Data Analyst", "Analytics Engineer", "Business Intelligence Analyst", "Cloud Engineer", "DevOps Engineer", "QA Engineer", "SDET", "Cybersecurity Analyst", "Security Engineer", "Product Analyst", "Business Analyst", "Systems Analyst", "Salesforce Administrator", "Project Manager"],
+    includes: ["Python", "SQL", "cloud", "AI", "data", "analytics"],
+    query: '("software engineer" OR "software developer" OR "AI engineer" OR "machine learning engineer" OR "data scientist" OR "data engineer" OR "data analyst" OR "analytics engineer" OR "business intelligence analyst" OR "cloud engineer" OR "DevOps engineer" OR "QA engineer" OR SDET OR "cybersecurity analyst" OR "security engineer" OR "product analyst" OR "business analyst" OR "systems analyst" OR "Salesforce administrator" OR "project manager")'
+  },
   {
     id: "software-ai-data",
     label: "Software / AI / Data",
@@ -659,8 +669,8 @@ const state = {
   results: [],
   checked: new Set(),
   favoriteCompanies: new Set(),
-  visibleCompanies: COMPANIES,
-  trackerEntries: []
+  pinnedPortals: new Set(),
+  visibleCompanies: COMPANIES
 };
 
 const els = {};
@@ -676,7 +686,6 @@ document.addEventListener("DOMContentLoaded", () => {
   populateResources();
   renderCompanyOptions("");
   renderSponsorGrid();
-  loadTrackerEntries();
   loadTheme();
   bindEvents();
 
@@ -691,7 +700,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderCompanyOptions(els.companyFilter.value);
   syncProfileDescription();
   syncCompanyCard();
-  renderTracker();
+  renderPinnedOperators();
   if (hasJobTitle()) {
     generateResults(false);
   } else {
@@ -706,7 +715,6 @@ function cacheElements() {
     jobTitle: document.getElementById("jobTitle"),
     rolePackSelect: document.getElementById("rolePackSelect"),
     profileSelect: document.getElementById("profileSelect"),
-    precisionSelect: document.getElementById("precisionSelect"),
     timeFilter: document.getElementById("timeFilter"),
     locationSelect: document.getElementById("locationSelect"),
     sortSelect: document.getElementById("sortSelect"),
@@ -731,9 +739,7 @@ function cacheElements() {
     companySortSelect: document.getElementById("companySortSelect"),
     companyCategorySelect: document.getElementById("companyCategorySelect"),
     companySponsorTier: document.getElementById("companySponsorTier"),
-    companyMinFilings: document.getElementById("companyMinFilings"),
     companyKind: document.getElementById("companyKind"),
-    companyCautionFlag: document.getElementById("companyCautionFlag"),
     companyCount: document.getElementById("companyCount"),
     companyCard: document.getElementById("companyCard"),
     openCompanyButton: document.getElementById("openCompanyButton"),
@@ -745,17 +751,8 @@ function cacheElements() {
     openTopSponsorButton: document.getElementById("openTopSponsorButton"),
     favoriteCompanyButton: document.getElementById("favoriteCompanyButton"),
     sponsorGrid: document.getElementById("sponsorGrid"),
-    trackerForm: document.getElementById("trackerForm"),
-    trackerCompany: document.getElementById("trackerCompany"),
-    trackerRole: document.getElementById("trackerRole"),
-    trackerStatus: document.getElementById("trackerStatus"),
-    trackerSource: document.getElementById("trackerSource"),
-    trackerLink: document.getElementById("trackerLink"),
-    trackerFollowUp: document.getElementById("trackerFollowUp"),
-    trackerNotes: document.getElementById("trackerNotes"),
-    trackerCount: document.getElementById("trackerCount"),
-    trackerList: document.getElementById("trackerList"),
-    copyTrackerButton: document.getElementById("copyTrackerButton"),
+    pinnedBlock: document.getElementById("pinnedBlock"),
+    pinnedOperators: document.getElementById("pinnedOperators"),
     resourceGrid: document.getElementById("resourceGrid"),
     portalCount: document.getElementById("portalCount"),
     checkedCount: document.getElementById("checkedCount"),
@@ -790,10 +787,6 @@ function bindEvents() {
   });
 
   els.rolePackSelect.addEventListener("change", persistAndMaybeGenerate);
-  els.precisionSelect.addEventListener("change", () => {
-    applyPrecision(els.precisionSelect.value);
-    persistAndMaybeGenerate();
-  });
 
   els.engineSelect.addEventListener("change", () => {
     rebuildTimeOptions(els.engineSelect.value);
@@ -840,9 +833,7 @@ function bindEvents() {
     els.companySortSelect,
     els.companyCategorySelect,
     els.companySponsorTier,
-    els.companyMinFilings,
-    els.companyKind,
-    els.companyCautionFlag
+    els.companyKind
   ].forEach(control => {
     control.addEventListener("change", () => {
       renderCompanyOptions(els.companyFilter.value);
@@ -875,17 +866,12 @@ function bindEvents() {
   els.latestOneHourButton.addEventListener("click", applyLatestOneHourFlow);
   els.themeToggle.addEventListener("click", toggleTheme);
 
-  els.trackerForm.addEventListener("submit", addTrackerEntry);
-  els.copyTrackerButton.addEventListener("click", copyTrackerCsv);
-  els.trackerList.addEventListener("click", event => {
-    const button = event.target.closest("button[data-tracker-action]");
+  els.pinnedOperators.addEventListener("click", event => {
+    const button = event.target.closest("button[data-pin-remove]");
     if (!button) {
       return;
     }
-    const id = button.getAttribute("data-id");
-    if (button.dataset.trackerAction === "delete") {
-      deleteTrackerEntry(id);
-    }
+    togglePinnedPortal(button.dataset.pinRemove);
   });
 }
 
@@ -1008,8 +994,6 @@ function renderSponsorGrid() {
       els.companySponsorTier.value = company.sponsorTier;
       els.companyKind.value = company.companyKind;
       els.companyCategorySelect.value = "all";
-      els.companyMinFilings.value = "";
-      els.companyCautionFlag.value = "all";
       els.companyFilter.value = company.name;
       renderCompanyOptions(els.companyFilter.value);
       const match = state.visibleCompanies.find(item => item.id === company.id);
@@ -1046,7 +1030,6 @@ function hydrateFromUrl() {
 
   setSelectIfValid(els.profileSelect, params.get("profile") || DEFAULT_PROFILE_ID);
   setSelectIfValid(els.rolePackSelect, params.get("rolePack") || DEFAULT_ROLE_PACK_ID);
-  setSelectIfValid(els.precisionSelect, params.get("precision") || "coverage");
   if (params.get("engine") && TIME_OPTIONS[params.get("engine")]) {
     els.engineSelect.value = params.get("engine");
   }
@@ -1071,6 +1054,10 @@ function hydrateFromUrl() {
     const selected = groups === "none" ? new Set() : new Set(groups.split(",").filter(Boolean));
     setCategorySelection(selected);
   }
+  const pins = params.get("pins");
+  if (pins) {
+    state.pinnedPortals = new Set(pins.split(",").filter(id => PORTALS.some(portal => portal.id === id)));
+  }
 
   return true;
 }
@@ -1085,7 +1072,6 @@ function loadPreferences() {
 
   setSelectIfValid(els.profileSelect, data.profile || DEFAULT_PROFILE_ID);
   setSelectIfValid(els.rolePackSelect, data.rolePack || DEFAULT_ROLE_PACK_ID);
-  setSelectIfValid(els.precisionSelect, data.precision || "coverage");
   setSelectIfValid(els.engineSelect, data.engine || "google");
   rebuildTimeOptions(els.engineSelect.value, data.time || undefined);
   setSelectIfValid(els.timeFilter, data.time || "all");
@@ -1111,15 +1097,16 @@ function loadPreferences() {
   setSelectIfValid(els.companySortSelect, data.companySort || "latest");
   setSelectIfValid(els.companyCategorySelect, data.companyCategory || "all");
   setSelectIfValid(els.companySponsorTier, data.companySponsorTier || "all");
-  els.companyMinFilings.value = data.companyMinFilings || "";
   setSelectIfValid(els.companyKind, data.companyKind || "all");
-  setSelectIfValid(els.companyCautionFlag, data.companyCautionFlag || "all");
 
   if (Array.isArray(data.selectedCategories)) {
     setCategorySelection(new Set(data.selectedCategories));
   }
   if (Array.isArray(data.favoriteCompanies)) {
     state.favoriteCompanies = new Set(data.favoriteCompanies);
+  }
+  if (Array.isArray(data.pinnedPortals)) {
+    state.pinnedPortals = new Set(data.pinnedPortals.filter(id => PORTALS.some(portal => portal.id === id)));
   }
   if (data.selectedCompany) {
     setSelectIfValid(els.companySelect, data.selectedCompany);
@@ -1130,7 +1117,6 @@ function savePreferences() {
   const payload = {
     profile: els.profileSelect.value,
     rolePack: els.rolePackSelect.value,
-    precision: els.precisionSelect.value,
     jobTitle: els.jobTitle.value,
     engine: els.engineSelect.value,
     time: els.timeFilter.value,
@@ -1138,6 +1124,7 @@ function savePreferences() {
     sort: els.sortSelect.value,
     remoteMode: els.remoteMode.value,
     matchMode: els.matchMode.value,
+    hasTypedTitle: parseTitles(els.jobTitle.value).length > 0,
     experience: els.experienceSelect.value,
     employment: els.employmentSelect.value,
     authorization: els.authorizationSelect.value,
@@ -1154,11 +1141,10 @@ function savePreferences() {
     companySort: els.companySortSelect.value,
     companyCategory: els.companyCategorySelect.value,
     companySponsorTier: els.companySponsorTier.value,
-    companyMinFilings: els.companyMinFilings.value,
     companyKind: els.companyKind.value,
-    companyCautionFlag: els.companyCautionFlag.value,
     selectedCategories: Array.from(getSelectedCategories()),
     favoriteCompanies: Array.from(state.favoriteCompanies),
+    pinnedPortals: Array.from(state.pinnedPortals),
     selectedCompany: els.companySelect.value
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
@@ -1182,7 +1168,6 @@ function applyProfile(profileId) {
     rebuildTimeOptions(els.engineSelect.value, profile.defaults.time);
   }
   setSelectIfValid(els.rolePackSelect, profile.defaults.rolePack);
-  setSelectIfValid(els.precisionSelect, profile.defaults.precision);
   setSelectIfValid(els.timeFilter, profile.defaults.time);
   setSelectIfValid(els.sortSelect, profile.defaults.sort);
   setSelectIfValid(els.authorizationSelect, profile.defaults.authorization);
@@ -1234,7 +1219,7 @@ function applyPrecision(precision) {
 function syncProfileDescription() {
   const profile = SEARCH_PROFILES.find(item => item.id === els.profileSelect.value) || SEARCH_PROFILES[0];
   const rolePack = getRolePack(els.rolePackSelect.value);
-  els.profileDescription.textContent = `${profile.description} Role pack: ${rolePack.label}. Filtering: ${FILTER_LABELS.precision[els.precisionSelect.value] || "Max Coverage"}.`;
+  els.profileDescription.textContent = `${profile.description} Role pack: ${rolePack.label}. Mode: ${FILTER_LABELS.precision[getPrecisionFromProfile(profile.id)] || "Max Coverage"}.`;
 }
 
 function setSelectIfValid(select, value) {
@@ -1404,13 +1389,23 @@ function renderPortalRow(item) {
 
   body.append(link, summary, meta);
 
+  const actions = document.createElement("div");
+  actions.className = "portal-actions";
+
+  const pinButton = document.createElement("button");
+  pinButton.type = "button";
+  pinButton.className = "copy-button";
+  pinButton.textContent = state.pinnedPortals.has(item.portal.id) ? "Unpin" : "Pin";
+  pinButton.addEventListener("click", () => togglePinnedPortal(item.portal.id));
+
   const copyButton = document.createElement("button");
   copyButton.type = "button";
   copyButton.className = "copy-button";
   copyButton.textContent = "Copy";
   copyButton.addEventListener("click", () => copyLinks([item.url], `Copied ${item.portal.name}`));
 
-  row.append(checkbox, body, copyButton);
+  actions.append(pinButton, copyButton);
+  row.append(checkbox, body, actions);
   return row;
 }
 
@@ -1505,7 +1500,7 @@ function getContext() {
   return {
     profile: els.profileSelect.value,
     rolePack: els.rolePackSelect.value,
-    precision: els.precisionSelect.value,
+    precision: getPrecisionFromProfile(els.profileSelect.value),
     engine: els.engineSelect.value,
     time: els.timeFilter.value,
     location: els.locationSelect.value,
@@ -1519,6 +1514,11 @@ function getContext() {
     excludeTerms: parseTermList(els.excludeTerms.value),
     cautionExcludes: els.cautionExcludes.checked
   };
+}
+
+function getPrecisionFromProfile(profileId) {
+  const profile = SEARCH_PROFILES.find(item => item.id === profileId) || SEARCH_PROFILES[0];
+  return profile.defaults.precision || "coverage";
 }
 
 function parseTermList(value) {
@@ -1554,19 +1554,20 @@ function sortPortals(portals, sortMode) {
 
   const score = portal => {
     const base = portal.priority * 10 + (categoryBoost[portal.category] || 0);
+    const pinnedBoost = state.pinnedPortals.has(portal.id) ? 1200 : 0;
     if (sortMode === "latest") {
       const latestBoost = ["linkedinJobs", "indeed", "linkedinPosts", "google", "usajobs"].includes(portal.id) ? 600 : 0;
-      return base + latestBoost;
+      return base + latestBoost + pinnedBoost;
     }
     if (sortMode === "direct") {
       const directBoost = portal.category === "direct" ? 700 : portal.category === "company" ? 450 : 0;
-      return base + directBoost;
+      return base + directBoost + pinnedBoost;
     }
     if (sortMode === "coverage") {
       const coverageBoost = ["top", "general", "tech", "company"].includes(portal.category) ? 450 : 0;
-      return base + coverageBoost;
+      return base + coverageBoost + pinnedBoost;
     }
-    return base;
+    return base + pinnedBoost;
   };
 
   return [...portals].sort((a, b) => score(b) - score(a) || a.order - b.order);
@@ -1584,6 +1585,37 @@ function updateCounts() {
   els.resultMeta.textContent = hasResults
     ? `${state.results.length} links across ${selectedPortals.length} sources - ${getActiveFilterSummary(getContext())}`
     : "Ready";
+  renderPinnedOperators();
+}
+
+function togglePinnedPortal(portalId) {
+  if (state.pinnedPortals.has(portalId)) {
+    state.pinnedPortals.delete(portalId);
+  } else {
+    state.pinnedPortals.add(portalId);
+  }
+  savePreferences();
+  renderPinnedOperators();
+  if (hasJobTitle()) {
+    generateResults();
+  } else {
+    updatePreviewForEmptyState();
+    updateAddressBar(getSearchTitles(), getContext());
+  }
+}
+
+function renderPinnedOperators() {
+  els.pinnedOperators.innerHTML = "";
+  const pinned = PORTALS.filter(portal => state.pinnedPortals.has(portal.id));
+  els.pinnedBlock.hidden = pinned.length === 0;
+  pinned.forEach(portal => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "tag-button";
+    button.dataset.pinRemove = portal.id;
+    button.textContent = `${portal.name} - remove`;
+    els.pinnedOperators.appendChild(button);
+  });
 }
 
 function setEmptyState(show) {
@@ -1664,9 +1696,11 @@ function buildTitleExpression(title, context) {
   if (context.matchMode === "exact") {
     return quoteTerm(title);
   }
-  const pack = getRolePack(context.rolePack);
-  if (pack && pack.query) {
-    return pack.query;
+  if (!context.hasTypedTitle) {
+    const pack = getRolePack(context.rolePack);
+    if (pack && pack.query) {
+      return pack.query;
+    }
   }
   const related = findTitleGroup(title);
   return `(${related.map(quoteTerm).join(" OR ")})`;
@@ -1868,8 +1902,14 @@ function buildNativeTitleQuery(title, context) {
   if (context.matchMode === "exact") {
     return title;
   }
-  const pack = getRolePack(context.rolePack);
-  return pack ? pack.query : title;
+  if (!context.hasTypedTitle) {
+    const pack = getRolePack(context.rolePack);
+    if (pack && pack.query) {
+      return pack.query;
+    }
+  }
+  const related = findTitleGroup(title);
+  return related.length > 1 ? `(${related.map(quoteTerm).join(" OR ")})` : title;
 }
 
 function getNativeAuthorizationSuffix(value) {
@@ -2024,8 +2064,10 @@ function getLinkedInJobTypeParam(value) {
 function getLinkedInWorkTypeParam(value) {
   const map = {
     onsite: "1",
+    "onsite-hybrid": "1,3",
     only: "2",
-    hybrid: "3"
+    hybrid: "3",
+    exclude: "1,3"
   };
   return map[value] || "";
 }
@@ -2213,7 +2255,6 @@ function updateAddressBar(titles, context) {
   }
   params.set("profile", context.profile);
   params.set("rolePack", context.rolePack);
-  params.set("precision", context.precision);
   params.set("location", context.location);
   params.set("time", context.time);
   params.set("sort", context.sort);
@@ -2241,6 +2282,9 @@ function updateAddressBar(titles, context) {
   }
   if (context.cautionExcludes) {
     params.set("caution", "1");
+  }
+  if (state.pinnedPortals.size) {
+    params.set("pins", Array.from(state.pinnedPortals).join(","));
   }
   const categories = Array.from(getSelectedCategories());
   if (!categories.length) {
@@ -2325,19 +2369,8 @@ function companyMatchesFilters(company) {
   if (sponsorTier !== "all" && company.sponsorTier !== sponsorTier) {
     return false;
   }
-  const minFilings = Number(els.companyMinFilings.value || 0);
-  if (minFilings > 0 && company.h1bFilings < minFilings) {
-    return false;
-  }
   const kind = els.companyKind.value;
   if (kind !== "all" && company.companyKind !== kind) {
-    return false;
-  }
-  const caution = els.companyCautionFlag.value;
-  if (caution === "clean" && company.caution) {
-    return false;
-  }
-  if (caution === "caution" && !company.caution) {
     return false;
   }
   return true;
@@ -2619,14 +2652,17 @@ function getCompaniesForAction() {
 }
 
 function getCompanyActionUrls(company, title, context, type) {
-  const companyTitle = `${title} ${company.name}`;
+  const companyContext = {
+    ...context,
+    includeTerms: mergeUnique(context.includeTerms, [company.name])
+  };
   switch (type) {
     case "linkedinJobs":
-      return [buildLinkedInJobsUrl(companyTitle, context)];
+      return [buildLinkedInJobsUrl(title, companyContext)];
     case "linkedinPosts":
-      return [buildLinkedInPostsUrl(companyTitle, context)];
+      return [buildLinkedInPostsUrl(title, companyContext)];
     case "indeedGoogle":
-      return [buildIndeedUrl(companyTitle, context), buildCompanySearchUrl(company, title, context)];
+      return [buildIndeedUrl(title, companyContext), buildCompanySearchUrl(company, title, context)];
     default:
       return [buildCompanySearchUrl(company, title, context)];
   }
@@ -2661,9 +2697,11 @@ function getCompanySearchTitle() {
 }
 
 function getCompanyContext() {
+  const hasCompanyTypedTitle = Boolean(parseTitles(els.companyRole.value)[0] || parseTitles(els.jobTitle.value)[0]);
   return {
     ...getContext(),
     rolePack: els.companyRolePack.value || els.rolePackSelect.value,
+    hasTypedTitle: hasCompanyTypedTitle,
     time: els.companyTimeFilter.value,
     sort: els.companySortSelect.value === "latest" ? "latest" : "coverage",
     experience: els.companyExperienceSelect.value,
@@ -2685,7 +2723,7 @@ function buildCompanySearchUrl(company, title, context) {
     buildCompanyNameExpression(company),
     getLocationQuery(context.location),
     "(job OR jobs OR careers OR hiring OR openings)",
-    `site:${urlToSiteHost(company.careersUrl)}`,
+    company.careersUrl ? `site:${urlToSiteHost(company.careersUrl)}` : "",
     getAuthorizationQuery(context.authorization),
     buildIncludeQuery(context.includeTerms),
     buildExcludeQuery([...context.excludeTerms, ...getCautionExcludes(context)])
@@ -2694,11 +2732,14 @@ function buildCompanySearchUrl(company, title, context) {
 }
 
 function buildCompanyNameExpression(company) {
-  const names = [company.name, ...company.aliases].slice(0, 4).map(quoteTerm);
+  const names = [company.name, ...(company.aliases || [])].slice(0, 4).map(quoteTerm);
   return names.length > 1 ? `(${names.join(" OR ")})` : names[0];
 }
 
 function urlToSiteScope(url) {
+  if (!url) {
+    return "";
+  }
   try {
     const parsed = new URL(url);
     const host = parsed.hostname.replace(/^www\./, "");
@@ -2710,6 +2751,9 @@ function urlToSiteScope(url) {
 }
 
 function urlToSiteHost(url) {
+  if (!url) {
+    return "";
+  }
   try {
     return new URL(url).hostname.replace(/^www\./, "");
   } catch (error) {
@@ -2736,127 +2780,6 @@ async function copyLinks(links, message) {
   }
 }
 
-function loadTrackerEntries() {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(TRACKER_KEY) || "[]");
-    state.trackerEntries = Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    state.trackerEntries = [];
-  }
-}
-
-function saveTrackerEntries() {
-  localStorage.setItem(TRACKER_KEY, JSON.stringify(state.trackerEntries));
-}
-
-function addTrackerEntry(event) {
-  event.preventDefault();
-  const company = els.trackerCompany.value.trim();
-  const role = els.trackerRole.value.trim();
-  if (!company || !role) {
-    showToast("Add company and role to save a job");
-    return;
-  }
-  state.trackerEntries.unshift({
-    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    company,
-    role,
-    status: els.trackerStatus.value,
-    source: els.trackerSource.value.trim(),
-    link: els.trackerLink.value.trim(),
-    followUp: els.trackerFollowUp.value,
-    notes: els.trackerNotes.value.trim(),
-    savedAt: new Date().toISOString().slice(0, 10)
-  });
-  saveTrackerEntries();
-  renderTracker();
-  els.trackerForm.reset();
-  showToast("Saved tracker entry");
-}
-
-function renderTracker() {
-  els.trackerList.innerHTML = "";
-  els.trackerCount.textContent = `${state.trackerEntries.length} saved`;
-  if (!state.trackerEntries.length) {
-    const empty = document.createElement("p");
-    empty.className = "empty-note";
-    empty.textContent = "Save roles here after you open applications so follow-ups do not disappear into tabs.";
-    els.trackerList.appendChild(empty);
-    return;
-  }
-  const fragment = document.createDocumentFragment();
-  state.trackerEntries.forEach(entry => {
-    const row = document.createElement("article");
-    row.className = "tracker-row";
-    const title = document.createElement("div");
-    title.className = "tracker-title";
-    const heading = document.createElement("strong");
-    heading.textContent = `${entry.company} - ${entry.role}`;
-    const status = createPill(entry.status);
-    title.append(heading, status);
-
-    const meta = document.createElement("div");
-    meta.className = "portal-meta";
-    meta.append(createPill(entry.source || "source not set"));
-    meta.append(createPill(entry.followUp ? `Follow-up ${entry.followUp}` : "no follow-up date"));
-    meta.append(createPill(`saved ${entry.savedAt}`));
-
-    const notes = document.createElement("p");
-    notes.className = "company-note";
-    notes.textContent = entry.notes || "No notes yet.";
-
-    const actions = document.createElement("div");
-    actions.className = "tracker-row-actions";
-    if (entry.link) {
-      const link = document.createElement("a");
-      link.href = entry.link;
-      link.target = "_blank";
-      link.rel = "noopener";
-      link.textContent = "Open";
-      actions.appendChild(link);
-    }
-    const remove = document.createElement("button");
-    remove.type = "button";
-    remove.className = "copy-button";
-    remove.dataset.trackerAction = "delete";
-    remove.dataset.id = entry.id;
-    remove.textContent = "Delete";
-    actions.appendChild(remove);
-
-    row.append(title, meta, notes, actions);
-    fragment.appendChild(row);
-  });
-  els.trackerList.appendChild(fragment);
-}
-
-function deleteTrackerEntry(id) {
-  state.trackerEntries = state.trackerEntries.filter(entry => entry.id !== id);
-  saveTrackerEntries();
-  renderTracker();
-  showToast("Deleted tracker entry");
-}
-
-function copyTrackerCsv() {
-  const header = ["Company", "Role", "Status", "Source", "Link", "Follow-up", "Notes", "Saved"];
-  const rows = state.trackerEntries.map(entry => [
-    entry.company,
-    entry.role,
-    entry.status,
-    entry.source,
-    entry.link,
-    entry.followUp,
-    entry.notes,
-    entry.savedAt
-  ]);
-  const csv = [header, ...rows].map(row => row.map(csvEscape).join(",")).join("\n");
-  copyLinks([csv], "Copied tracker CSV");
-}
-
-function csvEscape(value) {
-  const text = String(value || "");
-  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
-}
-
 function showToast(message) {
   els.toast.textContent = message;
   clearTimeout(showToast.timeout);
@@ -2867,7 +2790,6 @@ function showToast(message) {
 
 function applyLatestOneHourFlow() {
   els.profileSelect.value = "latest1";
-  els.precisionSelect.value = "latest1";
   applyProfile("latest1");
   applyPrecision("latest1");
   generateResults();
@@ -2879,7 +2801,6 @@ function resetSearch() {
   els.jobTitle.value = "";
   els.profileSelect.value = DEFAULT_PROFILE_ID;
   els.rolePackSelect.value = DEFAULT_ROLE_PACK_ID;
-  els.precisionSelect.value = "coverage";
   els.engineSelect.value = "google";
   rebuildTimeOptions("google", "all");
   els.locationSelect.value = "usa";
@@ -2901,9 +2822,7 @@ function resetSearch() {
   els.companySortSelect.value = "latest";
   els.companyCategorySelect.value = "all";
   els.companySponsorTier.value = "all";
-  els.companyMinFilings.value = "";
   els.companyKind.value = "all";
-  els.companyCautionFlag.value = "all";
   els.companyFilter.value = "";
   setCategorySelection(new Set(DEFAULT_CATEGORY_IDS));
   renderCompanyOptions("");

@@ -231,8 +231,7 @@ pre {
 .side-panel,
 .results-panel,
 .resources-panel,
-.sponsor-panel,
-.tracker-panel {
+.sponsor-panel {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
@@ -243,8 +242,7 @@ pre {
 .careers-tool,
 .results-panel,
 .resources-panel,
-.sponsor-panel,
-.tracker-panel {
+.sponsor-panel {
   padding: 18px;
 }
 
@@ -659,6 +657,9 @@ pre {
 
 .results-panel {
   min-height: 420px;
+  max-height: min(920px, calc(100vh - 88px));
+  overflow: auto;
+  scroll-padding-top: 14px;
 }
 
 .empty-state {
@@ -718,6 +719,11 @@ pre {
   border-radius: var(--radius);
   background: var(--surface);
   padding: 12px;
+}
+
+.portal-actions {
+  display: grid;
+  gap: 7px;
 }
 
 .portal-row.checked {
@@ -800,8 +806,7 @@ pre {
 }
 
 .resource-card,
-.sponsor-card,
-.tracker-row {
+.sponsor-card {
   display: grid;
   align-content: start;
   gap: 8px;
@@ -819,51 +824,15 @@ pre {
   min-height: 150px;
 }
 
-.sponsor-title,
-.tracker-title {
+.sponsor-title {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 10px;
 }
 
-.sponsor-title strong,
-.tracker-title strong {
+.sponsor-title strong {
   overflow-wrap: anywhere;
-}
-
-.tracker-form {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 12px;
-  align-items: end;
-}
-
-.tracker-notes {
-  grid-column: span 2;
-}
-
-.tracker-actions {
-  display: flex;
-  gap: 8px;
-  grid-column: span 2;
-}
-
-.tracker-actions button {
-  flex: 1 1 0;
-}
-
-.tracker-list {
-  display: grid;
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.tracker-row-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 900;
 }
 
 .empty-note {
@@ -921,14 +890,6 @@ pre {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .tracker-form {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .tracker-notes,
-  .tracker-actions {
-    grid-column: span 3;
-  }
 }
 
 @media (max-width: 900px) {
@@ -975,8 +936,7 @@ pre {
   }
 
   .search-form,
-  .careers-grid,
-  .tracker-form {
+  .careers-grid {
     grid-template-columns: 1fr;
   }
 
@@ -984,15 +944,12 @@ pre {
   .checkbox-field,
   .company-wide,
   .action-row,
-  .company-actions,
-  .tracker-notes,
-  .tracker-actions {
+  .company-actions {
     grid-column: auto;
   }
 
   .action-row,
-  .company-actions,
-  .tracker-actions {
+  .company-actions {
     display: grid;
     grid-template-columns: 1fr;
   }
