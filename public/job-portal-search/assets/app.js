@@ -2,7 +2,11 @@
 
 const STORAGE_KEY = "optJobCommandCenterPrefs";
 const THEME_KEY = "optJobCommandCenterTheme";
+const TRACKER_KEY = "optJobCommandCenterTracker";
 const ALL_COMPANIES_ID = "__all_companies__";
+const DEFAULT_PROFILE_ID = "softwareAiDataEntryOpt";
+const DEFAULT_ROLE_PACK_ID = "software-ai-data";
+const CAUTION_EXCLUDE_TERMS = ["unpaid", "commission only", "clearance", "US citizenship required", "must be a US citizen"];
 
 const CATEGORY_ROWS = [
   ["top", "Top Sources", true],
@@ -22,45 +26,59 @@ const DEFAULT_CATEGORY_IDS = CATEGORIES.filter(category => category.checked).map
 
 const SEARCH_PROFILES = [
   {
+    id: "softwareAiDataEntryOpt",
+    label: "Software / AI / Data - Entry OPT",
+    description: "Personal default for US-wide entry/new-grad software, AI, and data searches. Keeps coverage broad and uses OPT/sponsor wording as companion research.",
+    defaults: { time: "all", sort: "coverage", authorization: "none", experience: "entry", rolePack: "software-ai-data", precision: "coverage", matchMode: "smart" },
+    categories: DEFAULT_CATEGORY_IDS
+  },
+  {
+    id: "latest1",
+    label: "Latest 1h",
+    description: "Urgent apply flow for postings from the last hour on sources with reliable date filters.",
+    defaults: { time: "1hour", sort: "latest", authorization: "none", experience: "entry", rolePack: "software-ai-data", precision: "latest1", matchMode: "smart" },
+    categories: ["top", "direct", "signals", "general", "tech", "company"]
+  },
+  {
     id: "maxCoverage",
     label: "Max Coverage",
     description: "Broadest US search. Keeps authorization filters off so useful results are not hidden.",
-    defaults: { time: "all", sort: "coverage", authorization: "none" },
+    defaults: { time: "all", sort: "coverage", authorization: "none", precision: "coverage" },
     categories: DEFAULT_CATEGORY_IDS
   },
   {
     id: "latest24",
     label: "Latest 24h",
     description: "Newest-first links for daily searching across the most active job sources.",
-    defaults: { time: "24hours", sort: "latest", authorization: "none" },
+    defaults: { time: "24hours", sort: "latest", authorization: "none", precision: "latest24" },
     categories: DEFAULT_CATEGORY_IDS
   },
   {
     id: "optFriendly",
     label: "OPT Friendly",
     description: "Adds OPT, STEM OPT, E-Verify, sponsorship, and US work authorization terms.",
-    defaults: { time: "week", sort: "recommended", authorization: "optBroad" },
+    defaults: { time: "week", sort: "recommended", authorization: "optBroad", precision: "optSponsor" },
     categories: ["top", "direct", "signals", "general", "tech", "company"]
   },
   {
     id: "sponsorResearch",
     label: "Sponsor Research",
     description: "Focuses on sponsorship signals, H-1B history, E-Verify, and employer research.",
-    defaults: { time: "month", sort: "coverage", authorization: "sponsorNeeded" },
+    defaults: { time: "month", sort: "coverage", authorization: "sponsorNeeded", precision: "optSponsor" },
     categories: ["top", "direct", "company", "research"]
   },
   {
     id: "directATS",
     label: "Direct ATS",
     description: "Prioritizes direct application pages and common ATS systems.",
-    defaults: { time: "week", sort: "direct", authorization: "none" },
+    defaults: { time: "week", sort: "direct", authorization: "none", precision: "direct" },
     categories: ["top", "direct", "company"]
   },
   {
     id: "linkedinPosts",
     label: "LinkedIn Posts",
     description: "Surfaces fresh recruiter and hiring-manager posts using LinkedIn content search.",
-    defaults: { time: "24hours", sort: "latest", authorization: "none" },
+    defaults: { time: "24hours", sort: "latest", authorization: "none", precision: "latest24" },
     categories: ["top", "signals"]
   }
 ];
@@ -140,6 +158,17 @@ const PORTAL_ROWS = [
 
 const PORTALS = PORTAL_ROWS.map((portal, index) => ({ ...portal, order: index + 1 }));
 
+const SOURCE_CAPABILITIES = {
+  linkedinJobs: { kind: "native-filtered", label: "Native filtered", supports: ["time", "sort", "experience", "employment", "remote", "company keywords"] },
+  linkedinPosts: { kind: "native-filtered", label: "Native post search", supports: ["date posted", "content type", "company keywords"] },
+  indeed: { kind: "native-filtered", label: "Native filtered", supports: ["date", "sort", "location", "remote keyword"] },
+  google: { kind: "native-filtered", label: "Google date tools", supports: ["time", "sort", "operators"] },
+  usajobs: { kind: "native-filtered", label: "Native public search", supports: ["date sort", "location"] },
+  static: { kind: "companion-search", label: "Research link", supports: ["manual research"] },
+  native: { kind: "broad-search", label: "Native broad search", supports: ["keyword", "location where supported"] },
+  operator: { kind: "broad-search", label: "Broad search operator", supports: ["site operators", "date where engine supports it"] }
+};
+
 const TIME_OPTIONS = {
   google: [
     ["all", "All"],
@@ -210,6 +239,67 @@ const RELATED_TITLE_GROUPS = [
   ["Scrum Master", "Agile Coach", "Lean Practitioner", "Kanban Coach", "Agile Project Facilitator", "Agile Transformation Lead", "Agile Team Coach", "Iteration Manager", "Scrum"]
 ];
 
+const ROLE_PACKS = [
+  {
+    id: "software-ai-data",
+    label: "Software / AI / Data",
+    primary: "Software Engineer",
+    titles: ["Software Engineer", "Software Developer", "AI Engineer", "Machine Learning Engineer", "Data Engineer", "Data Analyst", "Analytics Engineer", "Business Intelligence Analyst"],
+    includes: ["Python", "SQL", "cloud", "AI", "data"],
+    query: '("software engineer" OR "software developer" OR "AI engineer" OR "machine learning engineer" OR "data engineer" OR "data analyst" OR "analytics engineer" OR "business intelligence analyst")'
+  },
+  {
+    id: "software",
+    label: "Software Engineering",
+    primary: "Software Engineer",
+    titles: ["Software Engineer", "Software Developer", "Full Stack Developer", "Backend Developer", "Frontend Developer", "Application Developer"],
+    includes: ["JavaScript", "Python", "Java", "API"],
+    query: '("software engineer" OR "software developer" OR "full stack developer" OR "backend developer" OR "frontend developer" OR "application developer")'
+  },
+  {
+    id: "ai-ml",
+    label: "AI / ML",
+    primary: "Machine Learning Engineer",
+    titles: ["Machine Learning Engineer", "AI Engineer", "Applied Scientist", "ML Engineer", "Data Scientist", "AI Data Engineer"],
+    includes: ["Python", "machine learning", "LLM", "AI"],
+    query: '("machine learning engineer" OR "AI engineer" OR "applied scientist" OR "ML engineer" OR "data scientist" OR "LLM")'
+  },
+  {
+    id: "data-analytics",
+    label: "Data / Analytics",
+    primary: "Data Analyst",
+    titles: ["Data Analyst", "Business Intelligence Analyst", "Analytics Engineer", "SQL Analyst", "Reporting Analyst", "Data Scientist", "Data Engineer"],
+    includes: ["SQL", "Python", "Tableau", "Power BI"],
+    query: '("data analyst" OR "business intelligence analyst" OR "analytics engineer" OR "SQL analyst" OR "reporting analyst" OR "data scientist" OR "data engineer")'
+  },
+  {
+    id: "cloud-devops",
+    label: "Cloud / DevOps",
+    primary: "Cloud Engineer",
+    titles: ["Cloud Engineer", "DevOps Engineer", "Site Reliability Engineer", "Platform Engineer", "Infrastructure Engineer"],
+    includes: ["AWS", "Azure", "Kubernetes", "Terraform"],
+    query: '("cloud engineer" OR "DevOps engineer" OR "site reliability engineer" OR "platform engineer" OR "infrastructure engineer")'
+  },
+  {
+    id: "qa-sdet",
+    label: "QA / SDET",
+    primary: "QA Engineer",
+    titles: ["QA Engineer", "Software Test Engineer", "Automation Engineer", "SDET", "Quality Engineer"],
+    includes: ["automation", "testing", "Selenium", "API"],
+    query: '("QA engineer" OR "software test engineer" OR "automation engineer" OR "SDET" OR "quality engineer")'
+  },
+  {
+    id: "product-data",
+    label: "Product / Data Analyst",
+    primary: "Product Analyst",
+    titles: ["Product Analyst", "Business Analyst", "Business Systems Analyst", "Operations Analyst", "Technical Analyst"],
+    includes: ["SQL", "metrics", "dashboard", "requirements"],
+    query: '("product analyst" OR "business analyst" OR "business systems analyst" OR "operations analyst" OR "technical analyst")'
+  }
+];
+
+const ROLE_PACK_LABELS = Object.fromEntries(ROLE_PACKS.map(pack => [pack.id, pack.label]));
+
 const ACRONYMS = new Set(["AI", "API", "BI", "CRM", "FP&A", "GRC", "HR", "ML", "QA", "SEO", "SOC", "SRE", "SQL", "UI", "UX"]);
 
 const FILTER_LABELS = {
@@ -253,6 +343,26 @@ const FILTER_LABELS = {
     latest: "Newest first",
     direct: "Direct apply first",
     coverage: "Broad coverage"
+  },
+  precision: {
+    coverage: "Max Coverage",
+    latest1: "Latest 1h",
+    latest24: "Latest 24h",
+    optSponsor: "OPT/Sponsor Research",
+    direct: "Direct ATS",
+    exact: "Exact Role"
+  },
+  companyKind: {
+    all: "Direct and vendors",
+    direct: "Direct employers",
+    vendor: "Staffing/vendors"
+  },
+  sponsorTier: {
+    all: "All sponsor tiers",
+    top: "Top H1B sponsors",
+    strong: "Strong sponsors",
+    moderate: "Moderate sponsors",
+    curated: "Curated/no filing data"
   }
 };
 
@@ -409,15 +519,44 @@ const COMPANY_ROWS = [
   ["SpaceX", "Aerospace and Defense", "https://www.spacex.com/careers/", "aerospace, software, data", "Many roles may require US person status under export-control rules."]
 ];
 
-const COMPANIES = COMPANY_ROWS.map(([name, category, careersUrl, tags, caution], index) => ({
-  id: slugify(name),
-  name,
-  category,
-  careersUrl,
-  rank: index + 1,
-  tags: tags.split(",").map(tag => tag.trim()).filter(Boolean),
-  caution: caution || ""
-}));
+const SPONSOR_COMPANY_ROWS = [
+  ["Infosys", 1795, "direct", "top", "Consulting and Services", "https://www.infosys.com/careers/", "consulting, technology, data, sponsor", "Infosys Limited"],
+  ["TCS", 1438, "direct", "top", "Consulting and Services", "https://www.tcs.com/careers", "consulting, technology, data, sponsor", "Tata Consultancy Services Limited"],
+  ["Amazon", 962, "direct", "top", "Cloud and Big Tech", "https://www.amazon.jobs/", "software, data, cloud, operations, sponsor", "Amazon.com Services LLC|Amazon Web Services Inc|Amazon Development Center U.S. Inc|AWS"],
+  ["Meta", 533, "direct", "top", "Cloud and Big Tech", "https://www.metacareers.com/", "software, data, AI, product, sponsor", "Meta Platforms Inc|Facebook"],
+  ["Google / Alphabet", 488, "direct", "top", "Cloud and Big Tech", "https://www.google.com/about/careers/applications/", "software, data, AI, product, sponsor", "Google LLC|Alphabet"],
+  ["Fidelity", 374, "direct", "top", "Fintech and Finance", "https://jobs.fidelity.com/", "finance, data, software, sponsor", "Fidelity Technology Group LLC|Fidelity Investments"],
+  ["JPMorgan Chase", 301, "direct", "top", "Fintech and Finance", "https://careers.jpmorgan.com/", "banking, data, software, analytics, sponsor", "JPMorgan Chase & Co"],
+  ["Apple", 288, "direct", "top", "Cloud and Big Tech", "https://jobs.apple.com/", "software, hardware, data, product, sponsor", "Apple Inc"],
+  ["Mphasis", 257, "direct", "top", "Consulting and Services", "https://www.mphasis.com/home/careers.html", "consulting, technology, data, sponsor", "Mphasis Corporation"],
+  ["LinkedIn", 215, "direct", "top", "Consumer Tech", "https://careers.linkedin.com/", "software, data, platform, sponsor", "LinkedIn Corporation"],
+  ["Walmart", 190, "direct", "top", "Retail and Consumer", "https://careers.walmart.com/", "retail, data, software, supply chain, sponsor", "WAL-MART ASSOCIATES INC|Walmart Global Tech"],
+  ["IBM", 124, "direct", "strong", "Enterprise Software", "https://www.ibm.com/careers", "software, data, consulting, AI, sponsor", "IBM Corporation"],
+  ["PayPal", 117, "direct", "strong", "Fintech and Finance", "https://careers.pypl.com/", "fintech, software, data, sponsor", "PayPal Inc"],
+  ["U.S. Bank", 107, "direct", "strong", "Fintech and Finance", "https://careers.usbank.com/", "banking, data, software, analytics, sponsor", "U.S. Bank National Association|US Bank"],
+  ["LTIMindtree", 101, "direct", "strong", "Consulting and Services", "https://www.ltimindtree.com/careers/", "consulting, technology, data, sponsor", "LTIMindtree Limited"],
+  ["NVIDIA", 101, "direct", "strong", "Cloud and Big Tech", "https://www.nvidia.com/en-us/about-nvidia/careers/", "AI, hardware, software, data, sponsor", "NVIDIA Corporation"],
+  ["J.B. Hunt", 86, "direct", "strong", "Logistics and Industrial", "https://careers.jbhunt.com/", "logistics, data, software, sponsor", "J.B. Hunt Transport Inc|JB Hunt"],
+  ["Qualcomm", 85, "direct", "strong", "Hardware and Semiconductors", "https://careers.qualcomm.com/", "semiconductor, wireless, software, sponsor", "Qualcomm Technologies Inc"],
+  ["Adobe", 83, "direct", "strong", "Enterprise Software", "https://careers.adobe.com/", "software, data, product, creative, sponsor", "Adobe Inc"],
+  ["eBay", 79, "direct", "strong", "Consumer Tech", "https://jobs.ebayinc.com/", "software, data, marketplace, sponsor", "eBay Inc"],
+  ["General Motors", 75, "direct", "strong", "Automotive and Mobility", "https://search-careers.gm.com/", "automotive, software, data, manufacturing, sponsor", "General Motors|GM"],
+  ["Wells Fargo", 73, "direct", "moderate", "Fintech and Finance", "https://www.wellsfargojobs.com/", "banking, data, software, analytics, sponsor", "WELLS FARGO BANK N.A"],
+  ["Intuit", 68, "direct", "moderate", "Enterprise Software", "https://www.intuit.com/careers/", "software, data, fintech, product, sponsor", "Intuit Inc"],
+  ["Expedia Group", 68, "direct", "moderate", "Consumer Tech", "https://careers.expediagroup.com/", "travel, software, data, marketplace, sponsor", "Expedia Inc|Expedia Group"],
+  ["Compunnel", 469, "vendor", "top", "Staffing Vendors", "https://www.compunnel.com/careers/", "staffing, consulting, technology, vendor, sponsor", "COMPUNNEL SOFTWARE GROUP INC"],
+  ["Grandison Management", 403, "vendor", "top", "Staffing Vendors", "https://www.grandison.com/careers/", "staffing, technology, vendor, sponsor", "Grandison Management Inc"],
+  ["People Tech Group", 370, "vendor", "top", "Staffing Vendors", "https://peopletech.com/careers/", "staffing, technology, vendor, sponsor", "People Tech Group Inc"],
+  ["Kforce", 133, "vendor", "strong", "Staffing Vendors", "https://www.kforce.com/about/careers/", "staffing, technology, vendor, sponsor", "KFORCE INC"],
+  ["UST", 114, "vendor", "strong", "Staffing Vendors", "https://www.ust.com/en/careers", "consulting, technology, vendor, sponsor", "UST Global Inc"],
+  ["Randstad Digital", 114, "vendor", "strong", "Staffing Vendors", "https://www.randstaddigital.com/careers/", "staffing, digital, technology, vendor, sponsor", "RANDSTAD DIGITAL LLC"],
+  ["Innova Solutions", 89, "vendor", "strong", "Staffing Vendors", "https://www.innovasolutions.com/careers/", "staffing, technology, vendor, sponsor", "INNOVA SOLUTIONS INC"],
+  ["MSR Technology Group", 85, "vendor", "strong", "Staffing Vendors", "https://msrtechnologygroup.com/careers/", "staffing, technology, vendor, sponsor", "MSR TECHNOLOGY GROUP LLC"],
+  ["V-Soft Consulting", 81, "vendor", "strong", "Staffing Vendors", "https://www.vsoftconsulting.com/careers/", "staffing, consulting, technology, vendor, sponsor", "V-Soft Consulting Group INC"],
+  ["L&T Technology Services", 76, "vendor", "strong", "Staffing Vendors", "https://www.ltts.com/careers", "engineering, technology, vendor, sponsor", "L&T Technology Services Limited"]
+];
+
+const COMPANIES = buildCompanies();
 
 const RESOURCE_LINKS = [
   ["USCIS OPT", "OPT basics", "https://www.uscis.gov/working-in-the-united-states/students-and-exchange-visitors/optional-practical-training-opt-for-f-1-students", "Official OPT reference for F-1 students."],
@@ -433,23 +572,111 @@ const RESOURCE_LINKS = [
   ["FTC Job Scams", "Scam checks", "https://consumer.ftc.gov/articles/job-scams", "Spot fake job postings and recruiter scams."]
 ].map(([name, category, url, note]) => ({ name, category, url, note }));
 
+function buildCompanies() {
+  const byId = new Map();
+  COMPANY_ROWS.forEach(([name, category, careersUrl, tags, caution], index) => {
+    const company = {
+      id: slugify(name),
+      name,
+      category,
+      careersUrl,
+      rank: index + 1,
+      baseRank: index + 1,
+      tags: splitTags(tags),
+      caution: caution || "",
+      h1bFilings: 0,
+      sponsorTier: "curated",
+      companyKind: "direct",
+      aliases: [],
+      h1bSource: ""
+    };
+    byId.set(company.id, company);
+  });
+
+  SPONSOR_COMPANY_ROWS.forEach(([name, filings, kind, tier, category, careersUrl, tags, aliases, caution]) => {
+    const aliasList = splitAliases(aliases);
+    const sponsorId = findExistingCompanyId(byId, name, aliasList) || slugify(name);
+    const existing = byId.get(sponsorId);
+    if (existing) {
+      existing.h1bFilings = Math.max(existing.h1bFilings || 0, filings);
+      existing.sponsorTier = tier;
+      existing.companyKind = kind;
+      existing.aliases = mergeUnique(existing.aliases, aliasList);
+      existing.tags = mergeUnique(existing.tags, splitTags(tags));
+      existing.h1bSource = "H1B workbook";
+      existing.caution = existing.caution || caution || "";
+      if (!existing.careersUrl && careersUrl) {
+        existing.careersUrl = careersUrl;
+      }
+    } else {
+      byId.set(sponsorId, {
+        id: sponsorId,
+        name,
+        category,
+        careersUrl,
+        rank: 0,
+        baseRank: COMPANY_ROWS.length + byId.size + 1,
+        tags: splitTags(tags),
+        caution: caution || "",
+        h1bFilings: filings,
+        sponsorTier: tier,
+        companyKind: kind,
+        aliases: aliasList,
+        h1bSource: "H1B workbook"
+      });
+    }
+  });
+
+  return Array.from(byId.values())
+    .sort((a, b) => getCompanyDefaultScore(b) - getCompanyDefaultScore(a) || a.name.localeCompare(b.name))
+    .map((company, index) => ({ ...company, rank: index + 1 }));
+}
+
+function splitTags(value) {
+  return value.split(",").map(tag => tag.trim()).filter(Boolean);
+}
+
+function splitAliases(value) {
+  return String(value || "").split("|").map(alias => alias.trim()).filter(Boolean);
+}
+
+function mergeUnique(left, right) {
+  return Array.from(new Set([...(left || []), ...(right || [])].filter(Boolean)));
+}
+
+function findExistingCompanyId(byId, name, aliases) {
+  const candidates = [name, ...aliases].map(slugify);
+  return candidates.find(candidate => byId.has(candidate)) || "";
+}
+
+function getCompanyDefaultScore(company) {
+  const sponsorBoost = company.h1bFilings ? 100000 + company.h1bFilings : 0;
+  const curatedBoost = company.category === "Cloud and Big Tech" || company.category === "AI and Data" ? 250 : 0;
+  return sponsorBoost + curatedBoost - company.baseRank;
+}
+
 const state = {
   results: [],
   checked: new Set(),
   favoriteCompanies: new Set(),
-  visibleCompanies: COMPANIES
+  visibleCompanies: COMPANIES,
+  trackerEntries: []
 };
 
 const els = {};
 
 document.addEventListener("DOMContentLoaded", () => {
   cacheElements();
+  populateRolePacks();
   populateProfiles();
   populateCategories();
   populateLocations();
+  populateCompanyControls();
   rebuildTimeOptions("google", "all");
   populateResources();
   renderCompanyOptions("");
+  renderSponsorGrid();
+  loadTrackerEntries();
   loadTheme();
   bindEvents();
 
@@ -461,8 +688,10 @@ document.addEventListener("DOMContentLoaded", () => {
     els.companyRole.value = els.jobTitle.value;
   }
 
+  renderCompanyOptions(els.companyFilter.value);
   syncProfileDescription();
   syncCompanyCard();
+  renderTracker();
   if (hasJobTitle()) {
     generateResults(false);
   } else {
@@ -475,7 +704,9 @@ function cacheElements() {
   Object.assign(els, {
     form: document.getElementById("searchForm"),
     jobTitle: document.getElementById("jobTitle"),
+    rolePackSelect: document.getElementById("rolePackSelect"),
     profileSelect: document.getElementById("profileSelect"),
+    precisionSelect: document.getElementById("precisionSelect"),
     timeFilter: document.getElementById("timeFilter"),
     locationSelect: document.getElementById("locationSelect"),
     sortSelect: document.getElementById("sortSelect"),
@@ -487,17 +718,44 @@ function cacheElements() {
     authorizationSelect: document.getElementById("authorizationSelect"),
     includeTerms: document.getElementById("includeTerms"),
     excludeTerms: document.getElementById("excludeTerms"),
+    cautionExcludes: document.getElementById("cautionExcludes"),
     categoryFilters: document.getElementById("categoryFilters"),
     companyRole: document.getElementById("companyRole"),
+    companyRolePack: document.getElementById("companyRolePack"),
     companyFilter: document.getElementById("companyFilter"),
     companySelect: document.getElementById("companySelect"),
     companyTimeFilter: document.getElementById("companyTimeFilter"),
+    companyExperienceSelect: document.getElementById("companyExperienceSelect"),
+    companyLocationSelect: document.getElementById("companyLocationSelect"),
+    companyRemoteMode: document.getElementById("companyRemoteMode"),
     companySortSelect: document.getElementById("companySortSelect"),
+    companyCategorySelect: document.getElementById("companyCategorySelect"),
+    companySponsorTier: document.getElementById("companySponsorTier"),
+    companyMinFilings: document.getElementById("companyMinFilings"),
+    companyKind: document.getElementById("companyKind"),
+    companyCautionFlag: document.getElementById("companyCautionFlag"),
     companyCount: document.getElementById("companyCount"),
     companyCard: document.getElementById("companyCard"),
     openCompanyButton: document.getElementById("openCompanyButton"),
     searchCompanyButton: document.getElementById("searchCompanyButton"),
+    companyLinkedInJobsButton: document.getElementById("companyLinkedInJobsButton"),
+    companyLinkedInPostsButton: document.getElementById("companyLinkedInPostsButton"),
+    companyIndeedButton: document.getElementById("companyIndeedButton"),
+    copyCompanyLinksButton: document.getElementById("copyCompanyLinksButton"),
+    openTopSponsorButton: document.getElementById("openTopSponsorButton"),
     favoriteCompanyButton: document.getElementById("favoriteCompanyButton"),
+    sponsorGrid: document.getElementById("sponsorGrid"),
+    trackerForm: document.getElementById("trackerForm"),
+    trackerCompany: document.getElementById("trackerCompany"),
+    trackerRole: document.getElementById("trackerRole"),
+    trackerStatus: document.getElementById("trackerStatus"),
+    trackerSource: document.getElementById("trackerSource"),
+    trackerLink: document.getElementById("trackerLink"),
+    trackerFollowUp: document.getElementById("trackerFollowUp"),
+    trackerNotes: document.getElementById("trackerNotes"),
+    trackerCount: document.getElementById("trackerCount"),
+    trackerList: document.getElementById("trackerList"),
+    copyTrackerButton: document.getElementById("copyTrackerButton"),
     resourceGrid: document.getElementById("resourceGrid"),
     portalCount: document.getElementById("portalCount"),
     checkedCount: document.getElementById("checkedCount"),
@@ -506,6 +764,7 @@ function cacheElements() {
     copyCheckedButton: document.getElementById("copyCheckedButton"),
     shareButton: document.getElementById("shareButton"),
     resetButton: document.getElementById("resetButton"),
+    latestOneHourButton: document.getElementById("latestOneHourButton"),
     themeToggle: document.getElementById("themeToggle"),
     results: document.getElementById("results"),
     emptyState: document.getElementById("emptyState"),
@@ -530,6 +789,12 @@ function bindEvents() {
     persistAndMaybeGenerate();
   });
 
+  els.rolePackSelect.addEventListener("change", persistAndMaybeGenerate);
+  els.precisionSelect.addEventListener("change", () => {
+    applyPrecision(els.precisionSelect.value);
+    persistAndMaybeGenerate();
+  });
+
   els.engineSelect.addEventListener("change", () => {
     rebuildTimeOptions(els.engineSelect.value);
     persistAndMaybeGenerate();
@@ -543,7 +808,8 @@ function bindEvents() {
     els.matchMode,
     els.experienceSelect,
     els.employmentSelect,
-    els.authorizationSelect
+    els.authorizationSelect,
+    els.cautionExcludes
   ].forEach(control => control.addEventListener("change", persistAndMaybeGenerate));
 
   [els.jobTitle, els.includeTerms, els.excludeTerms].forEach(input => {
@@ -558,14 +824,30 @@ function bindEvents() {
   els.companyFilter.addEventListener("input", () => {
     renderCompanyOptions(els.companyFilter.value);
     syncCompanyCard();
+    renderSponsorGrid();
+    savePreferences();
   });
   els.companyRole.addEventListener("input", () => {
     syncCompanyCard();
     savePreferences();
   });
-  [els.companyTimeFilter, els.companySortSelect].forEach(control => {
+  [
+    els.companyRolePack,
+    els.companyTimeFilter,
+    els.companyExperienceSelect,
+    els.companyLocationSelect,
+    els.companyRemoteMode,
+    els.companySortSelect,
+    els.companyCategorySelect,
+    els.companySponsorTier,
+    els.companyMinFilings,
+    els.companyKind,
+    els.companyCautionFlag
+  ].forEach(control => {
     control.addEventListener("change", () => {
+      renderCompanyOptions(els.companyFilter.value);
       syncCompanyCard();
+      renderSponsorGrid();
       savePreferences();
     });
   });
@@ -575,6 +857,11 @@ function bindEvents() {
   });
   els.openCompanyButton.addEventListener("click", openSelectedCompany);
   els.searchCompanyButton.addEventListener("click", searchSelectedCompany);
+  els.companyLinkedInJobsButton.addEventListener("click", () => openCompanySearchType("linkedinJobs"));
+  els.companyLinkedInPostsButton.addEventListener("click", () => openCompanySearchType("linkedinPosts"));
+  els.companyIndeedButton.addEventListener("click", () => openCompanySearchType("indeedGoogle"));
+  els.copyCompanyLinksButton.addEventListener("click", copySelectedCompanyLinks);
+  els.openTopSponsorButton.addEventListener("click", openTopSponsorSearches);
   els.favoriteCompanyButton.addEventListener("click", toggleFavoriteCompany);
 
   els.openTopButton.addEventListener("click", openTopResults);
@@ -585,7 +872,34 @@ function bindEvents() {
   });
   els.shareButton.addEventListener("click", () => copyLinks([window.location.href], "Copied share link"));
   els.resetButton.addEventListener("click", resetSearch);
+  els.latestOneHourButton.addEventListener("click", applyLatestOneHourFlow);
   els.themeToggle.addEventListener("click", toggleTheme);
+
+  els.trackerForm.addEventListener("submit", addTrackerEntry);
+  els.copyTrackerButton.addEventListener("click", copyTrackerCsv);
+  els.trackerList.addEventListener("click", event => {
+    const button = event.target.closest("button[data-tracker-action]");
+    if (!button) {
+      return;
+    }
+    const id = button.getAttribute("data-id");
+    if (button.dataset.trackerAction === "delete") {
+      deleteTrackerEntry(id);
+    }
+  });
+}
+
+function populateRolePacks() {
+  [els.rolePackSelect, els.companyRolePack].forEach(select => {
+    select.innerHTML = "";
+    ROLE_PACKS.forEach(pack => {
+      const option = document.createElement("option");
+      option.value = pack.id;
+      option.textContent = pack.label;
+      select.appendChild(option);
+    });
+    select.value = DEFAULT_ROLE_PACK_ID;
+  });
 }
 
 function populateProfiles() {
@@ -596,7 +910,7 @@ function populateProfiles() {
     option.textContent = profile.label;
     els.profileSelect.appendChild(option);
   });
-  els.profileSelect.value = "maxCoverage";
+  els.profileSelect.value = DEFAULT_PROFILE_ID;
 }
 
 function populateCategories() {
@@ -626,6 +940,25 @@ function populateLocations() {
   els.locationSelect.value = "usa";
 }
 
+function populateCompanyControls() {
+  els.companyLocationSelect.innerHTML = "";
+  LOCATIONS.forEach(([value, label]) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+    els.companyLocationSelect.appendChild(option);
+  });
+  els.companyLocationSelect.value = "usa";
+
+  const categories = Array.from(new Set(COMPANIES.map(company => company.category))).sort();
+  categories.forEach(category => {
+    const option = document.createElement("option");
+    option.value = category;
+    option.textContent = category;
+    els.companyCategorySelect.appendChild(option);
+  });
+}
+
 function populateResources() {
   els.resourceGrid.innerHTML = "";
   RESOURCE_LINKS.forEach(resource => {
@@ -644,6 +977,50 @@ function populateResources() {
     card.append(title, category, note);
     els.resourceGrid.appendChild(card);
   });
+}
+
+function renderSponsorGrid() {
+  els.sponsorGrid.innerHTML = "";
+  const sponsors = COMPANIES
+    .filter(company => company.h1bFilings > 0)
+    .sort((a, b) => b.h1bFilings - a.h1bFilings)
+    .slice(0, 16);
+  const fragment = document.createDocumentFragment();
+  sponsors.forEach(company => {
+    const card = document.createElement("article");
+    card.className = "sponsor-card";
+    const title = document.createElement("div");
+    title.className = "sponsor-title";
+    const name = document.createElement("strong");
+    name.textContent = company.name;
+    const filings = createPill(`${company.h1bFilings.toLocaleString()} filings`);
+    title.append(name, filings);
+    const meta = document.createElement("div");
+    meta.className = "portal-meta";
+    meta.append(createPill(company.companyKind === "vendor" ? "Vendor" : "Direct employer"));
+    meta.append(createPill(FILTER_LABELS.sponsorTier[company.sponsorTier] || company.sponsorTier));
+    meta.append(createPill(company.category));
+    const action = document.createElement("button");
+    action.type = "button";
+    action.className = "secondary-button";
+    action.textContent = "Use in companies";
+    action.addEventListener("click", () => {
+      els.companySponsorTier.value = company.sponsorTier;
+      els.companyKind.value = company.companyKind;
+      els.companyCategorySelect.value = "all";
+      els.companyMinFilings.value = "";
+      els.companyCautionFlag.value = "all";
+      els.companyFilter.value = company.name;
+      renderCompanyOptions(els.companyFilter.value);
+      const match = state.visibleCompanies.find(item => item.id === company.id);
+      els.companySelect.value = match ? company.id : ALL_COMPANIES_ID;
+      syncCompanyCard();
+      document.getElementById("careersHeading").scrollIntoView({ behavior: "smooth" });
+    });
+    card.append(title, meta, action);
+    fragment.appendChild(card);
+  });
+  els.sponsorGrid.appendChild(fragment);
 }
 
 function rebuildTimeOptions(engine, preferredValue) {
@@ -667,7 +1044,9 @@ function hydrateFromUrl() {
     return false;
   }
 
-  setSelectIfValid(els.profileSelect, params.get("profile") || "maxCoverage");
+  setSelectIfValid(els.profileSelect, params.get("profile") || DEFAULT_PROFILE_ID);
+  setSelectIfValid(els.rolePackSelect, params.get("rolePack") || DEFAULT_ROLE_PACK_ID);
+  setSelectIfValid(els.precisionSelect, params.get("precision") || "coverage");
   if (params.get("engine") && TIME_OPTIONS[params.get("engine")]) {
     els.engineSelect.value = params.get("engine");
   }
@@ -681,6 +1060,7 @@ function hydrateFromUrl() {
   setSelectIfValid(els.experienceSelect, params.get("experience") || "any");
   setSelectIfValid(els.employmentSelect, params.get("employment") || "any");
   setSelectIfValid(els.authorizationSelect, params.get("authorization") || "none");
+  els.cautionExcludes.checked = params.get("caution") === "1";
 
   els.jobTitle.value = params.get("job") || "";
   els.includeTerms.value = params.get("include") || "";
@@ -703,7 +1083,9 @@ function loadPreferences() {
     data = {};
   }
 
-  setSelectIfValid(els.profileSelect, data.profile || "maxCoverage");
+  setSelectIfValid(els.profileSelect, data.profile || DEFAULT_PROFILE_ID);
+  setSelectIfValid(els.rolePackSelect, data.rolePack || DEFAULT_ROLE_PACK_ID);
+  setSelectIfValid(els.precisionSelect, data.precision || "coverage");
   setSelectIfValid(els.engineSelect, data.engine || "google");
   rebuildTimeOptions(els.engineSelect.value, data.time || undefined);
   setSelectIfValid(els.timeFilter, data.time || "all");
@@ -711,16 +1093,27 @@ function loadPreferences() {
   setSelectIfValid(els.sortSelect, data.sort || "coverage");
   setSelectIfValid(els.remoteMode, data.remoteMode || "neutral");
   setSelectIfValid(els.matchMode, data.matchMode || "smart");
-  setSelectIfValid(els.experienceSelect, data.experience || "any");
+  setSelectIfValid(els.experienceSelect, data.experience || "entry");
   setSelectIfValid(els.employmentSelect, data.employment || "any");
   setSelectIfValid(els.authorizationSelect, data.authorization || "none");
+  els.cautionExcludes.checked = Boolean(data.cautionExcludes);
 
   els.jobTitle.value = data.jobTitle || "";
   els.includeTerms.value = data.includeTerms || "";
   els.excludeTerms.value = data.excludeTerms || "";
   els.companyRole.value = data.companyRole || "";
+  els.companyFilter.value = data.companyFilter || "";
+  setSelectIfValid(els.companyRolePack, data.companyRolePack || data.rolePack || DEFAULT_ROLE_PACK_ID);
   setSelectIfValid(els.companyTimeFilter, data.companyTime || "24hours");
+  setSelectIfValid(els.companyExperienceSelect, data.companyExperience || "entry");
+  setSelectIfValid(els.companyLocationSelect, data.companyLocation || data.location || "usa");
+  setSelectIfValid(els.companyRemoteMode, data.companyRemoteMode || data.remoteMode || "neutral");
   setSelectIfValid(els.companySortSelect, data.companySort || "latest");
+  setSelectIfValid(els.companyCategorySelect, data.companyCategory || "all");
+  setSelectIfValid(els.companySponsorTier, data.companySponsorTier || "all");
+  els.companyMinFilings.value = data.companyMinFilings || "";
+  setSelectIfValid(els.companyKind, data.companyKind || "all");
+  setSelectIfValid(els.companyCautionFlag, data.companyCautionFlag || "all");
 
   if (Array.isArray(data.selectedCategories)) {
     setCategorySelection(new Set(data.selectedCategories));
@@ -736,6 +1129,8 @@ function loadPreferences() {
 function savePreferences() {
   const payload = {
     profile: els.profileSelect.value,
+    rolePack: els.rolePackSelect.value,
+    precision: els.precisionSelect.value,
     jobTitle: els.jobTitle.value,
     engine: els.engineSelect.value,
     time: els.timeFilter.value,
@@ -748,9 +1143,20 @@ function savePreferences() {
     authorization: els.authorizationSelect.value,
     includeTerms: els.includeTerms.value,
     excludeTerms: els.excludeTerms.value,
+    cautionExcludes: els.cautionExcludes.checked,
     companyRole: els.companyRole.value,
+    companyFilter: els.companyFilter.value,
+    companyRolePack: els.companyRolePack.value,
     companyTime: els.companyTimeFilter.value,
+    companyExperience: els.companyExperienceSelect.value,
+    companyLocation: els.companyLocationSelect.value,
+    companyRemoteMode: els.companyRemoteMode.value,
     companySort: els.companySortSelect.value,
+    companyCategory: els.companyCategorySelect.value,
+    companySponsorTier: els.companySponsorTier.value,
+    companyMinFilings: els.companyMinFilings.value,
+    companyKind: els.companyKind.value,
+    companyCautionFlag: els.companyCautionFlag.value,
     selectedCategories: Array.from(getSelectedCategories()),
     favoriteCompanies: Array.from(state.favoriteCompanies),
     selectedCompany: els.companySelect.value
@@ -775,17 +1181,60 @@ function applyProfile(profileId) {
   if (profile.defaults.time) {
     rebuildTimeOptions(els.engineSelect.value, profile.defaults.time);
   }
+  setSelectIfValid(els.rolePackSelect, profile.defaults.rolePack);
+  setSelectIfValid(els.precisionSelect, profile.defaults.precision);
   setSelectIfValid(els.timeFilter, profile.defaults.time);
   setSelectIfValid(els.sortSelect, profile.defaults.sort);
   setSelectIfValid(els.authorizationSelect, profile.defaults.authorization);
+  setSelectIfValid(els.experienceSelect, profile.defaults.experience);
+  setSelectIfValid(els.matchMode, profile.defaults.matchMode);
   if (profile.categories) {
     setCategorySelection(new Set(profile.categories));
   }
 }
 
+function applyPrecision(precision) {
+  switch (precision) {
+    case "latest1":
+      rebuildTimeOptions(els.engineSelect.value, "1hour");
+      setSelectIfValid(els.timeFilter, "1hour");
+      setSelectIfValid(els.sortSelect, "latest");
+      setSelectIfValid(els.authorizationSelect, "none");
+      setCategorySelection(new Set(["top", "direct", "signals", "general", "tech", "company"]));
+      break;
+    case "latest24":
+      rebuildTimeOptions(els.engineSelect.value, "24hours");
+      setSelectIfValid(els.timeFilter, "24hours");
+      setSelectIfValid(els.sortSelect, "latest");
+      setSelectIfValid(els.authorizationSelect, "none");
+      setCategorySelection(new Set(DEFAULT_CATEGORY_IDS));
+      break;
+    case "optSponsor":
+      setSelectIfValid(els.authorizationSelect, "optBroad");
+      setSelectIfValid(els.sortSelect, "coverage");
+      setCategorySelection(new Set(["top", "direct", "signals", "general", "tech", "company", "research"]));
+      break;
+    case "direct":
+      setSelectIfValid(els.sortSelect, "direct");
+      setCategorySelection(new Set(["top", "direct", "company"]));
+      break;
+    case "exact":
+      setSelectIfValid(els.matchMode, "exact");
+      setSelectIfValid(els.sortSelect, "recommended");
+      break;
+    default:
+      setSelectIfValid(els.authorizationSelect, "none");
+      setSelectIfValid(els.matchMode, "smart");
+      setSelectIfValid(els.sortSelect, "coverage");
+      setCategorySelection(new Set(DEFAULT_CATEGORY_IDS));
+      break;
+  }
+}
+
 function syncProfileDescription() {
   const profile = SEARCH_PROFILES.find(item => item.id === els.profileSelect.value) || SEARCH_PROFILES[0];
-  els.profileDescription.textContent = profile.description;
+  const rolePack = getRolePack(els.rolePackSelect.value);
+  els.profileDescription.textContent = `${profile.description} Role pack: ${rolePack.label}. Filtering: ${FILTER_LABELS.precision[els.precisionSelect.value] || "Max Coverage"}.`;
 }
 
 function setSelectIfValid(select, value) {
@@ -804,11 +1253,11 @@ function setCategorySelection(selected) {
 }
 
 function hasJobTitle() {
-  return parseTitles(els.jobTitle.value).length > 0;
+  return getSearchTitles().length > 0;
 }
 
 function generateResults(updateUrl = true) {
-  const titles = parseTitles(els.jobTitle.value);
+  const titles = getSearchTitles();
   if (!titles.length) {
     state.results = [];
     state.checked.clear();
@@ -855,7 +1304,8 @@ function generateResults(updateUrl = true) {
         title,
         portal,
         query,
-        url
+        url,
+        searchKind: getSearchKind(portal)
       });
     });
   });
@@ -949,6 +1399,7 @@ function renderPortalRow(item) {
   meta.className = "portal-meta";
   meta.append(createPill(CATEGORY_LABELS[item.portal.category] || item.portal.category));
   meta.append(createPill(getPortalScopeLabel(item.portal)));
+  meta.append(createPill(item.searchKind));
   (item.portal.tags || []).forEach(tag => meta.append(createPill(tag)));
 
   body.append(link, summary, meta);
@@ -964,6 +1415,32 @@ function renderPortalRow(item) {
 }
 
 function getPortalScopeLabel(portal) {
+  const capability = getSourceCapability(portal);
+  if (capability) {
+    return capability.label;
+  }
+  return "Broad search";
+}
+
+function getSearchKind(portal) {
+  const capability = getSourceCapability(portal);
+  return capability ? capability.kind : SOURCE_CAPABILITIES.operator.kind;
+}
+
+function getSourceCapability(portal) {
+  if (portal.native && SOURCE_CAPABILITIES[portal.native]) {
+    return SOURCE_CAPABILITIES[portal.native];
+  }
+  if (portal.native) {
+    return SOURCE_CAPABILITIES.native;
+  }
+  if (portal.rawSiteQuery || portal.sites) {
+    return SOURCE_CAPABILITIES.operator;
+  }
+  return null;
+}
+
+function getLegacyPortalScopeLabel(portal) {
   if (portal.native === "linkedinJobs" || portal.native === "indeed" || portal.native === "usajobs") {
     return "Native filters";
   }
@@ -984,6 +1461,19 @@ function createPill(text) {
   pill.className = "pill";
   pill.textContent = text;
   return pill;
+}
+
+function getSearchTitles() {
+  const typed = parseTitles(els.jobTitle.value);
+  if (typed.length) {
+    return typed;
+  }
+  const pack = getRolePack(els.rolePackSelect.value);
+  return [pack.primary];
+}
+
+function getRolePack(id) {
+  return ROLE_PACKS.find(pack => pack.id === id) || ROLE_PACKS[0];
 }
 
 function parseTitles(input) {
@@ -1014,6 +1504,8 @@ function smartTitleCase(value) {
 function getContext() {
   return {
     profile: els.profileSelect.value,
+    rolePack: els.rolePackSelect.value,
+    precision: els.precisionSelect.value,
     engine: els.engineSelect.value,
     time: els.timeFilter.value,
     location: els.locationSelect.value,
@@ -1024,7 +1516,8 @@ function getContext() {
     employment: els.employmentSelect.value,
     authorization: els.authorizationSelect.value,
     includeTerms: parseTermList(els.includeTerms.value),
-    excludeTerms: parseTermList(els.excludeTerms.value)
+    excludeTerms: parseTermList(els.excludeTerms.value),
+    cautionExcludes: els.cautionExcludes.checked
   };
 }
 
@@ -1106,6 +1599,8 @@ function updatePreviewForEmptyState() {
   const context = getContext();
   els.queryPreview.textContent = [
     PROFILE_LABELS[context.profile],
+    ROLE_PACK_LABELS[context.rolePack],
+    FILTER_LABELS.precision[context.precision],
     FILTER_LABELS.authorization[context.authorization],
     FILTER_LABELS.sort[context.sort],
     getLocationLabel(context.location)
@@ -1159,7 +1654,7 @@ function buildPortalQuery(title, portal, context) {
     getEmploymentQuery(context.employment),
     getAuthorizationQuery(context.authorization),
     buildIncludeQuery(context.includeTerms),
-    buildExcludeQuery(context.excludeTerms)
+    buildExcludeQuery([...context.excludeTerms, ...getCautionExcludes(context)])
   ].filter(Boolean);
 
   return parts.join(" ");
@@ -1168,6 +1663,10 @@ function buildPortalQuery(title, portal, context) {
 function buildTitleExpression(title, context) {
   if (context.matchMode === "exact") {
     return quoteTerm(title);
+  }
+  const pack = getRolePack(context.rolePack);
+  if (pack && pack.query) {
+    return pack.query;
   }
   const related = findTitleGroup(title);
   return `(${related.map(quoteTerm).join(" OR ")})`;
@@ -1229,7 +1728,7 @@ function getWorkSettingQuery(mode) {
 function getExperienceQuery(value) {
   switch (value) {
     case "entry":
-      return '("entry level" OR junior OR "new grad" OR university OR "0-2 years")';
+      return '("entry level" OR junior OR "new grad" OR "university graduate" OR "0-2 years" OR "early career")';
     case "mid":
       return '("mid level" OR "2+ years" OR "3+ years" OR associate) -senior -principal';
     case "senior":
@@ -1241,6 +1740,10 @@ function getExperienceQuery(value) {
     default:
       return "";
   }
+}
+
+function getCautionExcludes(context) {
+  return context.cautionExcludes ? CAUTION_EXCLUDE_TERMS : [];
 }
 
 function getEmploymentQuery(value) {
@@ -1352,13 +1855,21 @@ function buildSearchUrl(portal, query, title, context) {
 }
 
 function buildNativeKeywordQuery(title, context) {
-  const parts = [title, ...context.includeTerms];
+  const parts = [buildNativeTitleQuery(title, context), ...context.includeTerms];
   const auth = getNativeAuthorizationSuffix(context.authorization);
   if (auth) {
     parts.push(auth);
   }
-  context.excludeTerms.forEach(term => parts.push(`-${formatTerm(term)}`));
+  [...context.excludeTerms, ...getCautionExcludes(context)].forEach(term => parts.push(`-${formatTerm(term)}`));
   return parts.filter(Boolean).join(" ");
+}
+
+function buildNativeTitleQuery(title, context) {
+  if (context.matchMode === "exact") {
+    return title;
+  }
+  const pack = getRolePack(context.rolePack);
+  return pack ? pack.query : title;
 }
 
 function getNativeAuthorizationSuffix(value) {
@@ -1686,6 +2197,8 @@ function getTimeLabel(value) {
 function getActiveFilterSummary(context) {
   return [
     PROFILE_LABELS[context.profile],
+    ROLE_PACK_LABELS[context.rolePack],
+    FILTER_LABELS.precision[context.precision],
     getLocationLabel(context.location),
     getTimeLabel(context.time),
     FILTER_LABELS.sort[context.sort],
@@ -1695,8 +2208,12 @@ function getActiveFilterSummary(context) {
 
 function updateAddressBar(titles, context) {
   const params = new URLSearchParams();
-  params.set("job", titles.join(","));
+  if (els.jobTitle.value.trim()) {
+    params.set("job", titles.join(","));
+  }
   params.set("profile", context.profile);
+  params.set("rolePack", context.rolePack);
+  params.set("precision", context.precision);
   params.set("location", context.location);
   params.set("time", context.time);
   params.set("sort", context.sort);
@@ -1722,6 +2239,9 @@ function updateAddressBar(titles, context) {
   if (context.excludeTerms.length) {
     params.set("exclude", context.excludeTerms.join(","));
   }
+  if (context.cautionExcludes) {
+    params.set("caution", "1");
+  }
   const categories = Array.from(getSelectedCategories());
   if (!categories.length) {
     params.set("groups", "none");
@@ -1734,18 +2254,21 @@ function updateAddressBar(titles, context) {
 function renderCompanyOptions(filterText) {
   const normalized = filterText.trim().toLowerCase();
   const previousValue = els.companySelect.value || ALL_COMPANIES_ID;
-  state.visibleCompanies = COMPANIES.filter(company => {
+  state.visibleCompanies = sortCompaniesForView(COMPANIES.filter(company => {
     if (!normalized) {
-      return true;
+      return companyMatchesFilters(company);
     }
     return [
       company.name,
       company.category,
       company.tags.join(" "),
+      company.aliases.join(" "),
+      company.sponsorTier,
+      company.companyKind,
       company.caution,
       state.favoriteCompanies.has(company.id) ? "favorite" : ""
-    ].join(" ").toLowerCase().includes(normalized);
-  });
+    ].join(" ").toLowerCase().includes(normalized) && companyMatchesFilters(company);
+  }));
 
   els.companySelect.innerHTML = "";
   if (!state.visibleCompanies.length) {
@@ -1753,7 +2276,7 @@ function renderCompanyOptions(filterText) {
     option.textContent = "No matching companies";
     option.value = "";
     els.companySelect.appendChild(option);
-    els.companyCount.textContent = "0 of 150 companies";
+    els.companyCount.textContent = `0 of ${COMPANIES.length} companies`;
     return;
   }
 
@@ -1789,7 +2312,62 @@ function renderCompanyOptions(filterText) {
   } else {
     els.companySelect.value = ALL_COMPANIES_ID;
   }
-  els.companyCount.textContent = `${state.visibleCompanies.length} of ${COMPANIES.length} companies`;
+  const sponsorCount = state.visibleCompanies.filter(company => company.h1bFilings > 0).length;
+  els.companyCount.textContent = `${state.visibleCompanies.length} of ${COMPANIES.length} companies - ${sponsorCount} H1B sponsors`;
+}
+
+function companyMatchesFilters(company) {
+  const category = els.companyCategorySelect.value;
+  if (category !== "all" && company.category !== category) {
+    return false;
+  }
+  const sponsorTier = els.companySponsorTier.value;
+  if (sponsorTier !== "all" && company.sponsorTier !== sponsorTier) {
+    return false;
+  }
+  const minFilings = Number(els.companyMinFilings.value || 0);
+  if (minFilings > 0 && company.h1bFilings < minFilings) {
+    return false;
+  }
+  const kind = els.companyKind.value;
+  if (kind !== "all" && company.companyKind !== kind) {
+    return false;
+  }
+  const caution = els.companyCautionFlag.value;
+  if (caution === "clean" && company.caution) {
+    return false;
+  }
+  if (caution === "caution" && !company.caution) {
+    return false;
+  }
+  return true;
+}
+
+function sortCompaniesForView(companies) {
+  const mode = els.companySortSelect.value;
+  return [...companies].sort((a, b) => {
+    if (mode === "favorites") {
+      const favDiff = Number(state.favoriteCompanies.has(b.id)) - Number(state.favoriteCompanies.has(a.id));
+      if (favDiff) {
+        return favDiff;
+      }
+    }
+    if (mode === "sponsor") {
+      return b.h1bFilings - a.h1bFilings || a.rank - b.rank;
+    }
+    if (mode === "recommended") {
+      return getCompanyRecommendationScore(b) - getCompanyRecommendationScore(a) || a.rank - b.rank;
+    }
+    return a.rank - b.rank;
+  });
+}
+
+function getCompanyRecommendationScore(company) {
+  const favoriteBoost = state.favoriteCompanies.has(company.id) ? 200000 : 0;
+  const sponsorBoost = company.h1bFilings * 20;
+  const directBoost = company.companyKind === "direct" ? 1000 : 0;
+  const cautionPenalty = company.caution ? 250 : 0;
+  return favoriteBoost + sponsorBoost + directBoost - cautionPenalty;
 }
 
 function isAllCompaniesSelected() {
@@ -1834,6 +2412,11 @@ function syncCompanyCard() {
   const meta = document.createElement("div");
   meta.className = "portal-meta";
   meta.append(createPill(company.category));
+  meta.append(createPill(FILTER_LABELS.companyKind[company.companyKind]));
+  if (company.h1bFilings) {
+    meta.append(createPill(`${company.h1bFilings.toLocaleString()} H1B filings`));
+    meta.append(createPill(FILTER_LABELS.sponsorTier[company.sponsorTier] || company.sponsorTier));
+  }
   company.tags.forEach(tag => meta.append(createPill(tag)));
   if (favorite) {
     meta.append(createPill("favorite"));
@@ -1846,6 +2429,12 @@ function syncCompanyCard() {
   url.textContent = company.careersUrl;
 
   els.companyCard.append(title, meta, url);
+  if (company.aliases.length) {
+    const aliases = document.createElement("p");
+    aliases.className = "company-note";
+    aliases.textContent = `Aliases: ${company.aliases.join(", ")}`;
+    els.companyCard.appendChild(aliases);
+  }
   if (company.caution) {
     const caution = document.createElement("p");
     caution.className = "caution";
@@ -1879,6 +2468,8 @@ function renderAllCompanyCard() {
   meta.append(createPill(getLocationLabel(context.location)));
   meta.append(createPill(getTimeLabel(context.time)));
   meta.append(createPill(FILTER_LABELS.authorization[context.authorization]));
+  meta.append(createPill(FILTER_LABELS.companyKind[els.companyKind.value] || "Direct and vendors"));
+  meta.append(createPill(FILTER_LABELS.sponsorTier[els.companySponsorTier.value] || "All sponsor tiers"));
   meta.append(createPill(hasRole ? `Role: ${titleText}` : "Role required"));
 
   const note = document.createElement("p");
@@ -1898,7 +2489,9 @@ function renderAllCompanyCard() {
 
     const category = document.createElement("span");
     category.className = "company-link-category";
-    category.textContent = row.company.category;
+    category.textContent = row.company.h1bFilings
+      ? `${row.company.category} - ${row.company.h1bFilings.toLocaleString()} H1B filings`
+      : row.company.category;
 
     const links = document.createElement("div");
     links.className = "company-link-actions";
@@ -1969,6 +2562,76 @@ function searchSelectedCompany() {
   window.open(buildCompanySearchUrl(company, title, context), "_blank", "noopener");
 }
 
+function openCompanySearchType(type) {
+  const title = getCompanySearchTitle();
+  if (!title) {
+    showToast("Enter a company search role");
+    return;
+  }
+  const companies = getCompaniesForAction();
+  const context = getCompanyContext();
+  const urls = companies.flatMap(company => getCompanyActionUrls(company, title, context, type));
+  if (!urls.length) {
+    return;
+  }
+  if (companies.length === 1 && urls.length <= 2) {
+    urls.forEach(url => window.open(url, "_blank", "noopener"));
+    showToast(`Opened ${type === "indeedGoogle" ? "Indeed/Google" : type}`);
+    return;
+  }
+  copyLinks(urls, `Copied ${urls.length} company ${type} links`);
+}
+
+function copySelectedCompanyLinks() {
+  const title = getCompanySearchTitle();
+  if (!title) {
+    showToast("Enter a company search role");
+    return;
+  }
+  const context = getCompanyContext();
+  const links = getCompaniesForAction().flatMap(company => [
+    company.careersUrl,
+    buildCompanySearchUrl(company, title, context),
+    ...getCompanyActionUrls(company, title, context, "linkedinJobs"),
+    ...getCompanyActionUrls(company, title, context, "linkedinPosts"),
+    ...getCompanyActionUrls(company, title, context, "indeedGoogle")
+  ]);
+  copyLinks(links, `Copied ${links.length} selected company links`);
+}
+
+function openTopSponsorSearches() {
+  const title = getCompanySearchTitle();
+  const context = getCompanyContext();
+  const topSponsors = COMPANIES
+    .filter(company => company.h1bFilings > 0 && company.companyKind === "direct")
+    .sort((a, b) => b.h1bFilings - a.h1bFilings)
+    .slice(0, 5);
+  topSponsors.forEach(company => window.open(buildCompanySearchUrl(company, title, context), "_blank", "noopener"));
+  showToast("Opened top 5 sponsor searches");
+}
+
+function getCompaniesForAction() {
+  if (isAllCompaniesSelected()) {
+    return state.visibleCompanies;
+  }
+  const selected = getSelectedCompany();
+  return selected ? [selected] : [];
+}
+
+function getCompanyActionUrls(company, title, context, type) {
+  const companyTitle = `${title} ${company.name}`;
+  switch (type) {
+    case "linkedinJobs":
+      return [buildLinkedInJobsUrl(companyTitle, context)];
+    case "linkedinPosts":
+      return [buildLinkedInPostsUrl(companyTitle, context)];
+    case "indeedGoogle":
+      return [buildIndeedUrl(companyTitle, context), buildCompanySearchUrl(company, title, context)];
+    default:
+      return [buildCompanySearchUrl(company, title, context)];
+  }
+}
+
 function toggleFavoriteCompany() {
   if (isAllCompaniesSelected()) {
     return;
@@ -1990,14 +2653,22 @@ function toggleFavoriteCompany() {
 }
 
 function getCompanySearchTitle() {
-  return parseTitles(els.companyRole.value)[0] || parseTitles(els.jobTitle.value)[0] || "";
+  const typed = parseTitles(els.companyRole.value)[0] || parseTitles(els.jobTitle.value)[0];
+  if (typed) {
+    return typed;
+  }
+  return getRolePack(els.companyRolePack.value || els.rolePackSelect.value).primary;
 }
 
 function getCompanyContext() {
   return {
     ...getContext(),
+    rolePack: els.companyRolePack.value || els.rolePackSelect.value,
     time: els.companyTimeFilter.value,
-    sort: els.companySortSelect.value
+    sort: els.companySortSelect.value === "latest" ? "latest" : "coverage",
+    experience: els.companyExperienceSelect.value,
+    location: els.companyLocationSelect.value,
+    remoteMode: els.companyRemoteMode.value
   };
 }
 
@@ -2010,16 +2681,21 @@ function getCompanySearchRows(title, context) {
 
 function buildCompanySearchUrl(company, title, context) {
   const query = [
-    quoteTerm(title),
-    quoteTerm(company.name),
+    buildTitleExpression(title, context),
+    buildCompanyNameExpression(company),
     getLocationQuery(context.location),
     "(job OR jobs OR careers OR hiring OR openings)",
     `site:${urlToSiteHost(company.careersUrl)}`,
     getAuthorizationQuery(context.authorization),
     buildIncludeQuery(context.includeTerms),
-    buildExcludeQuery(context.excludeTerms)
+    buildExcludeQuery([...context.excludeTerms, ...getCautionExcludes(context)])
   ].filter(Boolean).join(" ");
   return buildGoogleUrl(query, context.time, context.sort);
+}
+
+function buildCompanyNameExpression(company) {
+  const names = [company.name, ...company.aliases].slice(0, 4).map(quoteTerm);
+  return names.length > 1 ? `(${names.join(" OR ")})` : names[0];
 }
 
 function urlToSiteScope(url) {
@@ -2060,6 +2736,127 @@ async function copyLinks(links, message) {
   }
 }
 
+function loadTrackerEntries() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(TRACKER_KEY) || "[]");
+    state.trackerEntries = Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    state.trackerEntries = [];
+  }
+}
+
+function saveTrackerEntries() {
+  localStorage.setItem(TRACKER_KEY, JSON.stringify(state.trackerEntries));
+}
+
+function addTrackerEntry(event) {
+  event.preventDefault();
+  const company = els.trackerCompany.value.trim();
+  const role = els.trackerRole.value.trim();
+  if (!company || !role) {
+    showToast("Add company and role to save a job");
+    return;
+  }
+  state.trackerEntries.unshift({
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    company,
+    role,
+    status: els.trackerStatus.value,
+    source: els.trackerSource.value.trim(),
+    link: els.trackerLink.value.trim(),
+    followUp: els.trackerFollowUp.value,
+    notes: els.trackerNotes.value.trim(),
+    savedAt: new Date().toISOString().slice(0, 10)
+  });
+  saveTrackerEntries();
+  renderTracker();
+  els.trackerForm.reset();
+  showToast("Saved tracker entry");
+}
+
+function renderTracker() {
+  els.trackerList.innerHTML = "";
+  els.trackerCount.textContent = `${state.trackerEntries.length} saved`;
+  if (!state.trackerEntries.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty-note";
+    empty.textContent = "Save roles here after you open applications so follow-ups do not disappear into tabs.";
+    els.trackerList.appendChild(empty);
+    return;
+  }
+  const fragment = document.createDocumentFragment();
+  state.trackerEntries.forEach(entry => {
+    const row = document.createElement("article");
+    row.className = "tracker-row";
+    const title = document.createElement("div");
+    title.className = "tracker-title";
+    const heading = document.createElement("strong");
+    heading.textContent = `${entry.company} - ${entry.role}`;
+    const status = createPill(entry.status);
+    title.append(heading, status);
+
+    const meta = document.createElement("div");
+    meta.className = "portal-meta";
+    meta.append(createPill(entry.source || "source not set"));
+    meta.append(createPill(entry.followUp ? `Follow-up ${entry.followUp}` : "no follow-up date"));
+    meta.append(createPill(`saved ${entry.savedAt}`));
+
+    const notes = document.createElement("p");
+    notes.className = "company-note";
+    notes.textContent = entry.notes || "No notes yet.";
+
+    const actions = document.createElement("div");
+    actions.className = "tracker-row-actions";
+    if (entry.link) {
+      const link = document.createElement("a");
+      link.href = entry.link;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = "Open";
+      actions.appendChild(link);
+    }
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "copy-button";
+    remove.dataset.trackerAction = "delete";
+    remove.dataset.id = entry.id;
+    remove.textContent = "Delete";
+    actions.appendChild(remove);
+
+    row.append(title, meta, notes, actions);
+    fragment.appendChild(row);
+  });
+  els.trackerList.appendChild(fragment);
+}
+
+function deleteTrackerEntry(id) {
+  state.trackerEntries = state.trackerEntries.filter(entry => entry.id !== id);
+  saveTrackerEntries();
+  renderTracker();
+  showToast("Deleted tracker entry");
+}
+
+function copyTrackerCsv() {
+  const header = ["Company", "Role", "Status", "Source", "Link", "Follow-up", "Notes", "Saved"];
+  const rows = state.trackerEntries.map(entry => [
+    entry.company,
+    entry.role,
+    entry.status,
+    entry.source,
+    entry.link,
+    entry.followUp,
+    entry.notes,
+    entry.savedAt
+  ]);
+  const csv = [header, ...rows].map(row => row.map(csvEscape).join(",")).join("\n");
+  copyLinks([csv], "Copied tracker CSV");
+}
+
+function csvEscape(value) {
+  const text = String(value || "");
+  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
 function showToast(message) {
   els.toast.textContent = message;
   clearTimeout(showToast.timeout);
@@ -2068,23 +2865,45 @@ function showToast(message) {
   }, 2200);
 }
 
+function applyLatestOneHourFlow() {
+  els.profileSelect.value = "latest1";
+  els.precisionSelect.value = "latest1";
+  applyProfile("latest1");
+  applyPrecision("latest1");
+  generateResults();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  showToast("Latest 1h search ready");
+}
+
 function resetSearch() {
   els.jobTitle.value = "";
-  els.profileSelect.value = "maxCoverage";
+  els.profileSelect.value = DEFAULT_PROFILE_ID;
+  els.rolePackSelect.value = DEFAULT_ROLE_PACK_ID;
+  els.precisionSelect.value = "coverage";
   els.engineSelect.value = "google";
   rebuildTimeOptions("google", "all");
   els.locationSelect.value = "usa";
   els.sortSelect.value = "coverage";
   els.remoteMode.value = "neutral";
   els.matchMode.value = "smart";
-  els.experienceSelect.value = "any";
+  els.experienceSelect.value = "entry";
   els.employmentSelect.value = "any";
   els.authorizationSelect.value = "none";
   els.includeTerms.value = "";
   els.excludeTerms.value = "";
+  els.cautionExcludes.checked = false;
   els.companyRole.value = "";
+  els.companyRolePack.value = DEFAULT_ROLE_PACK_ID;
   els.companyTimeFilter.value = "24hours";
+  els.companyExperienceSelect.value = "entry";
+  els.companyLocationSelect.value = "usa";
+  els.companyRemoteMode.value = "neutral";
   els.companySortSelect.value = "latest";
+  els.companyCategorySelect.value = "all";
+  els.companySponsorTier.value = "all";
+  els.companyMinFilings.value = "";
+  els.companyKind.value = "all";
+  els.companyCautionFlag.value = "all";
   els.companyFilter.value = "";
   setCategorySelection(new Set(DEFAULT_CATEGORY_IDS));
   renderCompanyOptions("");
@@ -2113,7 +2932,9 @@ function toggleTheme() {
 
 function loadTheme() {
   const stored = localStorage.getItem(THEME_KEY);
-  if (stored === "dark") {
+  if (stored === "light") {
+    document.documentElement.classList.remove("dark");
+  } else {
     document.documentElement.classList.add("dark");
   }
   syncThemeButton();

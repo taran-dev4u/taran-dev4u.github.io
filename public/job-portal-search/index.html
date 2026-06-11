@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -27,7 +27,16 @@
     </header>
 
     <main class="app-shell">
-      <section class="search-tool" aria-labelledby="searchHeading">
+      <nav class="quick-rail" aria-label="Command center views">
+        <a href="#searchHeading">Daily Search</a>
+        <button type="button" id="latestOneHourButton">Latest 1h</button>
+        <a href="#careersHeading">Companies</a>
+        <a href="#sponsorsHeading">H1B Sponsors</a>
+        <a href="#trackerHeading">Tracker</a>
+        <a href="#resourcesHeading">Resources</a>
+      </nav>
+
+      <section class="search-tool" id="dailySearch" aria-labelledby="searchHeading">
         <div class="section-heading">
           <div>
             <p class="eyebrow">Daily search builder</p>
@@ -41,12 +50,29 @@
         <form id="searchForm" class="search-form">
           <label class="field field-wide" for="jobTitle">
             <span>Job title</span>
-            <input id="jobTitle" name="job" type="text" autocomplete="off" placeholder="Data analyst, software engineer, business analyst">
+            <input id="jobTitle" name="job" type="text" autocomplete="off" placeholder="Software engineer, AI engineer, data analyst">
+          </label>
+
+          <label class="field" for="rolePackSelect">
+            <span>Role pack</span>
+            <select id="rolePackSelect" name="rolePack"></select>
           </label>
 
           <label class="field" for="profileSelect">
             <span>Smart profile</span>
             <select id="profileSelect" name="profile"></select>
+          </label>
+
+          <label class="field" for="precisionSelect">
+            <span>Coverage mode</span>
+            <select id="precisionSelect" name="precision">
+              <option value="coverage">Max Coverage</option>
+              <option value="latest1">Latest 1h</option>
+              <option value="latest24">Latest 24h</option>
+              <option value="optSponsor">OPT/Sponsor Research</option>
+              <option value="direct">Direct ATS</option>
+              <option value="exact">Exact Role</option>
+            </select>
           </label>
 
           <label class="field" for="locationSelect">
@@ -148,6 +174,14 @@
             <input id="excludeTerms" name="exclude" type="text" autocomplete="off" placeholder="unpaid, clearance, commission only">
           </label>
 
+          <label class="field checkbox-field" for="cautionExcludes">
+            <span>Caution excludes</span>
+            <span class="checkbox-line">
+              <input id="cautionExcludes" name="caution" type="checkbox">
+              <span>Filter scams/clearance only when selected</span>
+            </span>
+          </label>
+
           <div class="action-row">
             <button class="primary-button" type="submit">Start Search</button>
             <button class="secondary-button" type="button" id="resetButton">Reset</button>
@@ -218,14 +252,18 @@
         <div class="section-heading">
           <div>
             <p class="eyebrow">Company careers</p>
-            <h2 id="careersHeading">Open top company career pages</h2>
+            <h2 id="careersHeading">Company and sponsor searches</h2>
           </div>
           <span class="status-pill" id="companyCount">150 companies</span>
         </div>
         <div class="careers-grid">
           <label class="field company-wide" for="companyRole">
             <span>Company search role</span>
-            <input id="companyRole" type="text" autocomplete="off" placeholder="Entry level data analyst, software engineer">
+            <input id="companyRole" type="text" autocomplete="off" placeholder="Entry level software engineer, AI engineer, data analyst">
+          </label>
+          <label class="field" for="companyRolePack">
+            <span>Role family</span>
+            <select id="companyRolePack"></select>
           </label>
           <label class="field company-wide" for="companyFilter">
             <span>Filter companies</span>
@@ -251,20 +289,150 @@
               <option value="year">Past Year</option>
             </select>
           </label>
+          <label class="field" for="companyExperienceSelect">
+            <span>Experience</span>
+            <select id="companyExperienceSelect">
+              <option value="entry" selected>Entry or new grad</option>
+              <option value="any">Any level</option>
+              <option value="mid">Mid level</option>
+              <option value="senior">Senior or lead</option>
+              <option value="internship">Internship</option>
+            </select>
+          </label>
+          <label class="field" for="companyLocationSelect">
+            <span>Company location</span>
+            <select id="companyLocationSelect"></select>
+          </label>
+          <label class="field" for="companyRemoteMode">
+            <span>Work setting</span>
+            <select id="companyRemoteMode">
+              <option value="neutral" selected>All work settings</option>
+              <option value="onsite-hybrid">On-site or hybrid</option>
+              <option value="hybrid">Hybrid</option>
+              <option value="onsite">On-site</option>
+              <option value="only">Remote only</option>
+              <option value="exclude">Exclude remote</option>
+            </select>
+          </label>
           <label class="field" for="companySortSelect">
             <span>Company order</span>
             <select id="companySortSelect">
               <option value="latest" selected>Newest first</option>
               <option value="recommended">Most useful first</option>
+              <option value="sponsor">H1B filings first</option>
+              <option value="favorites">Favorites first</option>
+            </select>
+          </label>
+          <label class="field" for="companyCategorySelect">
+            <span>Category</span>
+            <select id="companyCategorySelect">
+              <option value="all" selected>All categories</option>
+            </select>
+          </label>
+          <label class="field" for="companySponsorTier">
+            <span>Sponsor tier</span>
+            <select id="companySponsorTier">
+              <option value="all" selected>All sponsor tiers</option>
+              <option value="top">Top H1B sponsors</option>
+              <option value="strong">Strong sponsors</option>
+              <option value="moderate">Moderate sponsors</option>
+              <option value="curated">Curated/no filing data</option>
+            </select>
+          </label>
+          <label class="field" for="companyMinFilings">
+            <span>Min H1B filings</span>
+            <input id="companyMinFilings" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+          </label>
+          <label class="field" for="companyKind">
+            <span>Employer type</span>
+            <select id="companyKind">
+              <option value="all" selected>Direct and vendors</option>
+              <option value="direct">Direct employers</option>
+              <option value="vendor">Staffing/vendors</option>
+            </select>
+          </label>
+          <label class="field" for="companyCautionFlag">
+            <span>Caution flags</span>
+            <select id="companyCautionFlag">
+              <option value="all" selected>Show all</option>
+              <option value="clean">No caution flag</option>
+              <option value="caution">Caution flagged</option>
             </select>
           </label>
           <div class="company-actions">
             <button class="primary-button" type="button" id="openCompanyButton">Open Careers</button>
             <button class="secondary-button" type="button" id="searchCompanyButton">Search This Company</button>
+            <button class="secondary-button" type="button" id="companyLinkedInJobsButton">LinkedIn Jobs</button>
+            <button class="secondary-button" type="button" id="companyLinkedInPostsButton">LinkedIn Posts</button>
+            <button class="secondary-button" type="button" id="companyIndeedButton">Indeed/Google</button>
+            <button class="secondary-button" type="button" id="copyCompanyLinksButton">Copy Selected Links</button>
+            <button class="secondary-button" type="button" id="openTopSponsorButton">Open Top Sponsors</button>
             <button class="secondary-button" type="button" id="favoriteCompanyButton">Favorite</button>
           </div>
         </div>
         <div class="company-card" id="companyCard"></div>
+      </section>
+
+      <section class="sponsor-panel" aria-labelledby="sponsorsHeading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">H1B sponsor layer</p>
+            <h2 id="sponsorsHeading">Top sponsor companies for software, AI, and data</h2>
+          </div>
+          <span class="status-pill">Workbook-backed</span>
+        </div>
+        <div id="sponsorGrid" class="sponsor-grid"></div>
+      </section>
+
+      <section class="tracker-panel" aria-labelledby="trackerHeading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Local tracker</p>
+            <h2 id="trackerHeading">Application follow-up board</h2>
+          </div>
+          <span class="status-pill" id="trackerCount">0 saved</span>
+        </div>
+        <form id="trackerForm" class="tracker-form">
+          <label class="field" for="trackerCompany">
+            <span>Company</span>
+            <input id="trackerCompany" type="text" autocomplete="off" placeholder="Company">
+          </label>
+          <label class="field" for="trackerRole">
+            <span>Role</span>
+            <input id="trackerRole" type="text" autocomplete="off" placeholder="Role title">
+          </label>
+          <label class="field" for="trackerStatus">
+            <span>Status</span>
+            <select id="trackerStatus">
+              <option value="wishlist">Wishlist</option>
+              <option value="applied">Applied</option>
+              <option value="interview">Interview</option>
+              <option value="follow-up">Follow-up</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </label>
+          <label class="field" for="trackerSource">
+            <span>Source</span>
+            <input id="trackerSource" type="text" autocomplete="off" placeholder="LinkedIn, careers page, referral">
+          </label>
+          <label class="field field-wide" for="trackerLink">
+            <span>Job link</span>
+            <input id="trackerLink" type="url" autocomplete="off" placeholder="https://">
+          </label>
+          <label class="field" for="trackerFollowUp">
+            <span>Follow-up</span>
+            <input id="trackerFollowUp" type="date">
+          </label>
+          <label class="field tracker-notes" for="trackerNotes">
+            <span>Notes</span>
+            <input id="trackerNotes" type="text" autocomplete="off" placeholder="Recruiter, referral, next step">
+          </label>
+          <div class="tracker-actions">
+            <button class="primary-button" type="submit">Save Job</button>
+            <button class="secondary-button" type="button" id="copyTrackerButton">Copy CSV</button>
+          </div>
+        </form>
+        <div id="trackerList" class="tracker-list"></div>
       </section>
 
       <section class="resources-panel" aria-labelledby="resourcesHeading">

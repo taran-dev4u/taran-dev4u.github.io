@@ -142,6 +142,42 @@ pre {
   margin: 0 auto;
 }
 
+.quick-rail {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: var(--shadow);
+  padding: 10px;
+  backdrop-filter: blur(14px);
+}
+
+.quick-rail a,
+.quick-rail button {
+  flex: 0 0 auto;
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  color: var(--ink);
+  padding: 8px 11px;
+  font-size: .86rem;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.quick-rail a:hover,
+.quick-rail button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .topbar {
   display: flex;
   align-items: center;
@@ -155,6 +191,11 @@ pre {
   display: flex;
   align-items: center;
   gap: 14px;
+  min-width: 0;
+}
+
+.brand > div {
+  min-width: 0;
 }
 
 .brand img {
@@ -167,6 +208,7 @@ pre {
   margin: 2px 0 0;
   font-size: 1.7rem;
   line-height: 1.1;
+  overflow-wrap: anywhere;
 }
 
 .eyebrow {
@@ -188,7 +230,9 @@ pre {
 .careers-tool,
 .side-panel,
 .results-panel,
-.resources-panel {
+.resources-panel,
+.sponsor-panel,
+.tracker-panel {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
@@ -198,7 +242,9 @@ pre {
 .search-tool,
 .careers-tool,
 .results-panel,
-.resources-panel {
+.resources-panel,
+.sponsor-panel,
+.tracker-panel {
   padding: 18px;
 }
 
@@ -312,6 +358,40 @@ pre {
   min-width: 0;
 }
 
+.checkbox-field {
+  align-self: stretch;
+  grid-column: span 2;
+}
+
+.checkbox-line {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 9px 10px;
+  font-size: .84rem;
+  font-weight: 800;
+}
+
+.checkbox-line input {
+  width: 18px;
+  min-height: 18px;
+  flex: 0 0 auto;
+  accent-color: var(--accent);
+}
+
+.checkbox-line span {
+  color: var(--ink);
+  font-size: .86rem;
+  line-height: 1.25;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .action-row,
 .company-actions {
   display: flex;
@@ -410,8 +490,13 @@ pre {
 }
 
 .company-actions {
-  grid-column: span 4;
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
   min-width: 0;
+}
+
+.company-actions button {
+  flex: 1 1 150px;
 }
 
 .company-card {
@@ -708,15 +793,86 @@ pre {
   gap: 10px;
 }
 
-.resource-card {
+.sponsor-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.resource-card,
+.sponsor-card,
+.tracker-row {
   display: grid;
   align-content: start;
   gap: 8px;
-  min-height: 130px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface-strong);
   padding: 12px;
+}
+
+.resource-card {
+  min-height: 130px;
+}
+
+.sponsor-card {
+  min-height: 150px;
+}
+
+.sponsor-title,
+.tracker-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.sponsor-title strong,
+.tracker-title strong {
+  overflow-wrap: anywhere;
+}
+
+.tracker-form {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.tracker-notes {
+  grid-column: span 2;
+}
+
+.tracker-actions {
+  display: flex;
+  gap: 8px;
+  grid-column: span 2;
+}
+
+.tracker-actions button {
+  flex: 1 1 0;
+}
+
+.tracker-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.tracker-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+}
+
+.empty-note {
+  margin: 0;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  color: var(--muted);
+  padding: 16px;
 }
 
 .resource-card p {
@@ -760,6 +916,19 @@ pre {
   .resource-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+
+  .sponsor-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tracker-form {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .tracker-notes,
+  .tracker-actions {
+    grid-column: span 3;
+  }
 }
 
 @media (max-width: 900px) {
@@ -777,7 +946,8 @@ pre {
 
   .portal-grid,
   .resource-grid,
-  .company-link-list {
+  .company-link-list,
+  .sponsor-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -800,23 +970,29 @@ pre {
   }
 
   .brand h1 {
-    font-size: 1.35rem;
+    max-width: calc(100vw - 92px);
+    font-size: 1.2rem;
   }
 
   .search-form,
-  .careers-grid {
+  .careers-grid,
+  .tracker-form {
     grid-template-columns: 1fr;
   }
 
   .field-wide,
+  .checkbox-field,
   .company-wide,
   .action-row,
-  .company-actions {
+  .company-actions,
+  .tracker-notes,
+  .tracker-actions {
     grid-column: auto;
   }
 
   .action-row,
-  .company-actions {
+  .company-actions,
+  .tracker-actions {
     display: grid;
     grid-template-columns: 1fr;
   }
