@@ -5,8 +5,8 @@ Taran's Job Command Center is a US-focused static job-search launcher. It builds
 ## Features
 
 - Dark theme by default, with an explicit saved light-mode option.
-- Personal US OPT default profile with a max-coverage role pack for software, AI/ML, data, analytics, cloud/DevOps, QA/SDET, security, product, business analyst, systems, Salesforce, and project roles.
-- Role packs for broad target coverage, software, AI/ML, data analytics, cloud/DevOps, QA/SDET, and product/data analyst searches.
+- Personal US OPT default profile with a max-coverage role pack for software, AI/ML, data, analytics, and cloud/DevOps roles.
+- Role packs for broad target coverage, software, AI/ML, data analytics, and cloud/DevOps searches.
 - Multi-title search with comma-separated roles.
 - Freshness filters from past hour through older-than ranges.
 - Google, DuckDuckGo, Bing, Yahoo, Kagi, Qwant, Brave, and Startpage.

@@ -237,26 +237,21 @@ const RELATED_TITLE_GROUPS = [
   ["Data Engineer", "Analytics Engineer", "ETL Developer", "BI Engineer", "Data Platform Engineer"],
   ["Data Analyst", "Business Intelligence Analyst", "Reporting Analyst", "SQL Analyst", "Power BI Developer", "Tableau Developer"],
   ["Cloud Engineer", "DevOps Engineer", "Site Reliability Engineer", "Platform Engineer", "Infrastructure Engineer"],
-  ["Business Analyst", "Systems Analyst", "Product Analyst", "Operations Analyst", "Business Systems Analyst", "Technical Analyst"],
-  ["Cybersecurity Analyst", "Security Engineer", "SOC Analyst", "GRC Analyst", "Cloud Security Engineer", "Application Security Engineer"],
   ["Product Manager", "Product Owner", "Technical Product Manager"],
-  ["QA Engineer", "Software Test Engineer", "Automation Engineer", "SDET", "Quality Engineer"],
   ["UX Designer", "UI Designer", "Product Designer", "UX Researcher", "Content Designer"],
   ["Financial Analyst", "FP&A Analyst", "Business Operations Analyst", "Revenue Analyst", "Risk Analyst"],
   ["Video Producer", "Film Editor", "Content Producer", "Content Creator", "Media Manager", "Digital Marketing Specialist", "Multimedia Designer", "Social Media Strategist", "Brand Content Manager", "Video Production Coordinator", "Creative Director"],
-  ["Salesforce Administrator", "Salesforce Developer", "Salesforce Consultant", "Salesforce Business Analyst", "Database Administrator", "IT Systems Administrator"],
-  ["Project Manager", "Program Manager", "Operations Manager", "Team Lead", "Project Coordinator", "Delivery Manager"],
   ["Scrum Master", "Agile Coach", "Lean Practitioner", "Kanban Coach", "Agile Project Facilitator", "Agile Transformation Lead", "Agile Team Coach", "Iteration Manager"]
 ];
 
 const ROLE_PACKS = [
   {
     id: "all-role-families",
-    label: "All Target Role Families - Max Coverage",
+    label: "Core Software / AI / Data / Cloud - Max Coverage",
     primary: "Software Engineer",
-    titles: ["Software Engineer", "Software Developer", "AI Engineer", "Machine Learning Engineer", "Data Scientist", "Data Engineer", "Data Analyst", "Analytics Engineer", "Business Intelligence Analyst", "Cloud Engineer", "DevOps Engineer", "QA Engineer", "SDET", "Cybersecurity Analyst", "Security Engineer", "Product Analyst", "Business Analyst", "Systems Analyst", "Salesforce Administrator", "Project Manager"],
+    titles: ["Software Engineer", "Software Developer", "AI Engineer", "Machine Learning Engineer", "Data Scientist", "Data Engineer", "Data Analyst", "Analytics Engineer", "Business Intelligence Analyst", "Cloud Engineer", "DevOps Engineer"],
     includes: ["Python", "SQL", "cloud", "AI", "data", "analytics"],
-    query: '("software engineer" OR "software developer" OR "AI engineer" OR "machine learning engineer" OR "data scientist" OR "data engineer" OR "data analyst" OR "analytics engineer" OR "business intelligence analyst" OR "cloud engineer" OR "DevOps engineer" OR "QA engineer" OR SDET OR "cybersecurity analyst" OR "security engineer" OR "product analyst" OR "business analyst" OR "systems analyst" OR "Salesforce administrator" OR "project manager")'
+    query: '("software engineer" OR "software developer" OR "AI engineer" OR "machine learning engineer" OR "data scientist" OR "data engineer" OR "data analyst" OR "analytics engineer" OR "business intelligence analyst" OR "cloud engineer" OR "DevOps engineer")'
   },
   {
     id: "software-ai-data",
@@ -297,22 +292,6 @@ const ROLE_PACKS = [
     titles: ["Cloud Engineer", "DevOps Engineer", "Site Reliability Engineer", "Platform Engineer", "Infrastructure Engineer"],
     includes: ["AWS", "Azure", "Kubernetes", "Terraform"],
     query: '("cloud engineer" OR "DevOps engineer" OR "site reliability engineer" OR "platform engineer" OR "infrastructure engineer")'
-  },
-  {
-    id: "qa-sdet",
-    label: "QA / SDET",
-    primary: "QA Engineer",
-    titles: ["QA Engineer", "Software Test Engineer", "Automation Engineer", "SDET", "Quality Engineer"],
-    includes: ["automation", "testing", "Selenium", "API"],
-    query: '("QA engineer" OR "software test engineer" OR "automation engineer" OR "SDET" OR "quality engineer")'
-  },
-  {
-    id: "product-data",
-    label: "Product / Data Analyst",
-    primary: "Product Analyst",
-    titles: ["Product Analyst", "Business Analyst", "Business Systems Analyst", "Operations Analyst", "Technical Analyst"],
-    includes: ["SQL", "metrics", "dashboard", "requirements"],
-    query: '("product analyst" OR "business analyst" OR "business systems analyst" OR "operations analyst" OR "technical analyst")'
   }
 ];
 
@@ -9506,6 +9485,20 @@ function buildPortalQuery(title, portal, context) {
   return parts.join(" ");
 }
 
+function buildGoogleStructuredQuery(title, context, options = {}) {
+  return [
+    buildTitleExpression(title, context),
+    options.includeJobTerms ? "(job OR jobs OR careers OR hiring)" : "",
+    getLocationQuery(context.location),
+    getWorkSettingQuery(context.remoteMode),
+    getExperienceQuery(context.experience),
+    getEmploymentQuery(context.employment),
+    getAuthorizationQuery(context.authorization),
+    buildIncludeQuery(context.includeTerms),
+    buildExcludeQuery([...context.excludeTerms, ...getCautionExcludes(context)])
+  ].filter(Boolean).join(" ");
+}
+
 function buildTitleExpression(title, context) {
   let expression;
   if (context.matchMode === "exact") {
@@ -9670,7 +9663,7 @@ function buildSearchUrl(portal, query, title, context) {
     case "usajobs":
       return buildUSAJobsUrl(title, context);
     case "google":
-      return buildGoogleUrl(query, context.time, context.sort);
+      return buildGoogleUrl(buildGoogleStructuredQuery(title, context, { includeJobTerms: true }), context.time, context.sort);
     case "glassdoor": {
       const params = new URLSearchParams();
       params.set("sc.keyword", buildNativeKeywordQuery(title, context));
@@ -9731,8 +9724,15 @@ function buildSearchUrl(portal, query, title, context) {
     case "static":
       return portal.url;
     default:
+      if (context.engine === "google" && canUseGoogleAdvancedSiteSearch(portal)) {
+        return buildGoogleUrl(buildGoogleStructuredQuery(title, context), context.time, context.sort, { siteSearch: portal.sites[0] });
+      }
       return buildSearchEngineUrl(context.engine, query, context.time, context.sort);
   }
+}
+
+function canUseGoogleAdvancedSiteSearch(portal) {
+  return !portal.rawSiteQuery && Array.isArray(portal.sites) && portal.sites.length === 1;
 }
 
 function buildNativeKeywordQuery(title, context) {
@@ -10017,9 +10017,26 @@ function buildSearchEngineUrl(engine, query, time, sort) {
   }
 }
 
-function buildGoogleUrl(query, time, sort) {
+function buildGoogleUrl(query, time, sort, options = {}) {
   const tbs = getGoogleTbs(time, sort);
-  return `https://www.google.com/search?q=${encodeURIComponent(query)}${tbs ? `&tbs=${encodeURIComponent(tbs)}` : ""}`;
+  const params = new URLSearchParams();
+  params.set("q", query);
+  if (options.siteSearch) {
+    params.set("as_sitesearch", normalizeGoogleSiteSearch(options.siteSearch));
+    params.set("as_dt", "i");
+  }
+  if (tbs) {
+    params.set("tbs", tbs);
+  }
+  return `https://www.google.com/search?${params.toString()}`;
+}
+
+function normalizeGoogleSiteSearch(site) {
+  return String(site || "")
+    .replace(/^site:/i, "")
+    .replace(/^https?:\/\//i, "")
+    .replace(/^www\./i, "")
+    .replace(/\/$/, "");
 }
 
 function getGoogleTbs(time, sort) {
@@ -10726,7 +10743,7 @@ function roleMatchesVendor(company, title) {
     company.aliases.join(" ")
   ].join(" ").toLowerCase();
   const signals = [
-    { title: /software|developer|engineer|sdet|qa|devops|sre/, terms: ["software", "technology", "engineering", "cloud", "qa"] },
+    { title: /software|developer|engineer|devops|sre/, terms: ["software", "technology", "engineering", "cloud"] },
     { title: /data|analytics|analyst|business intelligence|bi|sql/, terms: ["data", "analytics", "business intelligence", "sql", "finance"] },
     { title: /ai|machine learning|ml|research|scientist/, terms: ["ai", "machine learning", "data", "research", "cloud"] },
     { title: /cloud|security|cyber|network/, terms: ["cloud", "security", "networking", "infrastructure"] },
@@ -10907,12 +10924,12 @@ function buildCompanySearchUrl(company, title, context) {
     buildCompanyNameExpression(company),
     getLocationQuery(context.location),
     "(job OR jobs OR careers OR hiring OR openings)",
-    company.careersUrl ? `site:${urlToSiteHost(company.careersUrl)}` : "",
     getAuthorizationQuery(context.authorization),
     buildIncludeQuery(context.includeTerms),
     buildExcludeQuery([...context.excludeTerms, ...getCautionExcludes(context)])
   ].filter(Boolean).join(" ");
-  return buildGoogleUrl(query, context.time, context.sort);
+  const siteSearch = company.careersUrl ? urlToSiteScope(company.careersUrl) : "";
+  return buildGoogleUrl(query, context.time, context.sort, siteSearch ? { siteSearch } : {});
 }
 
 function buildCompanyNameExpression(company) {
