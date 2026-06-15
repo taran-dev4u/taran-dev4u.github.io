@@ -1,207 +1,934 @@
 "use strict";
 
-const STORAGE_KEY = "optJobCommandCenterPrefs";
-const THEME_KEY = "optJobCommandCenterTheme";
-const ALL_COMPANIES_ID = "__all_companies__";
-const DEFAULT_PROFILE_ID = "softwareAiDataEntryOpt";
-const DEFAULT_ROLE_PACK_ID = "all-role-families";
-const CAUTION_EXCLUDE_TERMS = ["unpaid", "commission only", "clearance", "US citizenship required", "must be a US citizen"];
-
-const CATEGORY_ROWS = [
-  ["top", "Top Sources", true],
-  ["direct", "Direct ATS", true],
-  ["signals", "LinkedIn Signals", true],
-  ["general", "General Boards", true],
-  ["tech", "Tech and Startups", true],
-  ["company", "Company Careers", true],
-  ["remote", "Remote Boards", true],
-  ["public", "Public and Nonprofit", true],
-  ["research", "Research Tools", false]
+// ── COMPANY DATA ─────────────────────────────────────────────────────────────
+// Auto-generated from H1B Company list.xlsx
+// Direct employers - top 500
+const SPONSOR_COMPANY_ROWS = [
+  { name: 'Amazon.com Services LLC', filings: 731, kind: 'direct', tier: 'top', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://www.amazon.jobs/', aliases: '' },
+  { name: 'Meta Platforms, Inc', filings: 533, kind: 'direct', tier: 'top', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://www.metacareers.com/', aliases: '' },
+  { name: 'Google LLC', filings: 488, kind: 'direct', tier: 'strong', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://careers.google.com/', aliases: '' },
+  { name: 'Fidelity Technology Group, LLC d/b/a Fidelity Investments', filings: 374, kind: 'direct', tier: 'strong', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: 'https://jobs.fidelity.com/', aliases: '' },
+  { name: 'JPMorgan Chase & Co', filings: 301, kind: 'direct', tier: 'strong', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: 'https://careers.jpmorgan.com/', aliases: '' },
+  { name: 'Apple Inc', filings: 288, kind: 'direct', tier: 'strong', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://jobs.apple.com/', aliases: '' },
+  { name: 'Mphasis Corporation', filings: 257, kind: 'direct', tier: 'strong', category: 'Consulting and Services', tags: ["consulting"], careersUrl: 'https://careers.mphasis.com/', aliases: '' },
+  { name: 'LinkedIn Corporation', filings: 215, kind: 'direct', tier: 'strong', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://careers.linkedin.com/', aliases: '' },
+  { name: 'WAL-MART ASSOCIATES, INC', filings: 190, kind: 'direct', tier: 'moderate', category: 'Retail and Consumer', tags: ["other"], careersUrl: 'https://careers.walmart.com/', aliases: '' },
+  { name: 'Amazon Development Center U.S., Inc', filings: 124, kind: 'direct', tier: 'moderate', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://www.amazon.jobs/', aliases: '' },
+  { name: 'IBM Corporation', filings: 124, kind: 'direct', tier: 'moderate', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://www.ibm.com/employment/', aliases: '' },
+  { name: 'PayPal, Inc', filings: 117, kind: 'direct', tier: 'moderate', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://careers.pypl.com/', aliases: '' },
+  { name: 'U.S. Bank National Association', filings: 107, kind: 'direct', tier: 'moderate', category: 'Enterprise Software', tags: ["tech"], careersUrl: 'https://www.usbank.com/careers.html', aliases: '' },
+  { name: 'Amazon Web Services, Inc', filings: 107, kind: 'direct', tier: 'moderate', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://aws.amazon.com/careers/', aliases: '' },
+  { name: 'LTIMindtree Limited', filings: 101, kind: 'direct', tier: 'moderate', category: 'Consulting and Services', tags: ["consulting"], careersUrl: 'https://www.ltimindtree.com/careers/', aliases: '' },
+  { name: 'NVIDIA Corporation', filings: 101, kind: 'direct', tier: 'moderate', category: 'AI and Data', tags: ["tech", "ai"], careersUrl: 'https://www.nvidia.com/en-us/about-nvidia/careers/', aliases: '' },
+  { name: 'J.B. Hunt Transport, Inc', filings: 86, kind: 'direct', tier: 'moderate', category: 'Logistics and Industrial', tags: ["other"], careersUrl: 'https://www.jbhunt.com/careers/', aliases: '' },
+  { name: 'Qualcomm Technologies, Inc', filings: 85, kind: 'direct', tier: 'moderate', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://www.qualcomm.com/company/careers', aliases: '' },
+  { name: 'Adobe Inc', filings: 83, kind: 'direct', tier: 'moderate', category: 'Enterprise Software', tags: ["tech"], careersUrl: 'https://www.adobe.com/careers.html', aliases: '' },
+  { name: 'eBay Inc', filings: 79, kind: 'direct', tier: 'moderate', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://careers.ebayinc.com/', aliases: '' },
+  { name: 'General Motors', filings: 75, kind: 'direct', tier: 'moderate', category: 'Automotive and Mobility', tags: ["other"], careersUrl: 'https://careers.gm.com/', aliases: '' },
+  { name: 'WELLS FARGO BANK, N.A', filings: 73, kind: 'direct', tier: 'moderate', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: 'https://www.wellsfargo.com/about/careers/', aliases: '' },
+  { name: 'Intuit Inc', filings: 68, kind: 'direct', tier: 'moderate', category: 'Enterprise Software', tags: ["tech"], careersUrl: 'https://careers.intuit.com/', aliases: '' },
+  { name: 'Expedia, Inc', filings: 68, kind: 'direct', tier: 'moderate', category: 'Enterprise Software', tags: ["tech"], careersUrl: 'https://lifeatexpedia.com/', aliases: '' },
+  { name: 'Intel Corporation', filings: 67, kind: 'direct', tier: 'moderate', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://jobs.intel.com/', aliases: '' },
+  { name: 'ServiceNow, Inc', filings: 67, kind: 'direct', tier: 'moderate', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://careers.servicenow.com/', aliases: '' },
+  { name: 'Uber Technologies, Inc', filings: 66, kind: 'direct', tier: 'moderate', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://www.uber.com/us/en/careers/', aliases: '' },
+  { name: 'Capgemini America Inc', filings: 64, kind: 'direct', tier: 'moderate', category: 'Consulting and Services', tags: ["consulting"], careersUrl: 'https://www.capgemini.com/careers/', aliases: '' },
+  { name: 'CGI Technologies and Solutions Inc', filings: 62, kind: 'direct', tier: 'moderate', category: 'Consulting and Services', tags: ["consulting"], careersUrl: 'https://www.cgi.com/en/careers', aliases: '' },
+  { name: 'FORD MOTOR COMPANY', filings: 61, kind: 'direct', tier: 'moderate', category: 'Automotive and Mobility', tags: ["other"], careersUrl: 'https://careers.ford.com/', aliases: '' },
+  { name: 'Tesla, Inc', filings: 60, kind: 'direct', tier: 'moderate', category: 'Automotive and Mobility', tags: ["other"], careersUrl: 'https://www.tesla.com/careers', aliases: '' },
+  { name: 'Lowe\'s Companies, Inc', filings: 60, kind: 'direct', tier: 'moderate', category: 'Retail and Consumer', tags: ["other"], careersUrl: 'https://jobs.lowes.com/', aliases: '' },
+  { name: 'Citibank, N.A', filings: 58, kind: 'direct', tier: 'moderate', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: 'https://jobs.citi.com/', aliases: '' },
+  { name: 'Oracle America, Inc', filings: 56, kind: 'direct', tier: 'moderate', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://www.oracle.com/careers/', aliases: '' },
+  { name: 'Salesforce, Inc', filings: 54, kind: 'direct', tier: 'moderate', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://www.salesforce.com/company/careers/', aliases: '' },
+  { name: 'FIS Management Services, LLC', filings: 52, kind: 'direct', tier: 'moderate', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: 'https://careers.fisglobal.com/', aliases: '' },
+  { name: 'CVS Pharmacy Inc', filings: 51, kind: 'direct', tier: 'moderate', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: 'https://jobs.cvshealth.com/', aliases: '' },
+  { name: 'DoorDash, Inc', filings: 51, kind: 'direct', tier: 'moderate', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://careers.doordash.com/', aliases: '' },
+  { name: 'The MathWorks, Inc', filings: 51, kind: 'direct', tier: 'moderate', category: 'Enterprise Software', tags: ["tech"], careersUrl: 'https://www.mathworks.com/company/jobs/', aliases: '' },
+  { name: 'Charter Communications, Inc', filings: 50, kind: 'direct', tier: 'moderate', category: 'Telecom and Media', tags: ["other"], careersUrl: 'https://jobs.spectrum.com/', aliases: '' },
+  { name: 'Netflix, Inc', filings: 48, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://jobs.netflix.com/', aliases: '' },
+  { name: 'Snowflake Inc', filings: 48, kind: 'direct', tier: 'curated', category: 'AI and Data', tags: ["tech", "ai"], careersUrl: 'https://careers.snowflake.com/', aliases: '' },
+  { name: 'SNAP INC', filings: 47, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://careers.snap.com/', aliases: '' },
+  { name: 'Capital One Services, LLC', filings: 44, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: 'https://www.capitalonecareers.com/', aliases: '' },
+  { name: 'First Citizens Bank and Trust Co', filings: 44, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: 'https://careers.firstcitizens.com/', aliases: '' },
+  { name: 'Pinterest, Inc', filings: 43, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://www.pinterestcareers.com/', aliases: '' },
+  { name: 'Truist Bank', filings: 43, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: 'https://careers.truist.com/', aliases: '' },
+  { name: 'Optum Services, Inc', filings: 42, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: 'https://careers.unitedhealthgroup.com/', aliases: '' },
+  { name: 'Indeed, Inc', filings: 42, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: 'https://www.indeed.com/about/careers', aliases: '' },
+  { name: 'CVS Shared Services Resources LLC', filings: 41, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'Microsoft Corporation', filings: 40, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://careers.microsoft.com/', aliases: '' },
+  { name: 'Columbia University', filings: 39, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: 'https://hr.columbia.edu/jobs', aliases: '' },
+  { name: 'American Express Travel Related Services Company, Inc', filings: 38, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: 'https://aexp.eightfold.ai/careers', aliases: '' },
+  { name: 'Home Depot Management Company LLC', filings: 37, kind: 'direct', tier: 'curated', category: 'Retail and Consumer', tags: ["other"], careersUrl: 'https://careers.homedepot.com/', aliases: '' },
+  { name: 'Humana Inc', filings: 37, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: 'https://careers.humana.com/', aliases: '' },
+  { name: 'Federal Express Corporation', filings: 37, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: 'https://careers.fedex.com/', aliases: '' },
+  { name: 'TikTok Inc', filings: 36, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://careers.tiktok.com/', aliases: '' },
+  { name: 'TECH MAHINDRA (AMERICAS), INC', filings: 36, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: 'https://careers.techmahindra.com/', aliases: '' },
+  { name: 'Atlassian US, Inc', filings: 35, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://www.atlassian.com/company/careers', aliases: '' },
+  { name: 'Hexaware Technologies, Inc', filings: 34, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: 'https://hexaware.com/careers/', aliases: '' },
+  { name: 'Barclays Services Corp', filings: 34, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: 'https://home.barclays/careers/', aliases: '' },
+  { name: 'Workday, Inc', filings: 34, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://www.workday.com/en-us/company/careers.html', aliases: '' },
+  { name: 'Mastercard Technologies, LLC', filings: 33, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: 'https://careers.mastercard.com/', aliases: '' },
+  { name: 'BYTEDANCE INC', filings: 32, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://jobs.bytedance.com/', aliases: '' },
+  { name: 'Cisco Systems, Inc', filings: 32, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://jobs.cisco.com/', aliases: '' },
+  { name: 'Concentrix CVG Customer Management Group Inc', filings: 31, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: 'https://careers.concentrix.com/', aliases: '' },
+  { name: 'Equifax Inc', filings: 31, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: 'https://careers.equifax.com/', aliases: '' },
+  { name: 'Yale University', filings: 31, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: 'https://www.yale.edu/about-yale/careers-yale', aliases: '' },
+  { name: 'OpenAI OpCo, LLC', filings: 29, kind: 'direct', tier: 'curated', category: 'AI and Data', tags: ["tech", "ai"], careersUrl: 'https://openai.com/careers/', aliases: '' },
+  { name: 'Docusign Inc', filings: 29, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://www.docusign.com/company/careers', aliases: '' },
+  { name: 'Caremark LLC', filings: 28, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Charter Communications Inc', filings: 27, kind: 'direct', tier: 'curated', category: 'Telecom and Media', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'Amazon Data Services, Inc', filings: 27, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud", "data"], careersUrl: 'https://www.amazon.jobs/', aliases: '' },
+  { name: 'Waymo LLC', filings: 27, kind: 'direct', tier: 'curated', category: 'Automotive and Mobility', tags: ["other"], careersUrl: 'https://waymo.com/careers/', aliases: '' },
+  { name: 'Chewy, Inc', filings: 27, kind: 'direct', tier: 'curated', category: 'Retail and Consumer', tags: ["other"], careersUrl: 'https://careers.chewy.com/', aliases: '' },
+  { name: 'HubSpot, Inc', filings: 26, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://www.hubspot.com/careers', aliases: '' },
+  { name: 'Databricks, Inc', filings: 26, kind: 'direct', tier: 'curated', category: 'AI and Data', tags: ["tech", "ai", "data"], careersUrl: 'https://www.databricks.com/company/careers', aliases: '' },
+  { name: 'TATA CONSULTANCY SERVICES LIMITED', filings: 26, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: 'https://www.tcs.com/careers', aliases: '' },
+  { name: 'TikTok U.S. Data Security Inc', filings: 26, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud", "data"], careersUrl: '', aliases: '' },
+  { name: 'The Leland Stanford, Jr University', filings: 26, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: 'https://careers.stanford.edu/', aliases: '' },
+  { name: 'Bloomberg L.P', filings: 25, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: 'https://www.bloomberg.com/careers/', aliases: '' },
+  { name: 'Stripe, Inc', filings: 24, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://stripe.com/jobs', aliases: '' },
+  { name: 'Costco Wholesale Corporation', filings: 24, kind: 'direct', tier: 'curated', category: 'Retail and Consumer', tags: ["other"], careersUrl: 'https://www.costco.com/jobs.html', aliases: '' },
+  { name: 'AUDIBLE, INC', filings: 24, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: 'https://www.audiblecareers.com/', aliases: '' },
+  { name: 'GlobalLogic Inc', filings: 23, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: 'https://www.globallogic.com/careers/', aliases: '' },
+  { name: 'UBS Business Solutions US LLC', filings: 23, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: 'https://www.ubs.com/global/en/careers.html', aliases: '' },
+  { name: 'FedEx Freight, Inc', filings: 22, kind: 'direct', tier: 'curated', category: 'Logistics and Industrial', tags: ["other"], careersUrl: 'https://careers.fedex.com/', aliases: '' },
+  { name: 'ADP Technology Services, Inc', filings: 22, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: 'https://jobs.adp.com/', aliases: '' },
+  { name: 'Qualcomm Innovation Center, Inc', filings: 22, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://www.qualcomm.com/company/careers', aliases: '' },
+  { name: 'PERSISTENT SYSTEMS, INC', filings: 21, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: 'https://www.persistent.com/careers/', aliases: '' },
+  { name: 'ASML US, LP', filings: 21, kind: 'direct', tier: 'curated', category: 'Hardware and Semiconductors', tags: ["tech", "ai"], careersUrl: 'https://www.asml.com/en/careers', aliases: '' },
+  { name: 'Deere & Company', filings: 21, kind: 'direct', tier: 'curated', category: 'Logistics and Industrial', tags: ["other"], careersUrl: 'https://www.deere.com/en/our-company/careers/', aliases: '' },
+  { name: 'Massachusetts Institute of Technology', filings: 21, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: 'https://careers.mit.edu/', aliases: '' },
+  { name: 'Tiger Analytics, Inc', filings: 20, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["data", "consulting"], careersUrl: 'https://www.tigeranalytics.com/careers/', aliases: '' },
+  { name: 'AIRBNB, INC', filings: 20, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: 'https://careers.airbnb.com/', aliases: '' },
+  { name: 'UT Southwestern Medical Center', filings: 20, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: 'https://utswmed.org/jobs/', aliases: '' },
+  { name: 'Coinbase, Inc', filings: 20, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: 'https://www.coinbase.com/careers', aliases: '' },
+  { name: 'Moody\'s Analytics, Inc', filings: 19, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech", "data"], careersUrl: '', aliases: '' },
+  { name: 'Rocket Mortgage, LLC', filings: 19, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'PERSISTENT SYSTEMS LIMITED', filings: 19, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Aetna Resources LLC', filings: 19, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'Docusign, Inc', filings: 18, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: '', aliases: '' },
+  { name: 'Roblox Corporation', filings: 18, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Social Finance, LLC', filings: 18, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Citizens Financial Group, Inc', filings: 18, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: '', aliases: '' },
+  { name: 'RELX, Inc', filings: 18, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Barclays Services LLC', filings: 18, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: '', aliases: '' },
+  { name: 'SONY INTERACTIVE ENTERTAINMENT LLC', filings: 18, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Reddit, Inc', filings: 17, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: '', aliases: '' },
+  { name: 'Zoox, Inc', filings: 17, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Qualcomm Atheros, Inc', filings: 17, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: '', aliases: '' },
+  { name: '7-Eleven, Inc', filings: 17, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Cummins Inc', filings: 17, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Emory University', filings: 16, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'F5, Inc', filings: 16, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'CARIAD, Inc', filings: 16, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Annapurna Labs (U.S.) Inc', filings: 16, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'University of Michigan', filings: 16, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'NIKE, Inc', filings: 16, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Zoox Inc', filings: 16, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'NYU Grossman School of Medicine', filings: 15, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'The Northern Trust Company', filings: 15, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Penske Truck Leasing Co LP', filings: 15, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Capital One, National Association', filings: 15, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: '', aliases: '' },
+  { name: 'Paycom Payroll, LLC', filings: 15, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'BANK OF AMERICA N.A', filings: 15, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: '', aliases: '' },
+  { name: 'Delta Air Lines, Inc', filings: 15, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Axon Enterprise, Inc', filings: 15, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'BEST BUY CO., INC', filings: 15, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Comcast Cable Communications, LLC', filings: 15, kind: 'direct', tier: 'curated', category: 'Telecom and Media', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'CitiusTech Inc', filings: 15, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: '', aliases: '' },
+  { name: 'Crusoe Energy Systems, Inc', filings: 14, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Lawrence Livermore National Security, LLC', filings: 14, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Motorola Solutions, Inc', filings: 14, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Asurion, LLC', filings: 14, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Fortinet, Inc', filings: 14, kind: 'direct', tier: 'curated', category: 'Cybersecurity', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'Northwestern Mutual Life Insurance Company', filings: 14, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Autodesk, Inc', filings: 14, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Zions Bancorporation, N.A', filings: 14, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'The PNC Financial Services Group, Inc', filings: 14, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Discover Products Inc', filings: 14, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: '', aliases: '' },
+  { name: 'Dell USA L.P', filings: 13, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Visa Technology & Operations LLC', filings: 13, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: '', aliases: '' },
+  { name: 'Visa U.S.A. Inc', filings: 13, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: '', aliases: '' },
+  { name: 'Wayfair LLC', filings: 13, kind: 'direct', tier: 'curated', category: 'Retail and Consumer', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'Palo Alto Networks, Inc', filings: 13, kind: 'direct', tier: 'curated', category: 'Cybersecurity', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'PamTen, Inc', filings: 13, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'ADAEQUARE INC', filings: 13, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Memorial Sloan Kettering Cancer Center', filings: 13, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'ATOS SYNTEL INC', filings: 13, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'United Services Automobile Association', filings: 12, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Medtronic, Inc', filings: 12, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'Tinder LLC', filings: 12, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'CBRE, INC', filings: 12, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'The University of Virginia', filings: 12, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Credit Karma, LLC', filings: 12, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Robinhood Markets, Inc', filings: 12, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Akamai Technologies, Inc', filings: 12, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech", "ai"], careersUrl: '', aliases: '' },
+  { name: 'Zappos.com LLC', filings: 12, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'LexisNexis Risk Solutions, Inc', filings: 12, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Purdue University', filings: 12, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'The Travelers Indemnity Company', filings: 11, kind: 'direct', tier: 'curated', category: 'Insurance', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'University of Illinois', filings: 11, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'THE UNIVERSITY OF TEXAS M.D. ANDERSON CANCER CENTER', filings: 11, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Two Sigma Investments, LP', filings: 11, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Cotiviti, Inc', filings: 11, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Unity Technologies SF', filings: 11, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'KLA Corporation', filings: 11, kind: 'direct', tier: 'curated', category: 'Hardware and Semiconductors', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'The Bank of New York Mellon', filings: 11, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Ameriprise Financial, Inc', filings: 11, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Amgen Inc', filings: 11, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'National Charitable Services LLC d/b/a Fidelity Investments', filings: 11, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: '', aliases: '' },
+  { name: 'Orion Systems Integrators LLC', filings: 11, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'NetApp, Inc', filings: 11, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Upstart Network, Inc', filings: 11, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'The University of Iowa', filings: 11, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Qualtrics, LLC', filings: 11, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'University of Maryland College Park', filings: 11, kind: 'direct', tier: 'curated', category: 'Logistics and Industrial', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'INFOSYS LIMITED', filings: 10, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'United Wholesale Mortgage, LLC', filings: 10, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'NAGARRO, INC', filings: 10, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Macy\'s Systems & Technology, Inc', filings: 10, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Bayer Research and Development Services LLC', filings: 10, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Hartford Fire Insurance Company', filings: 10, kind: 'direct', tier: 'curated', category: 'Automotive and Mobility', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'Guidewire Software, Inc', filings: 10, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Aptiv US Services General Partnership', filings: 10, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'H-E-B, LP', filings: 10, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'ST. JUDE CHILDREN\'S RESEARCH HOSPITAL', filings: 10, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'Zoom Communications, Inc', filings: 10, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: '', aliases: '' },
+  { name: 'Advanced Micro Devices, Inc', filings: 10, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Wolters Kluwer DXG U.S., Inc', filings: 10, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'AutoZone, Inc', filings: 10, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'DK Crown Holdings Inc', filings: 10, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'ACE American Insurance Company', filings: 10, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'IQVIA RDS Inc', filings: 10, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Siemens Industry Software Inc', filings: 9, kind: 'direct', tier: 'curated', category: 'Logistics and Industrial', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'Experian Information Solutions, Inc', filings: 9, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Rokt US Corp', filings: 9, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'The Depository Trust & Clearing Corporation', filings: 9, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Resolve AI, Inc', filings: 9, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'The Prudential Insurance Company of America', filings: 9, kind: 'direct', tier: 'curated', category: 'Insurance', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'S.W.I.F.T., Inc', filings: 9, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'The Ohio State University', filings: 9, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Boston Consulting Group, Inc', filings: 9, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Cadence Design Systems, Inc', filings: 9, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Teladoc Health Inc', filings: 9, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'CITADEL ENTERPRISE AMERICAS SERVICES LLC', filings: 9, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Epsilon Data Management LLC', filings: 9, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech", "data"], careersUrl: '', aliases: '' },
+  { name: 'Deloitte Services LP', filings: 9, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Applied Intuition, Inc', filings: 9, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'WGU Corporation', filings: 9, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Aurora Operations, Inc', filings: 9, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Nokia of America Corporation', filings: 9, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Hewlett Packard Enterprise Company', filings: 9, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Virginia Polytechnic Institute & State University', filings: 9, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Lawrence Berkeley National Laboratory', filings: 9, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Global Payment Holding Company', filings: 9, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'PURE STORAGE, INC', filings: 9, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Government Employee Insurance Company (GEICO)', filings: 9, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Marriott International, Inc', filings: 9, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'M&T Bank', filings: 9, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Arizona State University', filings: 9, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Lucid USA, Inc', filings: 8, kind: 'direct', tier: 'curated', category: 'Automotive and Mobility', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'VIRTUSA CORPORATION', filings: 8, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Southwest Airlines Co', filings: 8, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'The Guardian Life Insurance Company of America', filings: 8, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Progressive Casualty Insurance Company', filings: 8, kind: 'direct', tier: 'curated', category: 'Insurance', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'Publix Super Markets, Inc', filings: 8, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'COMTEC CONSULTANTS INC', filings: 8, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Coupang Global LLC', filings: 8, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Safeway Inc', filings: 8, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Klaviyo, Inc', filings: 8, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'National Railroad Passenger Corporation', filings: 8, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'General Hospital Corporation', filings: 8, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'TikTok USDS Joint Venture LLC', filings: 8, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: '', aliases: '' },
+  { name: 'Maplebear Inc', filings: 8, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'FactSet Research Systems Inc', filings: 8, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Intuites LLC', filings: 8, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Corewell Health', filings: 8, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'Dropbox, Inc', filings: 8, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: '', aliases: '' },
+  { name: 'The Vanguard Group, Inc', filings: 8, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: '', aliases: '' },
+  { name: 'Meijer Great Lakes Limited Partnership', filings: 8, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'McKesson Corporation', filings: 8, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'EPAM Systems Inc', filings: 8, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Johns Hopkins University', filings: 8, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'SEATTLE CHILDREN\'S HOSPITAL', filings: 8, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'Environmental Systems Research Institute, Inc', filings: 8, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Figma, Inc', filings: 8, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Zscaler, Inc', filings: 8, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Twilio, Inc', filings: 8, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: '', aliases: '' },
+  { name: 'Mayo Clinic', filings: 8, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'Point72, L.P', filings: 8, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'TRUSTEES OF BOSTON UNIVERSITY', filings: 8, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Millennium Software, Inc', filings: 8, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'United Parcel Service General Services, Co', filings: 8, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Okta, Inc', filings: 8, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: '', aliases: '' },
+  { name: 'Deloitte Tax LLP', filings: 8, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'UT-BATTELLE, LLC (OAK RIDGE NATIONAL LABORATORY)', filings: 8, kind: 'direct', tier: 'curated', category: 'Logistics and Industrial', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'ServiceTitan, Inc', filings: 8, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Duolingo, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'University of Texas Health Science Center at San Antonio', filings: 7, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'Moody\'s Investors Service, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Insight Direct USA, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Elevance Health, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'Rivian and Volkswagen Group Technologies, LLC', filings: 7, kind: 'direct', tier: 'curated', category: 'Automotive and Mobility', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'Walgreen Co', filings: 7, kind: 'direct', tier: 'curated', category: 'Retail and Consumer', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'Western Union, LLC', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Liberty Mutual Technology Group Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Insurance', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'AppFolio Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'SIRIUS XM RADIO LLC', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Caterpillar Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Logistics and Industrial', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'SPOTIFY USA, INC', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Cohesity, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Adyen N.V', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'ExlService.com, LLC', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Affirm, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'TORC Robotics, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Teradata Operations, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech", "data"], careersUrl: '', aliases: '' },
+  { name: 'American Airlines, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Inovalon, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Colorado State University', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Netskope, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Ancestry.com Operations Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Paychex North America Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Arm, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Chan Zuckerberg Biohub, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Notion Labs, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Block, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'MOBIREY LLC', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Brillio, LLC', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Staples, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Thumbtack, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Fujitsu North America, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Gen Digital Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Xmotors.Ai, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Riot Games, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'LYFT, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: '', aliases: '' },
+  { name: 'DFS Corporate Services LLC', filings: 7, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Rackspace US, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Navy Federal Credit Union', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Red Hat, Inc', filings: 7, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Vitesco Technologies USA, LLC', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Box, Inc', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Delta Dental Of California', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'MetLife Group, Inc', filings: 6, kind: 'direct', tier: 'curated', category: 'Insurance', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'The University of Chicago', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'The University of Texas Health Science Center at Houston', filings: 6, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'Raymond James & Associates, Inc', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Tredence Inc', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Etsy, Inc', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Cedars-Sinai Medical Center', filings: 6, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["ai", "healthcare"], careersUrl: '', aliases: '' },
+  { name: 'Whatnot Inc', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Integral Ad Science, Inc', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Field AI, Inc', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Discord, Inc', filings: 6, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: '', aliases: '' },
+  { name: 'The Chamberlain Group LLC', filings: 6, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'BROWN BROTHERS HARRIMAN & CO', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Schlumberger Technology Corporation', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Fireworks.ai, Inc', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Superhuman Platform Inc', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Yahoo Holdings Inc', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'The Kroger Company', filings: 6, kind: 'direct', tier: 'curated', category: 'Retail and Consumer', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'Juniper Networks, Inc', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'COLLECTIVEHEALTH, INC', filings: 6, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'USG, Inc', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Airline Tariff Publishing Company (ATPCO)', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'MONGODB, INC', filings: 6, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: '', aliases: '' },
+  { name: 'The Sherwin-Williams Company', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'CLOUDFLARE, INC', filings: 6, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: '', aliases: '' },
+  { name: 'University of Pittsburgh', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Garmin International Inc', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Worldpay, LLC', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Twitch Interactive, Inc', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'University of Texas Medical Branch', filings: 6, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'Applied Materials, Inc', filings: 6, kind: 'direct', tier: 'curated', category: 'Hardware and Semiconductors', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Nexterapath, Inc', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Sunbelt Rentals, Inc', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'FedEx Dataworks, Inc', filings: 6, kind: 'direct', tier: 'curated', category: 'Logistics and Industrial', tags: ["data"], careersUrl: '', aliases: '' },
+  { name: 'Wellington Management Company LLP', filings: 6, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Lumen Technologies Service Group, LLC', filings: 5, kind: 'direct', tier: 'curated', category: 'Telecom and Media', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'Snorkel AI, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Skill Voice Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Smartsheet, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Datadog, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud", "data"], careersUrl: '', aliases: '' },
+  { name: 'Honeywell International Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Logistics and Industrial', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'People Center, Inc. d/b/a Rippling', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Clearwater Analytics, LLC', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech", "data"], careersUrl: '', aliases: '' },
+  { name: 'PARAMOUNT SOFTWARE SOLUTIONS INC', filings: 5, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Scale AI, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'AI and Data', tags: ["tech", "ai"], careersUrl: '', aliases: '' },
+  { name: 'Wolters Kluwer United States Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'State Farm Mutual Automobile Insurance Company', filings: 5, kind: 'direct', tier: 'curated', category: 'Insurance', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'Converse Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'HERE North America, LLC', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Dow Jones and Company, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'ConsultAdd Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'StubHub, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Corporation Service Company', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Starbucks Coffee Company', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Accenture LLP', filings: 5, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'HP Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Peloton Interactive, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Cruise LLC', filings: 5, kind: 'direct', tier: 'curated', category: 'Automotive and Mobility', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'PPD Development, L.P', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Susquehanna International Group, LLP', filings: 5, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'HARVEY AI CORPORATION', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech", "ai"], careersUrl: '', aliases: '' },
+  { name: 'Move Sales, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Cytel Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Discovery Communications, LLC', filings: 5, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: '', aliases: '' },
+  { name: 'Administrators of the Tulane Educational Fund', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'T. Rowe Price Associates, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'NORTHWELL HEALTH', filings: 5, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'Laboratory Corporation of America Holdings', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Nuro, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'ROBERT BOSCH  LLC', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Bill Me Later, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'BANDWIDTH, INC', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Genentech, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'Qualcomm Incorporated', filings: 5, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: '', aliases: '' },
+  { name: 'Arista Networks, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'The Research Institute at Nationwide Children\'s Hospital', filings: 5, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'Massachusetts Mutual Life Insurance Company', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'COPART, INC', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'The University of Alabama at Birmingham', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'CNH Industrial America LLC', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'InMarket Media LLC', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'GSK Solutions, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'MPG Operations LLC', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Fiserv Solutions, LLC', filings: 5, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'GRID DYNAMICS HOLDINGS, INC', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Together Computer, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Deloitte Consulting LLP', filings: 5, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'RIVIAN AUTOMOTIVE, LLC', filings: 5, kind: 'direct', tier: 'curated', category: 'Automotive and Mobility', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'Athene Annuity and Life Company', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Fanatics Retail Group Fulfillment LLC', filings: 5, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'C3.ai, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'AI and Data', tags: ["tech", "ai"], careersUrl: '', aliases: '' },
+  { name: 'BorgWarner PDS (USA) Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'AvidXchange, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Research Foundation for the State University of New York', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Boston Scientific Corporation', filings: 5, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'Relativity ODA LLC', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Brex Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'General Motors Financial Company, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Automotive and Mobility', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'University of Washington', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Van Andel Research Institute', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Rubrik, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Petco Animal Supplies Stores, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Macy\'s Systems and Technology, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Vizient, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Amazon Advertising LLC', filings: 5, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: '', aliases: '' },
+  { name: 'Texas A&M University', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Mercor.io Corporation', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Texas Instruments Incorporated', filings: 5, kind: 'direct', tier: 'curated', category: 'Hardware and Semiconductors', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'American Bankers Insurance Company of Florida', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'BOR USGA obo Augusta University', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'KPIT Technologies, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'The Children\'s Hospital of Philadelphia', filings: 5, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'LexisNexis Risk Solutions Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Rocket Limited Partnership', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Lam Research Corporation', filings: 5, kind: 'direct', tier: 'curated', category: 'Hardware and Semiconductors', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'S&P Global Market Intelligence Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud", "data"], careersUrl: '', aliases: '' },
+  { name: 'Verizon Data Services LLC', filings: 5, kind: 'direct', tier: 'curated', category: 'Telecom and Media', tags: ["data"], careersUrl: '', aliases: '' },
+  { name: 'ULINE, Inc', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Ford Motor Credit Company LLC', filings: 5, kind: 'direct', tier: 'curated', category: 'Automotive and Mobility', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'Cardinal Health', filings: 5, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'Nationwide Mutual Insurance Company', filings: 5, kind: 'direct', tier: 'curated', category: 'Insurance', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'The Hertz Corporation', filings: 5, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Scott & White Health Plan', filings: 4, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'Sentara Health', filings: 4, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'OCLC, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Regions Bank', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Northeastern University', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'PALANTIR TECHNOLOGIES INC', filings: 4, kind: 'direct', tier: 'curated', category: 'AI and Data', tags: ["tech", "ai"], careersUrl: '', aliases: '' },
+  { name: 'Indiana University Indianapolis', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'DiDi Research America, LLC', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Foundation Medicine, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Iowa State University of Science and Technology', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Fortrea Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'PACIFIC CONSULTANCY SERVICES LLC', filings: 4, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Navan, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Sephora USA, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Flatiron Health, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'Flexera Global, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'PATREON, INC', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'SHOPIFY (USA) INC', filings: 4, kind: 'direct', tier: 'curated', category: 'Retail and Consumer', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'RETOOL, INC', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Dish Wireless LLC', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Electronic Arts Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'IQVIA Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Ernst & Young U.S. LLP', filings: 4, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Insurance Services Office, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Rush University Medical Center', filings: 4, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'GoodLeap, LLC', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'NCS Pearson, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'EvolutionIQ LLC', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'SYSINTEL, INC', filings: 4, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud"], careersUrl: '', aliases: '' },
+  { name: 'EAB Global, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'ProCare Pharmacy LLC', filings: 4, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'QXO, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Extreme Networks Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'FCA US LLC', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'General Dynamics Information Technology, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Aerospace and Defense', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'HCA Management Services LP', filings: 4, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Duke University', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'PayPal Data Services, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Cloud and Big Tech', tags: ["tech", "cloud", "data"], careersUrl: '', aliases: '' },
+  { name: 'FMR LLC d/b/a Fidelity Investments', filings: 4, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: '', aliases: '' },
+  { name: 'FOL Management LLC', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Parker Hannifin Corporation', filings: 4, kind: 'direct', tier: 'curated', category: 'Logistics and Industrial', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'Faire Wholesale, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'GREENSKY MANAGEMENT COMPANY LLC', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Intuitive Surgical Operations, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Dolby Laboratories, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'GOCOOL INC', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'RELEVANCE LAB, INC', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'NBCUniversal Media, LLC', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Saviynt, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'GSK SOLUTIONS INC', filings: 4, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'Cleveland Clinic Foundation', filings: 4, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'Deloitte & Touche LLP', filings: 4, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'MedHOK, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Attentive Mobile, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'LatentView Analytics Corporation', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech", "data"], careersUrl: '', aliases: '' },
+  { name: 'University of California, Los Angeles', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'BANK OZK', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Mastercard International Incorporated', filings: 4, kind: 'direct', tier: 'curated', category: 'Fintech and Finance', tags: ["fintech"], careersUrl: '', aliases: '' },
+  { name: 'Bean Infosystems LLC', filings: 4, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'McDonald\'s Corporation', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'McKinsey & Company, Inc. United States', filings: 4, kind: 'direct', tier: 'curated', category: 'Consulting and Services', tags: ["consulting"], careersUrl: '', aliases: '' },
+  { name: 'The Simons Foundation Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'University of Oklahoma', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'The Methodist Hospital Research Institute', filings: 4, kind: 'direct', tier: 'curated', category: 'Health and Life Sciences', tags: ["healthcare"], careersUrl: '', aliases: '' },
+  { name: 'California Institute of Technology', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Calix, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'The Jackson Laboratory', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'The Florida State University', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Centene Management Company, LLC', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Chime Financial, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Clari, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'University of Georgia', filings: 4, kind: 'direct', tier: 'curated', category: 'Enterprise Software', tags: ["tech"], careersUrl: '', aliases: '' },
+  { name: 'Leidos, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Aerospace and Defense', tags: ["other"], careersUrl: '', aliases: '' },
+  { name: 'T-Mobile USA, Inc', filings: 4, kind: 'direct', tier: 'curated', category: 'Telecom and Media', tags: ["other"], careersUrl: '', aliases: '' },
 ];
 
-const CATEGORIES = CATEGORY_ROWS.map(([id, label, checked]) => ({ id, label, checked }));
-const CATEGORY_LABELS = Object.fromEntries(CATEGORIES.map(category => [category.id, category.label]));
-const DEFAULT_CATEGORY_IDS = CATEGORIES.filter(category => category.checked).map(category => category.id);
-
-const SEARCH_PROFILES = [
-  {
-    id: "softwareAiDataEntryOpt",
-    label: "Software / AI / Data - Entry OPT",
-    description: "Personal default for US-wide entry/new-grad software, AI, and data searches. Keeps coverage broad and uses OPT/sponsor wording as companion research.",
-    defaults: { time: "all", sort: "coverage", authorization: "none", experience: "entry", rolePack: "all-role-families", precision: "coverage", matchMode: "smart" },
-    categories: DEFAULT_CATEGORY_IDS
-  },
-  {
-    id: "latest1",
-    label: "Latest 1h",
-    description: "Urgent apply flow for postings from the last hour on sources with reliable date filters.",
-    defaults: { time: "1hour", sort: "latest", authorization: "none", experience: "entry", rolePack: "all-role-families", precision: "latest1", matchMode: "smart" },
-    categories: ["top", "direct", "signals", "general", "tech", "company"]
-  },
-  {
-    id: "dailyQuickApply",
-    label: "Daily Quick Apply",
-    description: "Focused daily flow: only the nine highest-yield apply sources, newest-first within the past 24 hours.",
-    defaults: { time: "24hours", sort: "latest", authorization: "none", precision: "latest24", matchMode: "smart" },
-    categories: ["top", "direct", "signals", "general", "tech"],
-    portals: ["linkedinJobs", "indeed", "directATS", "linkedinPosts", "google", "simplify", "hiringCafe", "builtin", "dice"]
-  },
-  {
-    id: "maxCoverage",
-    label: "Max Coverage",
-    description: "Broadest US search. Keeps authorization filters off so useful results are not hidden.",
-    defaults: { time: "all", sort: "coverage", authorization: "none", precision: "coverage" },
-    categories: DEFAULT_CATEGORY_IDS
-  },
-  {
-    id: "latest24",
-    label: "Latest 24h",
-    description: "Newest-first links for daily searching across the most active job sources.",
-    defaults: { time: "24hours", sort: "latest", authorization: "none", precision: "latest24" },
-    categories: DEFAULT_CATEGORY_IDS
-  },
-  {
-    id: "optFriendly",
-    label: "OPT Friendly",
-    description: "Adds OPT, STEM OPT, E-Verify, sponsorship, and US work authorization terms.",
-    defaults: { time: "week", sort: "recommended", authorization: "optBroad", precision: "optSponsor" },
-    categories: ["top", "direct", "signals", "general", "tech", "company"]
-  },
-  {
-    id: "sponsorResearch",
-    label: "Sponsor Research",
-    description: "Focuses on sponsorship signals, H-1B history, E-Verify, and employer research.",
-    defaults: { time: "month", sort: "coverage", authorization: "sponsorNeeded", precision: "optSponsor" },
-    categories: ["top", "direct", "company", "research"]
-  },
-  {
-    id: "directATS",
-    label: "Direct ATS",
-    description: "Prioritizes direct application pages and common ATS systems.",
-    defaults: { time: "week", sort: "direct", authorization: "none", precision: "direct" },
-    categories: ["top", "direct", "company"]
-  },
-  {
-    id: "linkedinPosts",
-    label: "LinkedIn Posts",
-    description: "Surfaces fresh recruiter and hiring-manager posts using LinkedIn content search.",
-    defaults: { time: "24hours", sort: "latest", authorization: "none", precision: "latest24" },
-    categories: ["top", "signals"]
-  }
+// Staffing vendors - top 200
+const STAFFING_VENDOR_ROWS = [
+  { name: 'COMPUNNEL SOFTWARE GROUP, INC', filings: 469, kind: 'staffing', tier: 'strong', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Grandison Management, Inc', filings: 403, kind: 'staffing', tier: 'strong', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'People Tech Group, Inc', filings: 370, kind: 'staffing', tier: 'strong', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'KFORCE INC', filings: 133, kind: 'staffing', tier: 'moderate', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'UST Global Inc', filings: 114, kind: 'staffing', tier: 'moderate', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'RANDSTAD DIGITAL, LLC', filings: 114, kind: 'staffing', tier: 'moderate', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'INNOVA SOLUTIONS, INC', filings: 89, kind: 'staffing', tier: 'moderate', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'MSR TECHNOLOGY GROUP LLC', filings: 85, kind: 'staffing', tier: 'moderate', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'V-Soft Consulting Group, INC', filings: 81, kind: 'staffing', tier: 'moderate', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'L&T Technology Services Limited', filings: 76, kind: 'staffing', tier: 'moderate', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Majestic IT Services Inc', filings: 65, kind: 'staffing', tier: 'moderate', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Infinite Computer Solutions, Inc', filings: 64, kind: 'staffing', tier: 'moderate', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'GP TECHNOLOGIES LLC', filings: 57, kind: 'staffing', tier: 'moderate', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'SKILLTUNE TECHNOLOGIES INC', filings: 57, kind: 'staffing', tier: 'moderate', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Insight Global, LLC', filings: 54, kind: 'staffing', tier: 'moderate', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'SYSTEM SOFT TECHNOLOGIES, LLC', filings: 53, kind: 'staffing', tier: 'moderate', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Populus Group LLC', filings: 50, kind: 'staffing', tier: 'moderate', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'RJ Systems Inc', filings: 50, kind: 'staffing', tier: 'moderate', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Mastech Digital Technologies, Inc', filings: 49, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'CORPORATE SOLUTIONS GENERAL INC', filings: 48, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'HCL GLOBAL SYSTEMS INC', filings: 47, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'INTRAEDGE, INC', filings: 44, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Quadrant Technologies LLC', filings: 44, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Avco Consulting, Inc', filings: 41, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'ERP Analysts, Inc', filings: 40, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'HTC GLOBAL SERVICES INC', filings: 39, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'SCHRILL TECHNOLOGIES INC', filings: 38, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Itek Info Inc', filings: 37, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'SLK AMERICA INC', filings: 37, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Elite IT Technologies LLC', filings: 36, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'DENKEN SOLUTIONS, INC', filings: 34, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'DIGIPULSE TECHNOLOGIES, INC', filings: 32, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'PHOTON INFOTECH, INC', filings: 31, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'GOIN TECHNOLOGY, INC', filings: 31, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'NATSOFT CORPORATION', filings: 30, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'SAGE IT INC', filings: 30, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Infogain Corporation', filings: 29, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Pyramid Consulting, Inc', filings: 29, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Tek Leaders Inc', filings: 27, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'APPLAB SYSTEMS INC', filings: 26, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'New Era Technology, LLC', filings: 26, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'PIONEER CONSULTING SERVICES LLC', filings: 26, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'INTELLECTT, INC', filings: 25, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Orpine Inc', filings: 25, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'ARTIFICIAL INTELLIGENCE LLC', filings: 25, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'CLOUD ANALYTICS TECHNOLOGIES LLC', filings: 25, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'i-Link Solutions, Inc', filings: 25, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Verton Solutions Inc', filings: 25, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'VIRTUAL REALITY TECHNOLOGIES LLC', filings: 24, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'AI TECHNOLOGIES LLC', filings: 24, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Federal Soft Systems Inc', filings: 23, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Ventois, Inc', filings: 23, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'ROBOTICS TECHNOLOGIES LLC', filings: 23, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Eliassen Group, LLC', filings: 23, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'DataEconomy, Inc', filings: 23, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'DGN Technologies, Inc', filings: 22, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'EDU INFOTECH INTERNATIONAL RESOURCES INC', filings: 22, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'ValueMomentum, Inc', filings: 22, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Intellectt Inc', filings: 22, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Collaborate Solutions Inc', filings: 21, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Specs Inc', filings: 21, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Vastek Inc', filings: 21, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Experis US, LLC', filings: 20, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Management Health Systems, LLC', filings: 20, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Kyyba, Inc', filings: 20, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Sapphire Software Solutions, Inc', filings: 20, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'COGNIER INC', filings: 20, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Beacon Hill Solutions Group LLC', filings: 20, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Horizon International Trd. Inc', filings: 20, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Hire IT people, Inc', filings: 20, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'CyberSource Corporation', filings: 20, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'OneMain General Services Corporation', filings: 19, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'MITCHELL/MARTIN, INC', filings: 19, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Genesis Corp', filings: 19, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Idexcel Inc', filings: 19, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Strategic Staffing Solutions, L.C', filings: 19, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'ZIFO TECHNOLOGIES, INC', filings: 19, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'RPA TECHNOLOGIES LLC', filings: 19, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'CareSource Management Services, LLC', filings: 19, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'TECHPRO SOLUTIONS, INC', filings: 19, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Epitec, Inc', filings: 18, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'SQUAD SOFTWARE, INC', filings: 18, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Northstar Group, Inc', filings: 18, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'SAVVY INFO SYSTEMS INC', filings: 18, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'SIGMA SOFTWARE LLC', filings: 18, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Appridat Solutions LLC', filings: 18, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'JEAN MARTIN INC', filings: 18, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Leland Stanford Jr. Univ/SLAC National Accelerator Lab', filings: 18, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Artech, LLC', filings: 18, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Iris Software, Inc', filings: 17, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'BRAINS TECHNOLOGY SOLUTIONS, INC', filings: 17, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'IPOLARITY LLC', filings: 17, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'SATIN SOLUTIONS LLC', filings: 17, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'SAP Labs, LLC', filings: 17, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'TANISHA SYSTEMS INC', filings: 17, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'RJT Compuquest Inc. dba Apolis', filings: 17, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Headstrong Services LLC', filings: 17, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Akkodis, Inc', filings: 17, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Avani Technology Solutions, Inc', filings: 17, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Zensar Technologies, Inc', filings: 16, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'New York Technology Partners Inc', filings: 16, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Innovative Consulting Solutions LLC', filings: 16, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'ROBOTICS STAFFING LLC', filings: 16, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'ARTIFINT TECHNOLOGIES LLC', filings: 16, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Collabrium Systems, LLC', filings: 16, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Sandisk Technologies, Inc', filings: 16, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Pentangle Tech Services LLC', filings: 16, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: '3i INFOTECH INC', filings: 16, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'ARTIFICIAL INTELLIGENCE STAFFING LLC', filings: 16, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'SWANKTEK INC', filings: 16, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Camelot Integrated Solutions Inc', filings: 16, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Hector Systems Inc', filings: 16, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Career Soft Solutions Inc', filings: 16, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Ascendion, Inc. (Formerly known as Collabera, Inc.)', filings: 16, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Eversoft Technologies LLC', filings: 16, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Acetech Group Corporation', filings: 16, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'SDH Systems LLC', filings: 16, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Tek Labs, Inc', filings: 16, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Fox Cable Network Services, LLC', filings: 15, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'MAHAUGHA LLC', filings: 15, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Marlabs LLC', filings: 15, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'TAVANT TECHNOLOGIES, INC', filings: 15, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'SRI Tech Solutions Inc', filings: 15, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Kelly Services, Inc', filings: 15, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'ETOUCH SYSTEMS CORPORATION', filings: 15, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Tech Tammina, LLC', filings: 15, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Vitosha Inc', filings: 15, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Asta CRS, Inc', filings: 15, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Isolve Technology Inc', filings: 15, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'ECONTENTI INC', filings: 15, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'DATAEDGE, INC', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'DREAM Venture Labs Inc', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'MIRACLE SOFTWARE SYSTEMS, INC', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'SAPPHIRE SOFTWARE SOLUTIONS INC', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'NobleSoft Solutions, Inc', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'SRI Tech Solutions, Inc', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Tekaccel Inc', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'ASTIR IT SOLUTIONS, INC', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Adroix Corp', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Novamegha LLC', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'NEON IT LLC', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Softworld Technologies LLC', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'COVANT SOLUTIONS, INC', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Megan Soft, Inc', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'ECCLESIASTES, INC', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Wingskyline Technologies Inc', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'EFICENS SYSTEMS INC', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Walbrydge Technologies Inc', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'INVOLGIXS INC', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'E-GIANTS TECHNOLOGIES LLC', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'VENTURESOFT GLOBAL INC', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Saipsit, Inc', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Numann Technologies, Inc', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Apex-2000 Inc', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Relevantz Technology Services, Inc', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Western Digital Technologies, Inc', filings: 14, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Infocons Inc', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Ana-Data Consulting, Inc', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'O3 TECHNOLOGY SOLUTIONS LLC', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'SAI TECHNOLOGIES, LLC', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Veridic Solutions LLC', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Meghaz Inc', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'PYRAMID TECHNOLOGY SOLUTIONS, INC', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'XORIANT CORPORATION', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'INTELENT INC (f.k.a SILICON STAFF IT SERVICES INC)', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'P2P SOFTTEK LLC', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Auger Inc', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'OKBL USA Technology Inc', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'IMR SOFT LLC', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Total System Services LLC', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Caresoft Technologies Inc', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Cigniti Technologies, Inc', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Dexian, LLC', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Gainwell Technologies LLC', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'DONATO TECHNOLOGIES INC', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'FUSION LIFE SCIENCES TECHNOLOGIES LLC', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Computer Sciences Corporation', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'TECHNOSOFT CORPORATION', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Tata Technologies, Inc', filings: 13, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Bioinfo Systems, LLC', filings: 12, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Technumen, Inc', filings: 12, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Zeus Solutions Inc', filings: 12, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Bitwise Inc', filings: 12, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Hitachi Digital Services LLC', filings: 12, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Quest IT Solutions Inc', filings: 12, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'L&T Technology Services LLC', filings: 12, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'ACEINTEGRATOR INC', filings: 12, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Strategic Systems, Inc', filings: 12, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Willsfly Technologies Inc', filings: 12, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Metrix IT Solutions INC', filings: 12, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'iTech US, Inc', filings: 12, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Lead IT Corporation', filings: 12, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'iPivot LLC', filings: 12, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'TT TECHNOLOGIES INC', filings: 12, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'MYTHRI CONSULTING LLC', filings: 12, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'AMZUR TECHNOLOGIES, INC', filings: 12, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Nisum Technologies Inc', filings: 12, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'Optimal Technologies, Inc', filings: 12, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'ADVITHRI TECHNOLOGIES LLC', filings: 12, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
+  { name: 'HITECK SOLUTIONS INC', filings: 12, kind: 'staffing', tier: 'curated', category: 'Staffing Vendors', tags: ["staffing", "tech"], careersUrl: '', aliases: '' },
 ];
 
-const PROFILE_LABELS = Object.fromEntries(SEARCH_PROFILES.map(profile => [profile.id, profile.label]));
-
-const PORTAL_ROWS = [
-  { id: "linkedinJobs", name: "LinkedIn Jobs", category: "top", native: "linkedinJobs", sites: ["linkedin.com/jobs"], priority: 100, tags: ["native filters", "high reach"], note: "Uses LinkedIn date, experience, job type, work setting, and newest-first filters when selected." },
-  { id: "indeed", name: "Indeed", category: "top", native: "indeed", sites: ["indeed.com/jobs"], priority: 99, tags: ["native filters", "high reach"], note: "Uses Indeed query, location, date, remote, and newest sorting when selected." },
-  { id: "directATS", name: "Direct ATS Search", category: "direct", rawSiteQuery: "(site:greenhouse.io OR site:lever.co OR site:ashbyhq.com OR site:myworkdayjobs.com OR site:pinpointhq.com OR site:recruiting.paylocity.com OR site:keka.com OR site:jobs.workable.com OR site:breezy.hr OR site:wellfound.com OR site:workatastartup.com OR site:oraclecloud.com OR site:recruitee.com OR site:rippling.com OR site:rippling-ats.com OR site:jobs.gusto.com OR site:careerpuck.com OR site:teamtailor.com OR site:jobs.smartrecruiters.com OR site:jobappnetwork.com OR site:homerun.co OR site:gem.com OR site:trakstar.com OR site:catsone.com OR site:applytojob.com OR site:jobvite.com OR site:icims.com OR site:dover.io OR site:notion.site OR site:workforcenow.adp.com OR site:myjobs.adp.com OR site:factorialhr.com OR site:trinethire.com)", priority: 98, tags: ["direct apply", "ATS"], note: "Searches Brian's ATS/source set together for fresher direct postings." },
-  { id: "linkedinPosts", name: "LinkedIn Posts", category: "signals", native: "linkedinPosts", sites: ["linkedin.com/search/results/content"], priority: 97, tags: ["hiring posts", "fresh"], note: "Uses LinkedIn content search with hiring keywords and date-posted sorting." },
-  { id: "google", name: "Google Jobs Web Search", category: "top", native: "google", priority: 96, tags: ["broad web", "date tools"], note: "Broad Google query across job posts, career pages, and hiring pages." },
-  { id: "glassdoor", name: "Glassdoor", category: "general", native: "glassdoor", sites: ["glassdoor.com/Job", "glassdoor.com/job-listing"], priority: 95, tags: ["salary context", "native date filter"] },
-  { id: "ziprecruiter", name: "ZipRecruiter", category: "general", native: "ziprecruiter", sites: ["ziprecruiter.com/jobs"], priority: 94, tags: ["general board"] },
-  { id: "dice", name: "Dice", category: "general", native: "dice", sites: ["dice.com/jobs"], priority: 93, tags: ["tech board"] },
-  { id: "builtin", name: "Built In", category: "tech", native: "builtin", sites: ["builtin.com/jobs", "builtin.com/job"], priority: 92, tags: ["tech cities"] },
-  { id: "handshake", name: "Handshake", category: "general", sites: ["joinhandshake.com", "app.joinhandshake.com"], priority: 91, tags: ["students", "new grad"] },
-  { id: "simplify", name: "Simplify", category: "tech", native: "simplify", sites: ["simplify.jobs"], priority: 90, tags: ["new grad", "tech"] },
-  { id: "hiringCafe", name: "HiringCafe", category: "tech", sites: ["hiring.cafe"], priority: 89, tags: ["fresh listings"] },
-  { id: "wellfound", name: "Wellfound", category: "tech", sites: ["wellfound.com/jobs"], priority: 88, tags: ["startups"] },
-  { id: "yc", name: "Y Combinator Jobs", category: "tech", native: "yc", sites: ["ycombinator.com/jobs", "workatastartup.com/jobs"], priority: 87, tags: ["startups"] },
-  { id: "levels", name: "Levels.fyi Jobs", category: "tech", native: "levels", sites: ["levels.fyi/jobs"], priority: 86, tags: ["tech pay"] },
-  { id: "welcome", name: "Welcome to the Jungle", category: "tech", native: "welcome", sites: ["welcometothejungle.com/en/jobs"], priority: 85, tags: ["startups"] },
-  { id: "ripplematch", name: "RippleMatch", category: "general", sites: ["ripplematch.com/careers"], priority: 84, tags: ["early career"] },
-  { id: "wayup", name: "WayUp", category: "general", sites: ["wayup.com/s/jobs"], priority: 83, tags: ["students"] },
-  { id: "monster", name: "Monster", category: "general", native: "monster", sites: ["monster.com/jobs", "monster.com/job-openings"], priority: 82, tags: ["general board"] },
-  { id: "careerbuilder", name: "CareerBuilder", category: "general", native: "careerbuilder", sites: ["careerbuilder.com/jobs", "careerbuilder.com/job"], priority: 81, tags: ["general board"] },
-  { id: "ladders", name: "Ladders", category: "general", sites: ["theladders.com/job"], priority: 80, tags: ["professional"] },
-  { id: "flexjobs", name: "FlexJobs", category: "remote", sites: ["flexjobs.com/search"], priority: 79, tags: ["remote", "hybrid"] },
-  { id: "remoteRocketship", name: "Remote Rocketship", category: "remote", native: "remoteRocketship", sites: ["remoterocketship.com"], priority: 78, tags: ["remote tech"] },
-  { id: "remotive", name: "Remotive", category: "remote", native: "remotive", sites: ["remotive.com"], priority: 77.5, tags: ["remote"] },
-  { id: "weWorkRemotely", name: "We Work Remotely", category: "remote", native: "weWorkRemotely", sites: ["weworkremotely.com/remote-jobs"], priority: 77, tags: ["remote"] },
-  { id: "remoteOk", name: "Remote OK", category: "remote", native: "remoteOk", sites: ["remoteok.com/remote-jobs"], priority: 76, tags: ["remote"] },
-  { id: "usajobs", name: "USAJOBS", category: "public", native: "usajobs", sites: ["usajobs.gov/job"], priority: 75, tags: ["public sector"], note: "Some federal roles require citizenship or clearance. Read eligibility carefully." },
-  { id: "idealist", name: "Idealist", category: "public", native: "idealist", sites: ["idealist.org/en/jobs"], priority: 74, tags: ["nonprofit"] },
-  { id: "higherEdJobs", name: "HigherEdJobs", category: "public", native: "higherEdJobs", sites: ["higheredjobs.com"], priority: 73, tags: ["universities"] },
-  { id: "governmentJobs", name: "GovernmentJobs", category: "public", native: "governmentJobs", sites: ["governmentjobs.com/careers"], priority: 72, tags: ["state/local"] },
-  { id: "careersSubdomains", name: "Careers Subdomains", category: "company", rawSiteQuery: "(site:careers.* OR site:*/careers/* OR site:*/career/*)", priority: 71, tags: ["company pages"] },
-  { id: "jobsSubdomains", name: "Jobs Subdomains", category: "company", rawSiteQuery: "(site:jobs.* OR site:*/jobs/* OR site:*/job/*)", priority: 70, tags: ["company pages"] },
-  { id: "peopleSubdomains", name: "People Subdomains", category: "company", rawSiteQuery: "(site:people.* OR site:*/people/*)", priority: 69.8, tags: ["company pages"] },
-  { id: "talentSubdomains", name: "Talent Subdomains", category: "company", rawSiteQuery: "(site:talent.* OR site:*/talent/*)", priority: 69.6, tags: ["company pages"] },
-  { id: "otherJobPages", name: "Other Job Pages", category: "company", rawSiteQuery: "(site:*/employment/* OR site:*/opportunities/* OR site:*/openings/* OR site:*/join-us/* OR site:*/work-with-us/*)", priority: 69.4, tags: ["company pages"] },
-  { id: "greenhouse", name: "Greenhouse", category: "direct", sites: ["greenhouse.io"], priority: 69, tags: ["ATS"] },
-  { id: "lever", name: "Lever", category: "direct", sites: ["lever.co"], priority: 68, tags: ["ATS"] },
-  { id: "ashby", name: "Ashby", category: "direct", sites: ["ashbyhq.com"], priority: 67, tags: ["ATS"] },
-  { id: "workdayAts", name: "Workday", category: "direct", sites: ["myworkdayjobs.com"], priority: 66, tags: ["ATS"] },
-  { id: "smartRecruiters", name: "SmartRecruiters", category: "direct", sites: ["jobs.smartrecruiters.com"], priority: 65, tags: ["ATS"] },
-  { id: "icims", name: "iCIMS", category: "direct", sites: ["icims.com/jobs"], priority: 64, tags: ["ATS"] },
-  { id: "pinpoint", name: "Pinpoint", category: "direct", sites: ["pinpointhq.com"], priority: 63.8, tags: ["ATS", "Brian source"] },
-  { id: "paylocity", name: "Paylocity", category: "direct", sites: ["recruiting.paylocity.com"], priority: 63.6, tags: ["ATS", "Brian source"] },
-  { id: "keka", name: "Keka", category: "direct", sites: ["keka.com"], priority: 63.4, tags: ["ATS", "Brian source"] },
-  { id: "workable", name: "Workable", category: "direct", sites: ["jobs.workable.com"], priority: 63.2, tags: ["ATS", "Brian source"] },
-  { id: "breezy", name: "BreezyHR", category: "direct", sites: ["breezy.hr"], priority: 63, tags: ["ATS", "Brian source"] },
-  { id: "oracleCloud", name: "Oracle Cloud", category: "direct", sites: ["oraclecloud.com"], priority: 62.8, tags: ["ATS", "Brian source"] },
-  { id: "recruitee", name: "Recruitee", category: "direct", sites: ["recruitee.com"], priority: 62.6, tags: ["ATS", "Brian source"] },
-  { id: "ripplingAts", name: "Rippling", category: "direct", rawSiteQuery: "(site:rippling.com OR site:rippling-ats.com)", priority: 62.4, tags: ["ATS", "Brian source"] },
-  { id: "gustoJobs", name: "Gusto Jobs", category: "direct", sites: ["jobs.gusto.com"], priority: 62.2, tags: ["ATS", "Brian source"] },
-  { id: "careerPuck", name: "CareerPuck", category: "direct", sites: ["careerpuck.com"], priority: 62, tags: ["ATS", "Brian source"] },
-  { id: "teamtailor", name: "Teamtailor", category: "direct", sites: ["teamtailor.com"], priority: 61.8, tags: ["ATS", "Brian source"] },
-  { id: "talentReef", name: "TalentReef", category: "direct", sites: ["jobappnetwork.com"], priority: 61.6, tags: ["ATS", "Brian source"] },
-  { id: "homerun", name: "Homerun", category: "direct", sites: ["homerun.co"], priority: 61.4, tags: ["ATS", "Brian source"] },
-  { id: "gem", name: "Gem", category: "direct", sites: ["gem.com"], priority: 61.2, tags: ["ATS", "Brian source"] },
-  { id: "trakstar", name: "Trakstar", category: "direct", sites: ["trakstar.com"], priority: 61, tags: ["ATS", "Brian source"] },
-  { id: "cats", name: "Cats", category: "direct", sites: ["catsone.com"], priority: 60.8, tags: ["ATS", "Brian source"] },
-  { id: "jazzhr", name: "JazzHR", category: "direct", sites: ["applytojob.com"], priority: 60.6, tags: ["ATS", "Brian source"] },
-  { id: "jobvite", name: "Jobvite", category: "direct", sites: ["jobvite.com"], priority: 60.4, tags: ["ATS", "Brian source"] },
-  { id: "dover", name: "Dover", category: "direct", sites: ["dover.io"], priority: 60.2, tags: ["ATS", "Brian source"] },
-  { id: "notionCareers", name: "Notion Career Pages", category: "direct", sites: ["notion.site"], priority: 60, tags: ["ATS", "Brian source"] },
-  { id: "adpAts", name: "ADP", category: "direct", rawSiteQuery: "(site:workforcenow.adp.com OR site:myjobs.adp.com)", priority: 59.8, tags: ["ATS", "Brian source"] },
-  { id: "factorial", name: "Factorial", category: "direct", sites: ["factorialhr.com"], priority: 59.6, tags: ["ATS", "Brian source"] },
-  { id: "trinet", name: "TriNet Hire", category: "direct", sites: ["trinethire.com"], priority: 59.4, tags: ["ATS", "Brian source"] },
-  { id: "myVisaJobs", name: "MyVisaJobs Sponsor Search", category: "research", sites: ["myvisajobs.com"], priority: 45, tags: ["H-1B", "sponsor"] },
-  { id: "h1bData", name: "H1BData", category: "research", sites: ["h1bdata.info"], priority: 44, tags: ["salary", "H-1B"] },
-  { id: "uscisHub", name: "USCIS H-1B Employer Data Hub", category: "research", native: "static", url: "https://www.uscis.gov/tools/reports-and-studies/h-1b-employer-data-hub", priority: 43, tags: ["official", "H-1B"] },
-  { id: "dolOflc", name: "DOL OFLC Disclosure Data", category: "research", native: "static", url: "https://www.dol.gov/agencies/eta/foreign-labor/performance", priority: 42, tags: ["official", "disclosure"] }
+// ── CATEGORIES ────────────────────────────────────────────────────────────────
+const CATEGORIES = [
+  "Direct ATS",
+  "General Boards",
+  "Remote Boards",
+  "Startup and Tech",
+  "Public and Nonprofit",
+  "Company Career Pages"
 ];
 
-const PORTALS = PORTAL_ROWS.map((portal, index) => ({ ...portal, order: index + 1 }));
+// ── PORTAL ROWS ───────────────────────────────────────────────────────────────
+const PORTALS = [
+  { id: "greenhouse", name: "Greenhouse", category: "Direct ATS", sites: ["greenhouse.io"], priority: 10 },
+  { id: "lever", name: "Lever", category: "Direct ATS", sites: ["lever.co"], priority: 10 },
+  { id: "ashby", name: "Ashby", category: "Direct ATS", sites: ["ashbyhq.com"], priority: 10 },
+  { id: "workday", name: "Workday", category: "Direct ATS", sites: ["myworkdayjobs.com"], priority: 9 },
+  { id: "smartrecruiters", name: "SmartRecruiters", category: "Direct ATS", sites: ["jobs.smartrecruiters.com"], priority: 9 },
+  { id: "icims", name: "iCIMS", category: "Direct ATS", sites: ["icims.com/jobs"], priority: 8 },
+  { id: "jobvite", name: "Jobvite", category: "Direct ATS", sites: ["jobvite.com"], priority: 8 },
+  { id: "workable", name: "Workable", category: "Direct ATS", sites: ["jobs.workable.com"], priority: 9 },
+  { id: "recruitee", name: "Recruitee", category: "Direct ATS", sites: ["recruitee.com"], priority: 8 },
+  { id: "teamtailor", name: "Teamtailor", category: "Direct ATS", sites: ["teamtailor.com"], priority: 8 },
+  { id: "breezy", name: "Breezy HR", category: "Direct ATS", sites: ["breezy.hr"], priority: 7 },
+  { id: "pinpoint", name: "Pinpoint", category: "Direct ATS", sites: ["pinpointhq.com"], priority: 7 },
+  { id: "paylocity", name: "Paylocity", category: "Direct ATS", sites: ["recruiting.paylocity.com"], priority: 7 },
+  { id: "adp", name: "ADP", category: "Direct ATS", sites: ["workforcenow.adp.com", "myjobs.adp.com"], priority: 7 },
+  { id: "oracle", name: "Oracle Recruiting", category: "Direct ATS", sites: ["oraclecloud.com"], priority: 7 },
+  { id: "successfactors", name: "SAP SuccessFactors", category: "Direct ATS", sites: ["successfactors.com", "career5.successfactors.eu", "career2.successfactors.eu"], priority: 7 },
+  { id: "dayforce", name: "Dayforce", category: "Direct ATS", sites: ["dayforcehcm.com"], priority: 7 },
+  { id: "ukg", name: "UKG", category: "Direct ATS", sites: ["ultipro.com", "ukg.com/careers"], priority: 6 },
+  { id: "bamboohr", name: "BambooHR", category: "Direct ATS", sites: ["bamboohr.com/careers"], priority: 6 },
+  { id: "jazzhr", name: "JazzHR", category: "Direct ATS", sites: ["applytojob.com"], priority: 6 },
+  { id: "comeet", name: "Comeet", category: "Direct ATS", sites: ["comeet.com/jobs"], priority: 6 },
+  { id: "personio", name: "Personio", category: "Direct ATS", sites: ["jobs.personio.com"], priority: 6 },
+  { id: "rippling", name: "Rippling", category: "Direct ATS", sites: ["rippling.com", "rippling-ats.com"], priority: 6 },
+  { id: "gem", name: "Gem", category: "Direct ATS", sites: ["gem.com"], priority: 5 },
+  { id: "trakstar", name: "Trakstar", category: "Direct ATS", sites: ["trakstar.com"], priority: 5 },
+  { id: "catsone", name: "CATS", category: "Direct ATS", sites: ["catsone.com"], priority: 5 },
+  { id: "linkedin", name: "LinkedIn", category: "General Boards", sites: ["linkedin.com/jobs/view"], native: "linkedin", priority: 10 },
+  { id: "indeed", name: "Indeed", category: "General Boards", sites: ["indeed.com/jobs", "indeed.com/viewjob"], native: "indeed", priority: 10 },
+  { id: "glassdoor", name: "Glassdoor", category: "General Boards", sites: ["glassdoor.com/job-listing"], native: "glassdoor", priority: 7 },
+  { id: "ziprecruiter", name: "ZipRecruiter", category: "General Boards", sites: ["ziprecruiter.com/jobs"], native: "ziprecruiter", priority: 7 },
+  { id: "monster", name: "Monster", category: "General Boards", sites: ["monster.com/job-openings"], priority: 5 },
+  { id: "careerbuilder", name: "CareerBuilder", category: "General Boards", sites: ["careerbuilder.com/job"], priority: 5 },
+  { id: "dice", name: "Dice", category: "General Boards", sites: ["dice.com/job-detail"], native: "dice", priority: 9 },
+  { id: "talent", name: "Talent.com", category: "General Boards", sites: ["talent.com/view"], priority: 6 },
+  { id: "simplyhired", name: "SimplyHired", category: "General Boards", sites: ["simplyhired.com/job"], priority: 5 },
+  { id: "handshake", name: "Handshake", category: "General Boards", sites: ["joinhandshake.com/jobs"], priority: 8 },
+  { id: "simplify", name: "Simplify", category: "General Boards", sites: ["simplify.jobs"], priority: 8 },
+  { id: "hiringcafe", name: "HiringCafe", category: "General Boards", sites: ["hiring.cafe"], priority: 7 },
+  { id: "remoterocketship", name: "Remote Rocketship", category: "Remote Boards", sites: ["remoterocketship.com"], priority: 5 },
+  { id: "remotive", name: "Remotive", category: "Remote Boards", sites: ["remotive.com/remote-jobs"], priority: 5 },
+  { id: "weworkremotely", name: "We Work Remotely", category: "Remote Boards", sites: ["weworkremotely.com/remote-jobs"], priority: 5 },
+  { id: "remoteok", name: "Remote OK", category: "Remote Boards", sites: ["remoteok.com/remote-jobs"], priority: 5 },
+  { id: "himalayas", name: "Himalayas", category: "Remote Boards", sites: ["himalayas.app/jobs"], priority: 5 },
+  { id: "workingnomads", name: "Working Nomads", category: "Remote Boards", sites: ["workingnomads.com/jobs"], priority: 4 },
+  { id: "otta", name: "Otta", category: "Startup and Tech", sites: ["otta.com/jobs"], priority: 8 },
+  { id: "wellfound", name: "Wellfound", category: "Startup and Tech", sites: ["wellfound.com/jobs"], priority: 8 },
+  { id: "yc", name: "YC Work at a Startup", category: "Startup and Tech", sites: ["workatastartup.com/jobs"], priority: 8 },
+  { id: "builtin", name: "Built In", category: "Startup and Tech", sites: ["builtin.com/job"], priority: 8 },
+  { id: "themuse", name: "The Muse", category: "Startup and Tech", sites: ["themuse.com/jobs"], priority: 6 },
+  { id: "cord", name: "Cord", category: "Startup and Tech", sites: ["cord.co"], priority: 5 },
+  { id: "techladder", name: "Ladders", category: "Startup and Tech", sites: ["theladders.com/job"], priority: 5 },
+  { id: "rippleMatch", name: "RippleMatch", category: "Startup and Tech", sites: ["ripplmatch.com/jobs"], priority: 6 },
+  { id: "wayup", name: "WayUp", category: "Startup and Tech", sites: ["wayup.com/gigs"], priority: 6 },
+  { id: "levelsfyi", name: "Levels.fyi Jobs", category: "Startup and Tech", sites: ["levels.fyi/jobs"], priority: 7 },
+  { id: "usajobs", name: "USAJobs", category: "Public and Nonprofit", sites: ["usajobs.gov/job"], native: "usajobs", priority: 6 },
+  { id: "idealist", name: "Idealist", category: "Public and Nonprofit", sites: ["idealist.org/en/job"], priority: 5 },
+  { id: "higheredjobs", name: "HigherEdJobs", category: "Public and Nonprofit", sites: ["higheredjobs.com/admin/details.cfm", "higheredjobs.com/faculty/details.cfm"], priority: 5 },
+  { id: "governmentjobs", name: "GovernmentJobs", category: "Public and Nonprofit", sites: ["governmentjobs.com/careers"], priority: 5 },
+  { id: "unjobs", name: "UN Jobs", category: "Public and Nonprofit", sites: ["unjobs.org/vacancies"], priority: 4 },
+  { id: "myvisajobs", name: "MyVisaJobs", category: "Public and Nonprofit", sites: ["myvisajobs.com/Search_H1B_Cap_Exempt_Jobs.aspx"], priority: 6 },
+  { id: "careersSubdomain", name: "Careers Subdomains", category: "Company Career Pages", rawSiteQuery: "(site:careers.* OR site:*/careers/* OR site:*/career/*)", priority: 7 },
+  { id: "jobsSubdomain", name: "Jobs Subdomains", category: "Company Career Pages", rawSiteQuery: "(site:jobs.* OR site:*/jobs/* OR site:*/job/*)", priority: 7 },
+  { id: "talentSubdomain", name: "Talent Pages", category: "Company Career Pages", rawSiteQuery: "(site:talent.* OR site:people.* OR site:*/talent/*)", priority: 6 },
+  { id: "joinPages", name: "Join Us Pages", category: "Company Career Pages", rawSiteQuery: "(site:*/join-us/* OR site:*/work-with-us/* OR site:*/opportunities/* OR site:*/openings/*)", priority: 6 },
+  { id: "notion", name: "Notion Career Pages", category: "Company Career Pages", sites: ["notion.site"], priority: 5 }
+];
 
-const SOURCE_CAPABILITIES = {
-  linkedinJobs: { kind: "native-filtered", label: "Native filtered", supports: ["time", "sort", "experience", "employment", "remote", "company keywords"] },
-  linkedinPosts: { kind: "native-filtered", label: "Native post search", supports: ["date posted", "content type", "company keywords"] },
-  indeed: { kind: "native-filtered", label: "Native filtered", supports: ["date", "sort", "location", "remote keyword"] },
-  google: { kind: "native-filtered", label: "Google date tools", supports: ["time", "sort", "operators"] },
-  usajobs: { kind: "native-filtered", label: "Native public search", supports: ["date sort", "location"] },
-  static: { kind: "companion-search", label: "Research link", supports: ["manual research"] },
-  native: { kind: "broad-search", label: "Native broad search", supports: ["keyword", "location where supported"] },
-  operator: { kind: "broad-search", label: "Broad search operator", supports: ["site operators", "date where engine supports it"] }
-};
+// ── ROLE PACKS ────────────────────────────────────────────────────────────────
+const ROLE_PACKS = [
+  { id: "all-role-families", label: "All Target Role Families – Max Coverage",
+    primary: "Software Engineer",
+    titles: ["Software Engineer","Software Developer","Full Stack Developer","Frontend Developer","Backend Developer","DevOps Engineer","Site Reliability Engineer","Platform Engineer","Data Engineer","Data Analyst","Analytics Engineer","Data Scientist","Business Intelligence Analyst","Power BI Developer","Machine Learning Engineer","AI Engineer","MLOps Engineer","Cloud Engineer","QA Engineer","SDET","Automation Engineer","Cybersecurity Analyst","Security Engineer","SOC Analyst","GRC Analyst","Product Manager","Product Analyst","Business Analyst","Systems Analyst","Salesforce Administrator","IT Analyst","IT Support Specialist","Help Desk Analyst","Network Engineer","Database Administrator","Scrum Master","Agile Coach","Technical Writer","UX Designer","UI Designer","Project Manager","Program Manager","Solutions Architect","Enterprise Architect"],
+    query: "" },
+  { id: "software-ai-data", label: "Software / AI / Data",
+    primary: "Software Engineer",
+    titles: ["Software Engineer","Data Engineer","Data Scientist","Machine Learning Engineer","AI Engineer","Data Analyst","Analytics Engineer"],
+    query: "" },
+  { id: "software-engineering", label: "Software Engineering",
+    primary: "Software Engineer",
+    titles: ["Software Engineer","Software Developer","Full Stack Developer","Frontend Developer","Backend Developer","Platform Engineer"],
+    query: "" },
+  { id: "ai-ml", label: "AI / ML",
+    primary: "Machine Learning Engineer",
+    titles: ["Machine Learning Engineer","AI Engineer","MLOps Engineer","Data Scientist","Research Scientist","Applied Scientist"],
+    query: "" },
+  { id: "data-analytics", label: "Data / Analytics",
+    primary: "Data Analyst",
+    titles: ["Data Analyst","Analytics Engineer","Business Intelligence Analyst","Data Engineer","Power BI Developer","Reporting Analyst","Data Scientist"],
+    query: "" },
+  { id: "cloud-devops", label: "Cloud / DevOps",
+    primary: "Cloud Engineer",
+    titles: ["Cloud Engineer","DevOps Engineer","Site Reliability Engineer","Platform Engineer","Infrastructure Engineer","Solutions Architect"],
+    query: "" },
+  { id: "qa-sdet", label: "QA / SDET",
+    primary: "QA Engineer",
+    titles: ["QA Engineer","SDET","Automation Engineer","Quality Assurance Engineer","Test Engineer","QA Analyst"],
+    query: "" },
+  { id: "product-analyst", label: "Product / Data Analyst",
+    primary: "Product Analyst",
+    titles: ["Product Analyst","Product Manager","Business Analyst","Data Analyst","Systems Analyst","Growth Analyst"],
+    query: "" }
+];
+
+// ── RELATED TITLE GROUPS ──────────────────────────────────────────────────────
+const RELATED_TITLE_GROUPS = [
+  ["Software Engineer","Software Developer","Full Stack Developer","Frontend Developer","Backend Developer","Platform Engineer","Application Developer"],
+  ["DevOps Engineer","Site Reliability Engineer","Cloud Engineer","Infrastructure Engineer","MLOps Engineer"],
+  ["Data Engineer","Analytics Engineer","Data Pipeline Engineer","ETL Developer"],
+  ["Data Analyst","Business Intelligence Analyst","Power BI Developer","Reporting Analyst","BI Analyst","Business Intelligence Developer"],
+  ["Data Scientist","Machine Learning Engineer","AI Engineer","Research Scientist","Applied Scientist","Computational Scientist"],
+  ["QA Engineer","SDET","Automation Engineer","Quality Assurance Engineer","Test Engineer","QA Analyst"],
+  ["Cybersecurity Analyst","Security Engineer","SOC Analyst","GRC Analyst","Cloud Security Engineer","Application Security Engineer","Information Security Analyst"],
+  ["Product Manager","Technical Product Manager","Product Owner"],
+  ["Product Analyst","Growth Analyst","Strategy Analyst"],
+  ["Business Analyst","Systems Analyst","Operations Analyst","Business Systems Analyst"],
+  ["Salesforce Administrator","Salesforce Developer","Salesforce Consultant","CRM Analyst"],
+  ["Network Engineer","Network Administrator","Systems Engineer","IT Infrastructure Engineer"],
+  ["Database Administrator","Database Engineer","SQL Developer","Data Architect"],
+  ["Project Manager","Program Manager","Delivery Manager","Scrum Master","Agile Coach"],
+  ["IT Analyst","IT Support Specialist","Help Desk Analyst","IT Specialist","Desktop Support"],
+  ["Solutions Architect","Enterprise Architect","Technical Architect","Cloud Architect"],
+  ["UX Designer","UI Designer","Product Designer","Design Researcher","UX Researcher","Content Designer"],
+  ["Financial Analyst","FP&A Analyst","Business Operations Analyst","Revenue Analyst"],
+  ["Technical Writer","Documentation Specialist","Content Engineer"],
+  ["Digital Marketing Specialist","Growth Marketer","SEO Specialist","Content Strategist","Lifecycle Marketing Manager","Social Media Manager"],
+  ["Sales Development Representative","Account Executive","Customer Success Manager","Solutions Engineer","Revenue Operations Analyst"],
+  ["HR Generalist","Recruiter","Talent Acquisition Specialist","People Operations Manager","Compensation Analyst"]
+];
+
+// ── OLDER OPTIONS & TIME OPTIONS ─────────────────────────────────────────────
+const OLDER_OPTIONS = [
+  { value: "older1month", label: "Older than 1 month" },
+  { value: "older3months", label: "Older than 3 months" },
+  { value: "older6months", label: "Older than 6 months" }
+];
 
 const TIME_OPTIONS = {
   google: [
-    ["all", "All"],
-    ["1hour", "Past Hour"],
-    ["4hours", "Past 4 Hours"],
-    ["8hours", "Past 8 Hours"],
-    ["12hours", "Past 12 Hours"],
-    ["24hours", "Past 24 Hours"],
-    ["48hours", "Past 48 Hours"],
-    ["72hours", "Past 72 Hours"],
-    ["week", "Past Week"],
-    ["month", "Past Month"],
-    ["year", "Past Year"],
-    ["older1month", "Older than 1 month"],
-    ["older3months", "Older than 3 months"],
-    ["older6months", "Older than 6 months"]
+    { value: "all", label: "All" },
+    { value: "1hour", label: "Past Hour" },
+    { value: "4hours", label: "Past 4 Hours" },
+    { value: "8hours", label: "Past 8 Hours" },
+    { value: "12hours", label: "Past 12 Hours" },
+    { value: "24hours", label: "Past 24 Hours" },
+    { value: "48hours", label: "Past 48 Hours" },
+    { value: "72hours", label: "Past 72 Hours" },
+    { value: "week", label: "Past Week" },
+    { value: "month", label: "Past Month" },
+    { value: "year", label: "Past Year" },
+    ...OLDER_OPTIONS
   ],
-  duckduckgo: [["all", "All"], ["24hours", "Past 24 Hours"], ["week", "Past Week"], ["month", "Past Month"], ["year", "Past Year"]],
-  bing: [["all", "All"], ["24hours", "Past 24 Hours"], ["week", "Past Week"], ["month", "Past Month"]],
-  brave: [["all", "All"], ["24hours", "Past 24 Hours"], ["week", "Past Week"], ["month", "Past Month"], ["year", "Past Year"]],
-  startpage: [["all", "All"], ["24hours", "Past 24 Hours"], ["week", "Past Week"], ["month", "Past Month"], ["year", "Past Year"]],
-  yahoo: [["all", "All"], ["24hours", "Past 24 Hours"], ["week", "Past Week"], ["month", "Past Month"]],
-  kagi: [["all", "All"], ["24hours", "Past 24 Hours"], ["week", "Past Week"], ["month", "Past Month"], ["year", "Past Year"]],
-  qwant: [["all", "All"], ["24hours", "Past 24 Hours"], ["week", "Past Week"], ["month", "Past Month"]]
+  duckduckgo: [
+    { value: "all", label: "All" },
+    { value: "24hours", label: "Past 24 Hours" },
+    { value: "week", label: "Past Week" },
+    { value: "month", label: "Past Month" },
+    { value: "year", label: "Past Year" },
+    ...OLDER_OPTIONS
+  ],
+  bing: [
+    { value: "all", label: "All" },
+    { value: "24hours", label: "Past 24 Hours" },
+    { value: "week", label: "Past Week" },
+    { value: "month", label: "Past Month" },
+    ...OLDER_OPTIONS
+  ],
+  yahoo: [
+    { value: "all", label: "All" },
+    { value: "24hours", label: "Past 24 Hours" },
+    { value: "week", label: "Past Week" },
+    { value: "month", label: "Past Month" },
+    ...OLDER_OPTIONS
+  ],
+  kagi: [
+    { value: "all", label: "All" },
+    { value: "24hours", label: "Past 24 Hours" },
+    { value: "week", label: "Past Week" },
+    { value: "month", label: "Past Month" },
+    { value: "year", label: "Past Year" },
+    ...OLDER_OPTIONS
+  ],
+  qwant: [
+    { value: "all", label: "All" },
+    { value: "24hours", label: "Past 24 Hours" },
+    { value: "week", label: "Past Week" },
+    { value: "month", label: "Past Month" },
+    ...OLDER_OPTIONS
+  ],
+  brave: [
+    { value: "all", label: "All" },
+    { value: "24hours", label: "Past 24 Hours" },
+    { value: "week", label: "Past Week" },
+    { value: "month", label: "Past Month" },
+    { value: "year", label: "Past Year" },
+    ...OLDER_OPTIONS
+  ],
+  startpage: [
+    { value: "all", label: "All" },
+    { value: "24hours", label: "Past 24 Hours" },
+    { value: "week", label: "Past Week" },
+    { value: "month", label: "Past Month" },
+    { value: "year", label: "Past Year" },
+    ...OLDER_OPTIONS
+  ]
 };
 
+// ── LOCATIONS ─────────────────────────────────────────────────────────────────
 const LOCATIONS = [
   ["usa", "United States", '("United States" OR USA OR "U.S.")', "United States"],
   ["remote-us", "Remote, US", '("United States" OR USA OR "U.S.") remote', "United States"],
@@ -209,7 +936,7 @@ const LOCATIONS = [
   ["bay-area-ca", "San Francisco Bay Area, CA", '("San Francisco" OR "Bay Area" OR "San Jose" OR "Palo Alto") California', "San Francisco Bay Area"],
   ["seattle-wa", "Seattle, WA", '"Seattle" Washington', "Seattle, WA"],
   ["austin-tx", "Austin, TX", '"Austin" Texas', "Austin, TX"],
-  ["dallas-tx", "Dallas-Fort Worth, TX", '("Dallas" OR "Fort Worth") Texas', "Dallas-Fort Worth, TX"],
+  ["dallas-tx", "Dallas, TX", '("Dallas" OR "Fort Worth") Texas', "Dallas-Fort Worth, TX"],
   ["houston-tx", "Houston, TX", '"Houston" Texas', "Houston, TX"],
   ["boston-ma", "Boston, MA", '"Boston" Massachusetts', "Boston, MA"],
   ["chicago-il", "Chicago, IL", '"Chicago" Illinois', "Chicago, IL"],
@@ -231,94 +958,8 @@ const LOCATIONS = [
   ["portland-or", "Portland, OR", '"Portland" Oregon', "Portland, OR"]
 ];
 
-const RELATED_TITLE_GROUPS = [
-  ["Software Engineer", "Software Developer", "Full Stack Developer", "Frontend Developer", "Backend Developer", "Application Developer", "Web Developer"],
-  ["Machine Learning Engineer", "ML Engineer", "AI Engineer", "Applied Scientist", "Data Scientist", "Research Engineer", "AI Data Engineer"],
-  ["Data Engineer", "Analytics Engineer", "ETL Developer", "BI Engineer", "Data Platform Engineer"],
-  ["Data Analyst", "Business Intelligence Analyst", "Reporting Analyst", "SQL Analyst", "Power BI Developer", "Tableau Developer"],
-  ["Cloud Engineer", "DevOps Engineer", "Site Reliability Engineer", "Platform Engineer", "Infrastructure Engineer"],
-  ["Business Analyst", "Systems Analyst", "Product Analyst", "Operations Analyst", "Business Systems Analyst", "Technical Analyst"],
-  ["Cybersecurity Analyst", "Security Engineer", "SOC Analyst", "GRC Analyst", "Cloud Security Engineer", "Application Security Engineer"],
-  ["Product Manager", "Product Owner", "Technical Product Manager"],
-  ["QA Engineer", "Software Test Engineer", "Automation Engineer", "SDET", "Quality Engineer"],
-  ["UX Designer", "UI Designer", "Product Designer", "UX Researcher", "Content Designer"],
-  ["Financial Analyst", "FP&A Analyst", "Business Operations Analyst", "Revenue Analyst", "Risk Analyst"],
-  ["Video Producer", "Film Editor", "Content Producer", "Content Creator", "Media Manager", "Digital Marketing Specialist", "Multimedia Designer", "Social Media Strategist", "Brand Content Manager", "Video Production Coordinator", "Creative Director"],
-  ["Salesforce Administrator", "Salesforce Developer", "Salesforce Consultant", "Salesforce Business Analyst", "Database Administrator", "IT Systems Administrator"],
-  ["Project Manager", "Program Manager", "Operations Manager", "Team Lead", "Project Coordinator", "Delivery Manager"],
-  ["Scrum Master", "Agile Coach", "Lean Practitioner", "Kanban Coach", "Agile Project Facilitator", "Agile Transformation Lead", "Agile Team Coach", "Iteration Manager"]
-];
-
-const ROLE_PACKS = [
-  {
-    id: "all-role-families",
-    label: "All Target Role Families - Max Coverage",
-    primary: "Software Engineer",
-    titles: ["Software Engineer", "Software Developer", "AI Engineer", "Machine Learning Engineer", "Data Scientist", "Data Engineer", "Data Analyst", "Analytics Engineer", "Business Intelligence Analyst", "Cloud Engineer", "DevOps Engineer", "QA Engineer", "SDET", "Cybersecurity Analyst", "Security Engineer", "Product Analyst", "Business Analyst", "Systems Analyst", "Salesforce Administrator", "Project Manager"],
-    includes: ["Python", "SQL", "cloud", "AI", "data", "analytics"],
-    query: '("software engineer" OR "software developer" OR "AI engineer" OR "machine learning engineer" OR "data scientist" OR "data engineer" OR "data analyst" OR "analytics engineer" OR "business intelligence analyst" OR "cloud engineer" OR "DevOps engineer" OR "QA engineer" OR SDET OR "cybersecurity analyst" OR "security engineer" OR "product analyst" OR "business analyst" OR "systems analyst" OR "Salesforce administrator" OR "project manager")'
-  },
-  {
-    id: "software-ai-data",
-    label: "Software / AI / Data",
-    primary: "Software Engineer",
-    titles: ["Software Engineer", "Software Developer", "AI Engineer", "Machine Learning Engineer", "Data Engineer", "Data Analyst", "Analytics Engineer", "Business Intelligence Analyst"],
-    includes: ["Python", "SQL", "cloud", "AI", "data"],
-    query: '("software engineer" OR "software developer" OR "AI engineer" OR "machine learning engineer" OR "data engineer" OR "data analyst" OR "analytics engineer" OR "business intelligence analyst")'
-  },
-  {
-    id: "software",
-    label: "Software Engineering",
-    primary: "Software Engineer",
-    titles: ["Software Engineer", "Software Developer", "Full Stack Developer", "Backend Developer", "Frontend Developer", "Application Developer"],
-    includes: ["JavaScript", "Python", "Java", "API"],
-    query: '("software engineer" OR "software developer" OR "full stack developer" OR "backend developer" OR "frontend developer" OR "application developer")'
-  },
-  {
-    id: "ai-ml",
-    label: "AI / ML",
-    primary: "Machine Learning Engineer",
-    titles: ["Machine Learning Engineer", "AI Engineer", "Applied Scientist", "ML Engineer", "Data Scientist", "AI Data Engineer"],
-    includes: ["Python", "machine learning", "LLM", "AI"],
-    query: '("machine learning engineer" OR "AI engineer" OR "applied scientist" OR "ML engineer" OR "data scientist" OR "LLM")'
-  },
-  {
-    id: "data-analytics",
-    label: "Data / Analytics",
-    primary: "Data Analyst",
-    titles: ["Data Analyst", "Business Intelligence Analyst", "Analytics Engineer", "SQL Analyst", "Reporting Analyst", "Data Scientist", "Data Engineer"],
-    includes: ["SQL", "Python", "Tableau", "Power BI"],
-    query: '("data analyst" OR "business intelligence analyst" OR "analytics engineer" OR "SQL analyst" OR "reporting analyst" OR "data scientist" OR "data engineer")'
-  },
-  {
-    id: "cloud-devops",
-    label: "Cloud / DevOps",
-    primary: "Cloud Engineer",
-    titles: ["Cloud Engineer", "DevOps Engineer", "Site Reliability Engineer", "Platform Engineer", "Infrastructure Engineer"],
-    includes: ["AWS", "Azure", "Kubernetes", "Terraform"],
-    query: '("cloud engineer" OR "DevOps engineer" OR "site reliability engineer" OR "platform engineer" OR "infrastructure engineer")'
-  },
-  {
-    id: "qa-sdet",
-    label: "QA / SDET",
-    primary: "QA Engineer",
-    titles: ["QA Engineer", "Software Test Engineer", "Automation Engineer", "SDET", "Quality Engineer"],
-    includes: ["automation", "testing", "Selenium", "API"],
-    query: '("QA engineer" OR "software test engineer" OR "automation engineer" OR "SDET" OR "quality engineer")'
-  },
-  {
-    id: "product-data",
-    label: "Product / Data Analyst",
-    primary: "Product Analyst",
-    titles: ["Product Analyst", "Business Analyst", "Business Systems Analyst", "Operations Analyst", "Technical Analyst"],
-    includes: ["SQL", "metrics", "dashboard", "requirements"],
-    query: '("product analyst" OR "business analyst" OR "business systems analyst" OR "operations analyst" OR "technical analyst")'
-  }
-];
-
-const ROLE_PACK_LABELS = Object.fromEntries(ROLE_PACKS.map(pack => [pack.id, pack.label]));
-
-const ACRONYMS = new Set(["AI", "API", "BI", "CRM", "FP&A", "GRC", "HR", "ML", "QA", "SEO", "SOC", "SRE", "SQL", "UI", "UX"]);
+// ── ACRONYMS & FILTER LABELS ─────────────────────────────────────────────────
+const ACRONYMS = new Set(["AI", "API", "BI", "CRM", "FP&A", "GRC", "HR", "ML", "QA", "SEO", "SOC", "SRE", "UI", "UX"]);
 
 const FILTER_LABELS = {
   remoteMode: {
@@ -349,378 +990,45 @@ const FILTER_LABELS = {
     internship: "Internship"
   },
   authorization: {
-    none: "No auth filter",
     optBroad: "OPT-aware broad",
+    none: "No auth filter",
     currentAuthorized: "US work authorized",
     sponsorNeeded: "Future sponsorship",
     everify: "E-Verify",
     optStrict: "OPT/STEM OPT exact"
   },
   sort: {
-    recommended: "Most useful first",
+    recommended: "Recommended",
     latest: "Newest first",
     direct: "Direct apply first",
     coverage: "Broad coverage"
-  },
-  precision: {
-    coverage: "Max Coverage",
-    latest1: "Latest 1h",
-    latest24: "Latest 24h",
-    optSponsor: "OPT/Sponsor Research",
-    direct: "Direct ATS",
-    exact: "Exact Role"
-  },
-  companyKind: {
-    all: "Direct and vendors",
-    direct: "Direct employers",
-    vendor: "Staffing/vendors"
-  },
-  sponsorTier: {
-    all: "All sponsor tiers",
-    top: "Top H1B sponsors",
-    strong: "Strong sponsors",
-    moderate: "Moderate sponsors",
-    curated: "Curated/no filing data"
   }
 };
 
-const COMPANY_ROWS = [
-  ["Amazon", "Cloud and Big Tech", "https://www.amazon.jobs/", "software, data, cloud, operations"],
-  ["Microsoft", "Cloud and Big Tech", "https://careers.microsoft.com/", "software, data, cloud, AI"],
-  ["Google / Alphabet", "Cloud and Big Tech", "https://www.google.com/about/careers/applications/", "software, data, AI, product"],
-  ["Meta", "Cloud and Big Tech", "https://www.metacareers.com/", "software, data, AI, product"],
-  ["Apple", "Cloud and Big Tech", "https://jobs.apple.com/", "software, hardware, data, product"],
-  ["NVIDIA", "Cloud and Big Tech", "https://www.nvidia.com/en-us/about-nvidia/careers/", "AI, hardware, software, data"],
-  ["OpenAI", "AI and Data", "https://openai.com/careers/", "AI, research, software, data"],
-  ["Anthropic", "AI and Data", "https://www.anthropic.com/careers", "AI, research, software, data"],
-  ["Databricks", "AI and Data", "https://www.databricks.com/company/careers", "data, AI, platform, software"],
-  ["Snowflake", "AI and Data", "https://careers.snowflake.com/", "data, cloud, platform, software"],
-  ["Oracle", "Enterprise Software", "https://careers.oracle.com/", "cloud, software, data, enterprise"],
-  ["Salesforce", "Enterprise Software", "https://www.salesforce.com/company/careers/", "CRM, software, data, product"],
-  ["Adobe", "Enterprise Software", "https://careers.adobe.com/", "software, data, product, creative"],
-  ["ServiceNow", "Enterprise Software", "https://careers.servicenow.com/", "platform, software, data, enterprise"],
-  ["IBM", "Enterprise Software", "https://www.ibm.com/careers", "software, data, consulting, AI"],
-  ["Cisco", "Enterprise Software", "https://jobs.cisco.com/", "networking, cloud, security, software"],
-  ["Intuit", "Enterprise Software", "https://www.intuit.com/careers/", "software, data, fintech, product"],
-  ["Workday", "Enterprise Software", "https://www.workday.com/en-us/company/careers.html", "software, data, HR, finance"],
-  ["Atlassian", "Enterprise Software", "https://www.atlassian.com/company/careers", "software, product, collaboration"],
-  ["Broadcom", "Hardware and Semiconductors", "https://www.broadcom.com/company/careers", "semiconductor, software, infrastructure"],
-  ["Cloudflare", "Enterprise Software", "https://www.cloudflare.com/careers/", "security, networking, cloud, software"],
-  ["MongoDB", "AI and Data", "https://www.mongodb.com/company/careers", "database, data, software, cloud"],
-  ["GitHub", "Enterprise Software", "https://www.github.careers/", "software, developer tools, platform"],
-  ["GitLab", "Enterprise Software", "https://about.gitlab.com/jobs/", "software, DevOps, platform"],
-  ["Elastic", "AI and Data", "https://www.elastic.co/careers", "search, data, security, cloud"],
-  ["Okta", "Enterprise Software", "https://www.okta.com/company/careers/", "identity, security, software"],
-  ["Twilio", "Enterprise Software", "https://www.twilio.com/en-us/company/jobs", "software, communications, data"],
-  ["HubSpot", "Enterprise Software", "https://www.hubspot.com/careers", "CRM, software, data, product"],
-  ["Zoom", "Enterprise Software", "https://careers.zoom.us/", "software, communications, platform"],
-  ["Palantir", "AI and Data", "https://www.palantir.com/careers/", "data, software, government", "Some roles can be clearance-heavy."],
-  ["Intel", "Hardware and Semiconductors", "https://jobs.intel.com/", "semiconductor, software, hardware"],
-  ["AMD", "Hardware and Semiconductors", "https://careers.amd.com/", "semiconductor, software, hardware"],
-  ["Qualcomm", "Hardware and Semiconductors", "https://careers.qualcomm.com/", "semiconductor, wireless, software"],
-  ["Micron", "Hardware and Semiconductors", "https://www.micron.com/about/careers", "semiconductor, data, hardware"],
-  ["Texas Instruments", "Hardware and Semiconductors", "https://careers.ti.com/", "semiconductor, hardware, software"],
-  ["Applied Materials", "Hardware and Semiconductors", "https://www.appliedmaterials.com/us/en/careers.html", "semiconductor, engineering, data"],
-  ["Lam Research", "Hardware and Semiconductors", "https://careers.lamresearch.com/", "semiconductor, engineering, data"],
-  ["KLA", "Hardware and Semiconductors", "https://www.kla.com/careers", "semiconductor, engineering, data"],
-  ["Dell", "Hardware and Semiconductors", "https://jobs.dell.com/", "hardware, cloud, software, data"],
-  ["HP", "Hardware and Semiconductors", "https://jobs.hp.com/", "hardware, software, data"],
-  ["HPE", "Hardware and Semiconductors", "https://careers.hpe.com/", "cloud, hardware, software"],
-  ["Motorola Solutions", "Hardware and Semiconductors", "https://www.motorolasolutions.com/en_us/about/careers.html", "software, public safety, data"],
-  ["Arista", "Hardware and Semiconductors", "https://www.arista.com/en/careers", "networking, software, cloud"],
-  ["Juniper", "Hardware and Semiconductors", "https://www.juniper.net/us/en/company/careers.html", "networking, software, security"],
-  ["Palo Alto Networks", "Cybersecurity", "https://jobs.paloaltonetworks.com/", "security, cloud, software"],
-  ["Netflix", "Consumer Tech", "https://jobs.netflix.com/", "software, data, streaming, product"],
-  ["Uber", "Consumer Tech", "https://www.uber.com/us/en/careers/", "software, data, product, operations"],
-  ["Lyft", "Consumer Tech", "https://www.lyft.com/careers", "software, data, product, operations"],
-  ["Airbnb", "Consumer Tech", "https://careers.airbnb.com/", "software, data, product, marketplace"],
-  ["DoorDash", "Consumer Tech", "https://careers.doordash.com/", "software, data, logistics, product"],
-  ["Instacart", "Consumer Tech", "https://instacart.careers/", "software, data, marketplace"],
-  ["Pinterest", "Consumer Tech", "https://www.pinterestcareers.com/", "software, data, product"],
-  ["Reddit", "Consumer Tech", "https://www.redditinc.com/careers", "software, data, community"],
-  ["Snap", "Consumer Tech", "https://careers.snap.com/", "software, data, AR, product"],
-  ["Roblox", "Consumer Tech", "https://careers.roblox.com/", "software, data, gaming"],
-  ["Etsy", "Consumer Tech", "https://careers.etsy.com/", "software, data, marketplace"],
-  ["eBay", "Consumer Tech", "https://jobs.ebayinc.com/", "software, data, marketplace"],
-  ["PayPal", "Fintech and Finance", "https://careers.pypl.com/", "fintech, software, data"],
-  ["Block", "Fintech and Finance", "https://block.xyz/careers", "fintech, software, data"],
-  ["Stripe", "Fintech and Finance", "https://stripe.com/jobs", "fintech, software, data"],
-  ["Coinbase", "Fintech and Finance", "https://www.coinbase.com/careers", "crypto, fintech, software"],
-  ["Robinhood", "Fintech and Finance", "https://careers.robinhood.com/", "fintech, software, data"],
-  ["Affirm", "Fintech and Finance", "https://www.affirm.com/careers", "fintech, software, data"],
-  ["JPMorgan Chase", "Fintech and Finance", "https://careers.jpmorgan.com/", "banking, data, software, analytics"],
-  ["Bank of America", "Fintech and Finance", "https://careers.bankofamerica.com/", "banking, data, software, analytics"],
-  ["Citi", "Fintech and Finance", "https://jobs.citi.com/", "banking, data, software, analytics"],
-  ["Wells Fargo", "Fintech and Finance", "https://www.wellsfargojobs.com/", "banking, data, software, analytics"],
-  ["Goldman Sachs", "Fintech and Finance", "https://www.goldmansachs.com/careers/", "banking, data, software, analytics"],
-  ["Morgan Stanley", "Fintech and Finance", "https://www.morganstanley.com/about-us/careers", "banking, data, software, analytics"],
-  ["Capital One", "Fintech and Finance", "https://www.capitalonecareers.com/", "fintech, data, software, analytics"],
-  ["American Express", "Fintech and Finance", "https://www.americanexpress.com/en-us/careers/", "payments, data, software, analytics"],
-  ["Mastercard", "Fintech and Finance", "https://careers.mastercard.com/", "payments, data, software"],
-  ["Visa", "Fintech and Finance", "https://usa.visa.com/careers.html", "payments, data, software"],
-  ["Discover", "Fintech and Finance", "https://jobs.discover.com/", "payments, data, software"],
-  ["Fiserv", "Fintech and Finance", "https://www.fiserv.com/en/about-fiserv/careers.html", "payments, fintech, software"],
-  ["Fidelity", "Fintech and Finance", "https://jobs.fidelity.com/", "finance, data, software"],
-  ["Charles Schwab", "Fintech and Finance", "https://www.schwabjobs.com/", "finance, data, software"],
-  ["BlackRock", "Fintech and Finance", "https://careers.blackrock.com/", "finance, data, analytics"],
-  ["Bloomberg", "Fintech and Finance", "https://www.bloomberg.com/company/careers/", "finance, data, software"],
-  ["Moody's", "Fintech and Finance", "https://careers.moodys.com/", "finance, data, analytics"],
-  ["S&P Global", "Fintech and Finance", "https://www.spglobal.com/en/careers", "finance, data, analytics"],
-  ["Progressive", "Insurance", "https://www.progressive.com/careers/", "insurance, data, analytics, software"],
-  ["State Farm", "Insurance", "https://www.statefarm.com/careers", "insurance, data, analytics, software"],
-  ["Allstate", "Insurance", "https://www.allstate.jobs/", "insurance, data, analytics, software"],
-  ["Chubb", "Insurance", "https://careers.chubb.com/", "insurance, data, analytics"],
-  ["Deloitte", "Consulting and Services", "https://www.deloitte.com/us/en/careers.html", "consulting, data, technology"],
-  ["Accenture", "Consulting and Services", "https://www.accenture.com/us-en/careers", "consulting, technology, data"],
-  ["PwC", "Consulting and Services", "https://www.pwc.com/us/en/careers.html", "consulting, data, technology"],
-  ["EY", "Consulting and Services", "https://www.ey.com/en_us/careers", "consulting, data, technology"],
-  ["KPMG", "Consulting and Services", "https://kpmg.com/us/en/careers.html", "consulting, data, technology"],
-  ["McKinsey", "Consulting and Services", "https://www.mckinsey.com/careers", "consulting, analytics, data"],
-  ["BCG", "Consulting and Services", "https://careers.bcg.com/", "consulting, analytics, data"],
-  ["Bain", "Consulting and Services", "https://www.bain.com/careers/", "consulting, analytics, data"],
-  ["Cognizant", "Consulting and Services", "https://careers.cognizant.com/", "consulting, technology, data"],
-  ["TCS", "Consulting and Services", "https://www.tcs.com/careers", "consulting, technology, data"],
-  ["Infosys", "Consulting and Services", "https://www.infosys.com/careers/", "consulting, technology, data"],
-  ["Wipro", "Consulting and Services", "https://careers.wipro.com/", "consulting, technology, data"],
-  ["HCLTech", "Consulting and Services", "https://www.hcltech.com/careers", "consulting, technology, data"],
-  ["Capgemini", "Consulting and Services", "https://www.capgemini.com/us-en/careers/", "consulting, technology, data"],
-  ["EPAM", "Consulting and Services", "https://www.epam.com/careers", "consulting, software, data"],
-  ["Globant", "Consulting and Services", "https://www.globant.com/careers", "consulting, software, data"],
-  ["Slalom", "Consulting and Services", "https://www.slalom.com/careers", "consulting, data, technology"],
-  ["Thoughtworks", "Consulting and Services", "https://www.thoughtworks.com/careers", "consulting, software, data"],
-  ["NTT DATA", "Consulting and Services", "https://us.nttdata.com/en/careers", "consulting, technology, data"],
-  ["LTIMindtree", "Consulting and Services", "https://www.ltimindtree.com/careers/", "consulting, technology, data"],
-  ["Tech Mahindra", "Consulting and Services", "https://www.techmahindra.com/en-in/careers/", "consulting, technology, data"],
-  ["Booz Allen Hamilton", "Consulting and Services", "https://www.boozallen.com/careers.html", "consulting, analytics, government", "Many roles may require clearance or citizenship."],
-  ["UnitedHealth Group", "Health and Life Sciences", "https://careers.unitedhealthgroup.com/", "healthcare, data, software"],
-  ["Optum", "Health and Life Sciences", "https://www.optum.com/en/careers.html", "healthcare, data, software"],
-  ["CVS Health", "Health and Life Sciences", "https://jobs.cvshealth.com/", "healthcare, data, software"],
-  ["Elevance Health", "Health and Life Sciences", "https://careers.elevancehealth.com/", "healthcare, data, software"],
-  ["Cigna / Evernorth", "Health and Life Sciences", "https://jobs.thecignagroup.com/us/en", "healthcare, data, software"],
-  ["Walgreens", "Health and Life Sciences", "https://jobs.walgreens.com/", "healthcare, data, software"],
-  ["Johnson & Johnson", "Health and Life Sciences", "https://www.careers.jnj.com/", "life sciences, data, software"],
-  ["Pfizer", "Health and Life Sciences", "https://www.pfizer.com/about/careers", "life sciences, data, analytics"],
-  ["Merck", "Health and Life Sciences", "https://jobs.merck.com/", "life sciences, data, analytics"],
-  ["Eli Lilly", "Health and Life Sciences", "https://careers.lilly.com/", "life sciences, data, analytics"],
-  ["Moderna", "Health and Life Sciences", "https://www.modernatx.com/careers", "life sciences, data, analytics"],
-  ["Amgen", "Health and Life Sciences", "https://careers.amgen.com/", "life sciences, data, analytics"],
-  ["Gilead", "Health and Life Sciences", "https://www.gilead.com/careers", "life sciences, data, analytics"],
-  ["AbbVie", "Health and Life Sciences", "https://careers.abbvie.com/", "life sciences, data, analytics"],
-  ["Abbott", "Health and Life Sciences", "https://www.jobs.abbott/us/en", "healthcare, data, software"],
-  ["Medtronic", "Health and Life Sciences", "https://www.medtronic.com/en-us/about/careers.html", "medical devices, data, software"],
-  ["Boston Scientific", "Health and Life Sciences", "https://jobs.bostonscientific.com/", "medical devices, data, software"],
-  ["Epic", "Health and Life Sciences", "https://careers.epic.com/", "healthcare software, data"],
-  ["Walmart", "Retail and Consumer", "https://careers.walmart.com/", "retail, data, software, supply chain"],
-  ["Target", "Retail and Consumer", "https://jobs.target.com/", "retail, data, software, supply chain"],
-  ["Costco", "Retail and Consumer", "https://www.costco.com/jobs.html", "retail, analytics, operations"],
-  ["Home Depot", "Retail and Consumer", "https://careers.homedepot.com/", "retail, data, software, supply chain"],
-  ["Lowe's", "Retail and Consumer", "https://talent.lowes.com/", "retail, data, software, supply chain"],
-  ["Best Buy", "Retail and Consumer", "https://jobs.bestbuy.com/", "retail, data, software"],
-  ["Nike", "Retail and Consumer", "https://jobs.nike.com/", "retail, data, software, product"],
-  ["Starbucks", "Retail and Consumer", "https://www.starbucks.com/careers/", "retail, analytics, technology"],
-  ["PepsiCo", "Retail and Consumer", "https://www.pepsicojobs.com/", "consumer goods, data, supply chain"],
-  ["Coca-Cola", "Retail and Consumer", "https://www.coca-colacompany.com/careers", "consumer goods, data, supply chain"],
-  ["Procter & Gamble", "Retail and Consumer", "https://www.pgcareers.com/", "consumer goods, data, analytics"],
-  ["FedEx", "Logistics and Industrial", "https://careers.fedex.com/", "logistics, data, software"],
-  ["UPS", "Logistics and Industrial", "https://www.jobs-ups.com/", "logistics, data, software"],
-  ["GE Aerospace", "Logistics and Industrial", "https://www.geaerospace.com/company/careers", "aerospace, data, software", "Some roles may require export-control review."],
-  ["GE Vernova", "Logistics and Industrial", "https://www.gevernova.com/careers", "energy, data, software"],
-  ["Honeywell", "Logistics and Industrial", "https://careers.honeywell.com/", "industrial, data, software", "Some roles may require export-control review."],
-  ["Tesla", "Automotive and Mobility", "https://www.tesla.com/careers", "EV, software, data, manufacturing"],
-  ["Rivian", "Automotive and Mobility", "https://careers.rivian.com/", "EV, software, data, manufacturing"],
-  ["AT&T", "Telecom and Media", "https://www.att.jobs/", "telecom, data, software"],
-  ["Verizon", "Telecom and Media", "https://www.verizon.com/about/careers", "telecom, data, software"],
-  ["T-Mobile", "Telecom and Media", "https://careers.t-mobile.com/", "telecom, data, software"],
-  ["Comcast", "Telecom and Media", "https://jobs.comcast.com/", "telecom, media, data, software"],
-  ["Disney", "Telecom and Media", "https://www.disneycareers.com/", "media, data, software"],
-  ["Boeing", "Aerospace and Defense", "https://jobs.boeing.com/", "aerospace, software, data", "Many roles may require US person status, clearance, or export-control eligibility."],
-  ["SpaceX", "Aerospace and Defense", "https://www.spacex.com/careers/", "aerospace, software, data", "Many roles may require US person status under export-control rules."]
-];
-
-const SPONSOR_COMPANY_ROWS = [
-  ["Infosys", 1795, "direct", "top", "Consulting and Services", "https://www.infosys.com/careers/", "consulting, technology, data, sponsor", "Infosys Limited"],
-  ["TCS", 1438, "direct", "top", "Consulting and Services", "https://www.tcs.com/careers", "consulting, technology, data, sponsor", "Tata Consultancy Services Limited"],
-  ["Amazon", 962, "direct", "top", "Cloud and Big Tech", "https://www.amazon.jobs/", "software, data, cloud, operations, sponsor", "Amazon.com Services LLC|Amazon Web Services Inc|Amazon Development Center U.S. Inc|AWS"],
-  ["Meta", 533, "direct", "top", "Cloud and Big Tech", "https://www.metacareers.com/", "software, data, AI, product, sponsor", "Meta Platforms Inc|Facebook"],
-  ["Google / Alphabet", 488, "direct", "top", "Cloud and Big Tech", "https://www.google.com/about/careers/applications/", "software, data, AI, product, sponsor", "Google LLC|Alphabet"],
-  ["Fidelity", 374, "direct", "top", "Fintech and Finance", "https://jobs.fidelity.com/", "finance, data, software, sponsor", "Fidelity Technology Group LLC|Fidelity Investments"],
-  ["JPMorgan Chase", 301, "direct", "top", "Fintech and Finance", "https://careers.jpmorgan.com/", "banking, data, software, analytics, sponsor", "JPMorgan Chase & Co"],
-  ["Apple", 288, "direct", "top", "Cloud and Big Tech", "https://jobs.apple.com/", "software, hardware, data, product, sponsor", "Apple Inc"],
-  ["Mphasis", 257, "direct", "top", "Consulting and Services", "https://www.mphasis.com/home/careers.html", "consulting, technology, data, sponsor", "Mphasis Corporation"],
-  ["LinkedIn", 215, "direct", "top", "Consumer Tech", "https://careers.linkedin.com/", "software, data, platform, sponsor", "LinkedIn Corporation"],
-  ["Walmart", 190, "direct", "top", "Retail and Consumer", "https://careers.walmart.com/", "retail, data, software, supply chain, sponsor", "WAL-MART ASSOCIATES INC|Walmart Global Tech"],
-  ["IBM", 124, "direct", "strong", "Enterprise Software", "https://www.ibm.com/careers", "software, data, consulting, AI, sponsor", "IBM Corporation"],
-  ["PayPal", 117, "direct", "strong", "Fintech and Finance", "https://careers.pypl.com/", "fintech, software, data, sponsor", "PayPal Inc"],
-  ["U.S. Bank", 107, "direct", "strong", "Fintech and Finance", "https://careers.usbank.com/", "banking, data, software, analytics, sponsor", "U.S. Bank National Association|US Bank"],
-  ["LTIMindtree", 101, "direct", "strong", "Consulting and Services", "https://www.ltimindtree.com/careers/", "consulting, technology, data, sponsor", "LTIMindtree Limited"],
-  ["NVIDIA", 101, "direct", "strong", "Cloud and Big Tech", "https://www.nvidia.com/en-us/about-nvidia/careers/", "AI, hardware, software, data, sponsor", "NVIDIA Corporation"],
-  ["J.B. Hunt", 86, "direct", "strong", "Logistics and Industrial", "https://careers.jbhunt.com/", "logistics, data, software, sponsor", "J.B. Hunt Transport Inc|JB Hunt"],
-  ["Qualcomm", 85, "direct", "strong", "Hardware and Semiconductors", "https://careers.qualcomm.com/", "semiconductor, wireless, software, sponsor", "Qualcomm Technologies Inc"],
-  ["Adobe", 83, "direct", "strong", "Enterprise Software", "https://careers.adobe.com/", "software, data, product, creative, sponsor", "Adobe Inc"],
-  ["eBay", 79, "direct", "strong", "Consumer Tech", "https://jobs.ebayinc.com/", "software, data, marketplace, sponsor", "eBay Inc"],
-  ["General Motors", 75, "direct", "strong", "Automotive and Mobility", "https://search-careers.gm.com/", "automotive, software, data, manufacturing, sponsor", "General Motors|GM"],
-  ["Wells Fargo", 73, "direct", "moderate", "Fintech and Finance", "https://www.wellsfargojobs.com/", "banking, data, software, analytics, sponsor", "WELLS FARGO BANK N.A"],
-  ["Intuit", 68, "direct", "moderate", "Enterprise Software", "https://www.intuit.com/careers/", "software, data, fintech, product, sponsor", "Intuit Inc"],
-  ["Expedia Group", 68, "direct", "moderate", "Consumer Tech", "https://careers.expediagroup.com/", "travel, software, data, marketplace, sponsor", "Expedia Inc|Expedia Group"],
-  ["Compunnel", 469, "vendor", "top", "Staffing Vendors", "https://www.compunnel.com/careers/", "staffing, consulting, technology, vendor, sponsor", "COMPUNNEL SOFTWARE GROUP INC"],
-  ["Grandison Management", 403, "vendor", "top", "Staffing Vendors", "https://www.grandison.com/careers/", "staffing, technology, vendor, sponsor", "Grandison Management Inc"],
-  ["People Tech Group", 370, "vendor", "top", "Staffing Vendors", "https://peopletech.com/careers/", "staffing, technology, vendor, sponsor", "People Tech Group Inc"],
-  ["Kforce", 133, "vendor", "strong", "Staffing Vendors", "https://www.kforce.com/about/careers/", "staffing, technology, vendor, sponsor", "KFORCE INC"],
-  ["UST", 114, "vendor", "strong", "Staffing Vendors", "https://www.ust.com/en/careers", "consulting, technology, vendor, sponsor", "UST Global Inc"],
-  ["Randstad Digital", 114, "vendor", "strong", "Staffing Vendors", "https://www.randstaddigital.com/careers/", "staffing, digital, technology, vendor, sponsor", "RANDSTAD DIGITAL LLC"],
-  ["Innova Solutions", 89, "vendor", "strong", "Staffing Vendors", "https://www.innovasolutions.com/careers/", "staffing, technology, vendor, sponsor", "INNOVA SOLUTIONS INC"],
-  ["MSR Technology Group", 85, "vendor", "strong", "Staffing Vendors", "https://msrtechnologygroup.com/careers/", "staffing, technology, vendor, sponsor", "MSR TECHNOLOGY GROUP LLC"],
-  ["V-Soft Consulting", 81, "vendor", "strong", "Staffing Vendors", "https://www.vsoftconsulting.com/careers/", "staffing, consulting, technology, vendor, sponsor", "V-Soft Consulting Group INC"],
-  ["L&T Technology Services", 76, "vendor", "strong", "Staffing Vendors", "https://www.ltts.com/careers", "engineering, technology, vendor, sponsor", "L&T Technology Services Limited"]
-];
-
-const COMPANIES = buildCompanies();
-
-const RESOURCE_LINKS = [
-  ["USCIS OPT", "OPT basics", "https://www.uscis.gov/working-in-the-united-states/students-and-exchange-visitors/optional-practical-training-opt-for-f-1-students", "Official OPT reference for F-1 students."],
-  ["Study in the States", "OPT/STEM OPT", "https://studyinthestates.dhs.gov/stem-opt-hub", "DHS student guidance for STEM OPT requirements."],
-  ["E-Verify", "Employer research", "https://www.e-verify.gov/about-e-verify/e-verify-data/how-to-find-participating-employers", "Find employers participating in E-Verify."],
-  ["DOL OFLC Data", "H-1B/PERM", "https://www.dol.gov/agencies/eta/foreign-labor/performance", "Official disclosure files for foreign labor programs."],
-  ["USCIS H-1B Hub", "H-1B employers", "https://www.uscis.gov/tools/reports-and-studies/h-1b-employer-data-hub", "Official H-1B employer data hub."],
-  ["MyVisaJobs", "Sponsor patterns", "https://www.myvisajobs.com/reports/", "Third-party sponsor history and reports."],
-  ["H1BData", "Salary/sponsor", "https://h1bdata.info/", "Third-party H-1B salary and employer lookup."],
-  ["BLS OOH", "Career research", "https://www.bls.gov/ooh/", "Occupation outlook, pay, and growth data."],
-  ["O*NET", "Title research", "https://www.onetonline.org/", "Skill and occupation title research."],
-  ["CareerOneStop", "US career tools", "https://www.careeronestop.org/", "US Department of Labor career resources."],
-  ["FTC Job Scams", "Scam checks", "https://consumer.ftc.gov/articles/job-scams", "Spot fake job postings and recruiter scams."]
-].map(([name, category, url, note]) => ({ name, category, url, note }));
-
-function buildCompanies() {
-  const byId = new Map();
-  COMPANY_ROWS.forEach(([name, category, careersUrl, tags, caution], index) => {
-    const company = {
-      id: slugify(name),
-      name,
-      category,
-      careersUrl,
-      rank: index + 1,
-      baseRank: index + 1,
-      tags: splitTags(tags),
-      caution: caution || "",
-      h1bFilings: 0,
-      sponsorTier: "curated",
-      companyKind: "direct",
-      aliases: [],
-      h1bSource: ""
-    };
-    byId.set(company.id, company);
-  });
-
-  SPONSOR_COMPANY_ROWS.forEach(([name, filings, kind, tier, category, careersUrl, tags, aliases, caution]) => {
-    const aliasList = splitAliases(aliases);
-    const sponsorId = findExistingCompanyId(byId, name, aliasList) || slugify(name);
-    const existing = byId.get(sponsorId);
-    if (existing) {
-      existing.h1bFilings = Math.max(existing.h1bFilings || 0, filings);
-      existing.sponsorTier = tier;
-      existing.companyKind = kind;
-      existing.aliases = mergeUnique(existing.aliases, aliasList);
-      existing.tags = mergeUnique(existing.tags, splitTags(tags));
-      existing.h1bSource = "H1B workbook";
-      existing.caution = existing.caution || caution || "";
-      if (!existing.careersUrl && careersUrl) {
-        existing.careersUrl = careersUrl;
-      }
-    } else {
-      byId.set(sponsorId, {
-        id: sponsorId,
-        name,
-        category,
-        careersUrl,
-        rank: 0,
-        baseRank: COMPANY_ROWS.length + byId.size + 1,
-        tags: splitTags(tags),
-        caution: caution || "",
-        h1bFilings: filings,
-        sponsorTier: tier,
-        companyKind: kind,
-        aliases: aliasList,
-        h1bSource: "H1B workbook"
-      });
-    }
-  });
-
-  return Array.from(byId.values())
-    .sort((a, b) => getCompanyDefaultScore(b) - getCompanyDefaultScore(a) || a.name.localeCompare(b.name))
-    .map((company, index) => ({ ...company, rank: index + 1 }));
-}
-
-function splitTags(value) {
-  return value.split(",").map(tag => tag.trim()).filter(Boolean);
-}
-
-function splitAliases(value) {
-  return String(value || "").split("|").map(alias => alias.trim()).filter(Boolean);
-}
-
-function mergeUnique(left, right) {
-  return Array.from(new Set([...(left || []), ...(right || [])].filter(Boolean)));
-}
-
-function findExistingCompanyId(byId, name, aliases) {
-  const candidates = [name, ...aliases].map(slugify);
-  return candidates.find(candidate => byId.has(candidate)) || "";
-}
-
-function getCompanyDefaultScore(company) {
-  const sponsorBoost = company.h1bFilings ? 100000 + company.h1bFilings : 0;
-  const curatedBoost = company.category === "Cloud and Big Tech" || company.category === "AI and Data" ? 250 : 0;
-  return sponsorBoost + curatedBoost - company.baseRank;
-}
-
+// ── STATE & ELEMENT CACHE ─────────────────────────────────────────────────────
 const state = {
   results: [],
-  checked: new Set(),
-  favoriteCompanies: new Set(),
-  pinnedPortals: new Set(),
-  visibleCompanies: COMPANIES
+  checked: new Set()
 };
 
 const els = {};
 
+// ── INIT ──────────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
   cacheElements();
-  populateRolePacks();
-  populateProfiles();
   populateCategories();
   populateLocations();
-  populateCompanyControls();
-  rebuildTimeOptions("google", "all");
-  populateResources();
-  renderCompanyOptions("");
-  renderSponsorGrid();
+  rebuildTimeOptions("google", "24hours");
   loadTheme();
   bindEvents();
-
-  loadPreferences();
   hydrateFromUrl();
-  if (!els.companyRole.value && els.jobTitle.value) {
-    els.companyRole.value = els.jobTitle.value;
-  }
-
-  renderCompanyOptions(els.companyFilter.value);
-  syncProfileDescription();
-  syncCompanyCard();
-  renderPinnedOperators();
-  if (hasJobTitle()) {
-    generateResults(false);
-  } else {
-    updateCounts();
-    updatePreviewForEmptyState();
-  }
+  initCompanySection();
 });
 
 function cacheElements() {
   Object.assign(els, {
     form: document.getElementById("searchForm"),
     jobTitle: document.getElementById("jobTitle"),
-    rolePackSelect: document.getElementById("rolePackSelect"),
-    profileSelect: document.getElementById("profileSelect"),
     timeFilter: document.getElementById("timeFilter"),
     locationSelect: document.getElementById("locationSelect"),
     sortSelect: document.getElementById("sortSelect"),
@@ -732,58 +1040,18 @@ function cacheElements() {
     authorizationSelect: document.getElementById("authorizationSelect"),
     includeTerms: document.getElementById("includeTerms"),
     excludeTerms: document.getElementById("excludeTerms"),
-    cautionExcludes: document.getElementById("cautionExcludes"),
-    strictTitle: document.getElementById("strictTitle"),
     categoryFilters: document.getElementById("categoryFilters"),
-    companyRole: document.getElementById("companyRole"),
-    companyRolePack: document.getElementById("companyRolePack"),
-    companyFilter: document.getElementById("companyFilter"),
-    companySelect: document.getElementById("companySelect"),
-    companyTimeFilter: document.getElementById("companyTimeFilter"),
-    companyExperienceSelect: document.getElementById("companyExperienceSelect"),
-    companyLocationSelect: document.getElementById("companyLocationSelect"),
-    companyRemoteMode: document.getElementById("companyRemoteMode"),
-    companyEmploymentSelect: document.getElementById("companyEmploymentSelect"),
-    companyAuthorizationSelect: document.getElementById("companyAuthorizationSelect"),
-    companyIncludeTerms: document.getElementById("companyIncludeTerms"),
-    companyExcludeTerms: document.getElementById("companyExcludeTerms"),
-    companySortSelect: document.getElementById("companySortSelect"),
-    companyCategorySelect: document.getElementById("companyCategorySelect"),
-    companySponsorTier: document.getElementById("companySponsorTier"),
-    companyKind: document.getElementById("companyKind"),
-    companyCount: document.getElementById("companyCount"),
-    companyCard: document.getElementById("companyCard"),
-    openCompanyButton: document.getElementById("openCompanyButton"),
-    searchCompanyButton: document.getElementById("searchCompanyButton"),
-    companyLinkedInJobsButton: document.getElementById("companyLinkedInJobsButton"),
-    companyLinkedInPostsButton: document.getElementById("companyLinkedInPostsButton"),
-    companyIndeedButton: document.getElementById("companyIndeedButton"),
-    copyCompanyLinksButton: document.getElementById("copyCompanyLinksButton"),
-    openTopSponsorButton: document.getElementById("openTopSponsorButton"),
-    favoriteCompanyButton: document.getElementById("favoriteCompanyButton"),
-    sponsorGrid: document.getElementById("sponsorGrid"),
-    pinnedBlock: document.getElementById("pinnedBlock"),
-    pinnedOperators: document.getElementById("pinnedOperators"),
-    resourceGrid: document.getElementById("resourceGrid"),
     portalCount: document.getElementById("portalCount"),
     checkedCount: document.getElementById("checkedCount"),
-    openBatchSize: document.getElementById("openBatchSize"),
-    openBatchButton: document.getElementById("openBatchButton"),
-    openAllButton: document.getElementById("openAllButton"),
-    exportSettingsButton: document.getElementById("exportSettingsButton"),
-    importSettingsButton: document.getElementById("importSettingsButton"),
     copyAllButton: document.getElementById("copyAllButton"),
     copyCheckedButton: document.getElementById("copyCheckedButton"),
     shareButton: document.getElementById("shareButton"),
     resetButton: document.getElementById("resetButton"),
-    latestOneHourButton: document.getElementById("latestOneHourButton"),
-    quickApplyButton: document.getElementById("quickApplyButton"),
     themeToggle: document.getElementById("themeToggle"),
     results: document.getElementById("results"),
     emptyState: document.getElementById("emptyState"),
     resultMeta: document.getElementById("resultMeta"),
     queryPreview: document.getElementById("queryPreview"),
-    profileDescription: document.getElementById("profileDescription"),
     relatedBlock: document.getElementById("relatedBlock"),
     relatedTitles: document.getElementById("relatedTitles"),
     toast: document.getElementById("toast")
@@ -796,17 +1064,11 @@ function bindEvents() {
     generateResults();
   });
 
-  els.profileSelect.addEventListener("change", () => {
-    applyProfile(els.profileSelect.value);
-    syncProfileDescription();
-    persistAndMaybeGenerate();
-  });
-
-  els.rolePackSelect.addEventListener("change", persistAndMaybeGenerate);
-
   els.engineSelect.addEventListener("change", () => {
     rebuildTimeOptions(els.engineSelect.value);
-    persistAndMaybeGenerate();
+    if (hasJobTitle()) {
+      generateResults();
+    }
   });
 
   [
@@ -817,77 +1079,33 @@ function bindEvents() {
     els.matchMode,
     els.experienceSelect,
     els.employmentSelect,
-    els.authorizationSelect,
-    els.cautionExcludes,
-    els.strictTitle
-  ].forEach(control => control.addEventListener("change", persistAndMaybeGenerate));
+    els.authorizationSelect
+  ].forEach(control => {
+    control.addEventListener("change", () => {
+      if (hasJobTitle()) {
+        generateResults();
+      } else {
+        updatePortalCount();
+      }
+    });
+  });
 
-  [els.jobTitle, els.includeTerms, els.excludeTerms].forEach(input => {
-    input.addEventListener("change", persistAndMaybeGenerate);
+  [els.includeTerms, els.excludeTerms].forEach(input => {
+    input.addEventListener("change", () => {
+      if (hasJobTitle()) {
+        generateResults();
+      }
+    });
   });
 
   els.categoryFilters.addEventListener("change", () => {
-    persistAndMaybeGenerate();
-    updateCounts();
+    if (hasJobTitle()) {
+      generateResults();
+    } else {
+      updatePortalCount();
+    }
   });
 
-  els.companyFilter.addEventListener("input", () => {
-    renderCompanyOptions(els.companyFilter.value);
-    syncCompanyCard();
-    renderSponsorGrid();
-    savePreferences();
-  });
-  els.companyRole.addEventListener("input", () => {
-    syncCompanyCard();
-    savePreferences();
-  });
-  [els.companyIncludeTerms, els.companyExcludeTerms].forEach(input => {
-    input.addEventListener("change", () => {
-      syncCompanyCard();
-      savePreferences();
-    });
-  });
-  [
-    els.companyRolePack,
-    els.companyTimeFilter,
-    els.companyExperienceSelect,
-    els.companyLocationSelect,
-    els.companyRemoteMode,
-    els.companyEmploymentSelect,
-    els.companyAuthorizationSelect,
-    els.companySortSelect,
-    els.companyCategorySelect,
-    els.companySponsorTier,
-    els.companyKind
-  ].forEach(control => {
-    control.addEventListener("change", () => {
-      renderCompanyOptions(els.companyFilter.value);
-      syncCompanyCard();
-      renderSponsorGrid();
-      savePreferences();
-    });
-  });
-  els.companySelect.addEventListener("change", () => {
-    syncCompanyCard();
-    savePreferences();
-  });
-  els.openCompanyButton.addEventListener("click", openSelectedCompany);
-  els.searchCompanyButton.addEventListener("click", searchSelectedCompany);
-  els.companyLinkedInJobsButton.addEventListener("click", () => openCompanySearchType("linkedinJobs"));
-  els.companyLinkedInPostsButton.addEventListener("click", () => openCompanySearchType("linkedinPosts"));
-  els.companyIndeedButton.addEventListener("click", () => openCompanySearchType("indeedGoogle"));
-  els.copyCompanyLinksButton.addEventListener("click", copySelectedCompanyLinks);
-  els.openTopSponsorButton.addEventListener("click", openTopSponsorSearches);
-  els.favoriteCompanyButton.addEventListener("click", toggleFavoriteCompany);
-
-  els.openBatchButton.addEventListener("click", openNextBatch);
-  els.openAllButton.addEventListener("click", openAllLinks);
-  els.openBatchSize.addEventListener("change", () => {
-    savePreferences();
-    syncBatchControls();
-  });
-  els.exportSettingsButton.addEventListener("click", exportSettings);
-  els.importSettingsButton.addEventListener("click", importSettings);
   els.copyAllButton.addEventListener("click", () => copyLinks(state.results.map(item => item.url), "Copied all links"));
   els.copyCheckedButton.addEventListener("click", () => {
     const checkedLinks = state.results.filter(item => state.checked.has(item.key)).map(item => item.url);
@@ -895,41 +1113,7 @@ function bindEvents() {
   });
   els.shareButton.addEventListener("click", () => copyLinks([window.location.href], "Copied share link"));
   els.resetButton.addEventListener("click", resetSearch);
-  els.latestOneHourButton.addEventListener("click", applyLatestOneHourFlow);
-  els.quickApplyButton.addEventListener("click", applyQuickApplyFlow);
   els.themeToggle.addEventListener("click", toggleTheme);
-
-  els.pinnedOperators.addEventListener("click", event => {
-    const button = event.target.closest("button[data-pin-remove]");
-    if (!button) {
-      return;
-    }
-    togglePinnedPortal(button.dataset.pinRemove);
-  });
-}
-
-function populateRolePacks() {
-  [els.rolePackSelect, els.companyRolePack].forEach(select => {
-    select.innerHTML = "";
-    ROLE_PACKS.forEach(pack => {
-      const option = document.createElement("option");
-      option.value = pack.id;
-      option.textContent = pack.label;
-      select.appendChild(option);
-    });
-    select.value = DEFAULT_ROLE_PACK_ID;
-  });
-}
-
-function populateProfiles() {
-  els.profileSelect.innerHTML = "";
-  SEARCH_PROFILES.forEach(profile => {
-    const option = document.createElement("option");
-    option.value = profile.id;
-    option.textContent = profile.label;
-    els.profileSelect.appendChild(option);
-  });
-  els.profileSelect.value = DEFAULT_PROFILE_ID;
 }
 
 function populateCategories() {
@@ -937,15 +1121,14 @@ function populateCategories() {
   CATEGORIES.forEach(category => {
     const label = document.createElement("label");
     label.className = "filter-chip";
-
     const input = document.createElement("input");
     input.type = "checkbox";
-    input.value = category.id;
-    input.checked = category.checked;
-
-    label.append(input, document.createTextNode(category.label));
+    input.value = category;
+    input.checked = true;
+    label.append(input, document.createTextNode(category));
     els.categoryFilters.appendChild(label);
   });
+  updatePortalCount();
 }
 
 function populateLocations() {
@@ -959,468 +1142,143 @@ function populateLocations() {
   els.locationSelect.value = "usa";
 }
 
-function populateCompanyControls() {
-  els.companyLocationSelect.innerHTML = "";
-  LOCATIONS.forEach(([value, label]) => {
-    const option = document.createElement("option");
-    option.value = value;
-    option.textContent = label;
-    els.companyLocationSelect.appendChild(option);
-  });
-  els.companyLocationSelect.value = "usa";
-
-  const categories = Array.from(new Set(COMPANIES.map(company => company.category))).sort();
-  categories.forEach(category => {
-    const option = document.createElement("option");
-    option.value = category;
-    option.textContent = category;
-    els.companyCategorySelect.appendChild(option);
-  });
-}
-
-function populateResources() {
-  els.resourceGrid.innerHTML = "";
-  RESOURCE_LINKS.forEach(resource => {
-    const card = document.createElement("article");
-    card.className = "resource-card";
-    const title = document.createElement("a");
-    title.href = resource.url;
-    title.target = "_blank";
-    title.rel = "noopener";
-    title.textContent = resource.name;
-    const category = document.createElement("span");
-    category.className = "pill";
-    category.textContent = resource.category;
-    const note = document.createElement("p");
-    note.textContent = resource.note;
-    card.append(title, category, note);
-    els.resourceGrid.appendChild(card);
-  });
-}
-
-function renderSponsorGrid() {
-  els.sponsorGrid.innerHTML = "";
-  const sponsors = COMPANIES
-    .filter(company => company.h1bFilings > 0)
-    .sort((a, b) => b.h1bFilings - a.h1bFilings)
-    .slice(0, 16);
-  const fragment = document.createDocumentFragment();
-  sponsors.forEach(company => {
-    const card = document.createElement("article");
-    card.className = "sponsor-card";
-    const title = document.createElement("div");
-    title.className = "sponsor-title";
-    const name = document.createElement("strong");
-    name.textContent = company.name;
-    const filings = createPill(`${company.h1bFilings.toLocaleString()} filings`);
-    title.append(name, filings);
-    const meta = document.createElement("div");
-    meta.className = "portal-meta";
-    meta.append(createPill(company.companyKind === "vendor" ? "Vendor" : "Direct employer"));
-    meta.append(createPill(FILTER_LABELS.sponsorTier[company.sponsorTier] || company.sponsorTier));
-    meta.append(createPill(company.category));
-    const action = document.createElement("button");
-    action.type = "button";
-    action.className = "secondary-button";
-    action.textContent = "Use in companies";
-    action.addEventListener("click", () => {
-      els.companySponsorTier.value = company.sponsorTier;
-      els.companyKind.value = company.companyKind;
-      els.companyCategorySelect.value = "all";
-      els.companyFilter.value = company.name;
-      renderCompanyOptions(els.companyFilter.value);
-      const match = state.visibleCompanies.find(item => item.id === company.id);
-      els.companySelect.value = match ? company.id : ALL_COMPANIES_ID;
-      syncCompanyCard();
-      document.getElementById("careersHeading").scrollIntoView({ behavior: "smooth" });
-    });
-    card.append(title, meta, action);
-    fragment.appendChild(card);
-  });
-  els.sponsorGrid.appendChild(fragment);
-}
-
 function rebuildTimeOptions(engine, preferredValue) {
   const options = TIME_OPTIONS[engine] || TIME_OPTIONS.google;
-  const current = preferredValue || els.timeFilter.value || "all";
+  const current = preferredValue || els.timeFilter.value || "24hours";
   els.timeFilter.innerHTML = "";
-
-  options.forEach(([value, label]) => {
+  options.forEach(item => {
     const option = document.createElement("option");
-    option.value = value;
-    option.textContent = label;
+    option.value = item.value;
+    option.textContent = item.label;
     els.timeFilter.appendChild(option);
   });
-
-  els.timeFilter.value = options.some(([value]) => value === current) ? current : "all";
+  els.timeFilter.value = options.some(item => item.value === current) ? current : "24hours";
 }
 
 function hydrateFromUrl() {
   const params = new URLSearchParams(window.location.search);
-  if (![...params.keys()].length) {
-    return false;
-  }
-
-  // Overlay-only: URL params override saved preferences without resetting
-  // anything the link does not mention.
-  setSelectIfValid(els.profileSelect, params.get("profile"));
-  setSelectIfValid(els.rolePackSelect, params.get("rolePack"));
-  if (params.get("engine") && TIME_OPTIONS[params.get("engine")]) {
-    els.engineSelect.value = params.get("engine");
-  }
-  rebuildTimeOptions(els.engineSelect.value, params.get("time") || els.timeFilter.value || undefined);
-
-  setSelectIfValid(els.locationSelect, params.get("location"));
-  setSelectIfValid(els.timeFilter, params.get("time"));
-  setSelectIfValid(els.sortSelect, params.get("sort"));
-  setSelectIfValid(els.remoteMode, params.get("remote"));
-  setSelectIfValid(els.matchMode, params.get("match"));
-  setSelectIfValid(els.experienceSelect, params.get("experience"));
-  setSelectIfValid(els.employmentSelect, params.get("employment"));
-  setSelectIfValid(els.authorizationSelect, params.get("authorization"));
-  if (params.has("caution")) {
-    els.cautionExcludes.checked = params.get("caution") === "1";
-  }
-  if (params.has("strict")) {
-    els.strictTitle.checked = params.get("strict") === "1";
-  }
-
-  if (params.has("job")) {
-    els.jobTitle.value = params.get("job") || "";
-  }
-  if (params.has("include")) {
-    els.includeTerms.value = params.get("include") || "";
-  }
-  if (params.has("exclude")) {
-    els.excludeTerms.value = params.get("exclude") || "";
-  }
-
+  const job = params.get("job");
+  const engine = params.get("engine");
+  const time = params.get("time");
+  const location = params.get("location");
+  const sort = params.get("sort");
+  const remote = params.get("remote");
+  const match = params.get("match");
+  const experience = params.get("experience");
+  const employment = params.get("employment");
+  const authorization = params.get("authorization");
+  const include = params.get("include");
+  const exclude = params.get("exclude");
   const groups = params.get("groups");
+
+  if (engine && TIME_OPTIONS[engine]) {
+    els.engineSelect.value = engine;
+    rebuildTimeOptions(engine, time || undefined);
+  } else if (time) {
+    rebuildTimeOptions("google", time);
+  }
+
+  setSelectIfValid(els.locationSelect, location || "usa");
+  setSelectIfValid(els.sortSelect, sort || "recommended");
+  setSelectIfValid(els.remoteMode, remote || "neutral");
+  setSelectIfValid(els.matchMode, match || "smart");
+  setSelectIfValid(els.experienceSelect, experience || "any");
+  setSelectIfValid(els.employmentSelect, employment || "any");
+  setSelectIfValid(els.authorizationSelect, authorization || "optBroad");
+  els.includeTerms.value = include ? decodeURIComponent(include) : "";
+  els.excludeTerms.value = exclude ? decodeURIComponent(exclude) : "";
+
   if (groups) {
-    const selected = groups === "none" ? new Set() : new Set(groups.split(",").filter(Boolean));
-    setCategorySelection(selected);
-  }
-  const pins = params.get("pins");
-  if (pins) {
-    state.pinnedPortals = new Set(pins.split(",").filter(id => PORTALS.some(portal => portal.id === id)));
+    const selected = new Set(groups.split(",").map(decodeURIComponent));
+    els.categoryFilters.querySelectorAll("input").forEach(input => {
+      input.checked = selected.has(input.value);
+    });
   }
 
-  return true;
-}
-
-function loadPreferences() {
-  let data = {};
-  try {
-    data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-  } catch (error) {
-    data = {};
-  }
-
-  setSelectIfValid(els.profileSelect, data.profile || DEFAULT_PROFILE_ID);
-  setSelectIfValid(els.rolePackSelect, data.rolePack || DEFAULT_ROLE_PACK_ID);
-  setSelectIfValid(els.engineSelect, data.engine || "google");
-  rebuildTimeOptions(els.engineSelect.value, data.time || undefined);
-  setSelectIfValid(els.timeFilter, data.time || "all");
-  setSelectIfValid(els.locationSelect, data.location || "usa");
-  setSelectIfValid(els.sortSelect, data.sort || "coverage");
-  setSelectIfValid(els.remoteMode, data.remoteMode || "neutral");
-  setSelectIfValid(els.matchMode, data.matchMode || "smart");
-  setSelectIfValid(els.experienceSelect, data.experience || "entry");
-  setSelectIfValid(els.employmentSelect, data.employment || "any");
-  setSelectIfValid(els.authorizationSelect, data.authorization || "none");
-  els.cautionExcludes.checked = Boolean(data.cautionExcludes);
-  els.strictTitle.checked = Boolean(data.strictTitle);
-
-  els.jobTitle.value = data.jobTitle || "";
-  els.includeTerms.value = data.includeTerms || "";
-  els.excludeTerms.value = data.excludeTerms || "";
-  els.companyRole.value = data.companyRole || "";
-  els.companyFilter.value = data.companyFilter || "";
-  setSelectIfValid(els.companyRolePack, data.companyRolePack || data.rolePack || DEFAULT_ROLE_PACK_ID);
-  setSelectIfValid(els.companyTimeFilter, data.companyTime || "24hours");
-  setSelectIfValid(els.companyExperienceSelect, data.companyExperience || "entry");
-  setSelectIfValid(els.companyLocationSelect, data.companyLocation || data.location || "usa");
-  setSelectIfValid(els.companyRemoteMode, data.companyRemoteMode || data.remoteMode || "neutral");
-  setSelectIfValid(els.companyEmploymentSelect, data.companyEmployment || "any");
-  setSelectIfValid(els.companyAuthorizationSelect, data.companyAuthorization || "none");
-  els.companyIncludeTerms.value = data.companyInclude || "";
-  els.companyExcludeTerms.value = data.companyExclude || "";
-  setSelectIfValid(els.companySortSelect, data.companySort || "latest");
-  setSelectIfValid(els.companyCategorySelect, data.companyCategory || "all");
-  setSelectIfValid(els.companySponsorTier, data.companySponsorTier || "all");
-  setSelectIfValid(els.companyKind, data.companyKind || "all");
-
-  if (Array.isArray(data.selectedCategories)) {
-    setCategorySelection(new Set(data.selectedCategories));
-  }
-  if (Array.isArray(data.favoriteCompanies)) {
-    state.favoriteCompanies = new Set(data.favoriteCompanies);
-  }
-  if (Array.isArray(data.pinnedPortals)) {
-    state.pinnedPortals = new Set(data.pinnedPortals.filter(id => PORTALS.some(portal => portal.id === id)));
-  }
-  if (data.selectedCompany) {
-    setSelectIfValid(els.companySelect, data.selectedCompany);
-  }
-  setSelectIfValid(els.openBatchSize, data.openBatchSize || "5");
-  // Checked links persist for the current day only, so each morning starts fresh.
-  if (Array.isArray(data.checkedKeys) && data.checkedDate === getTodayStamp()) {
-    state.checked = new Set(data.checkedKeys);
-  }
-}
-
-function getTodayStamp() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function savePreferences() {
-  const payload = {
-    profile: els.profileSelect.value,
-    rolePack: els.rolePackSelect.value,
-    jobTitle: els.jobTitle.value,
-    engine: els.engineSelect.value,
-    time: els.timeFilter.value,
-    location: els.locationSelect.value,
-    sort: els.sortSelect.value,
-    remoteMode: els.remoteMode.value,
-    matchMode: els.matchMode.value,
-    hasTypedTitle: parseTitles(els.jobTitle.value).length > 0,
-    experience: els.experienceSelect.value,
-    employment: els.employmentSelect.value,
-    authorization: els.authorizationSelect.value,
-    includeTerms: els.includeTerms.value,
-    excludeTerms: els.excludeTerms.value,
-    cautionExcludes: els.cautionExcludes.checked,
-    strictTitle: els.strictTitle.checked,
-    companyRole: els.companyRole.value,
-    companyFilter: els.companyFilter.value,
-    companyRolePack: els.companyRolePack.value,
-    companyTime: els.companyTimeFilter.value,
-    companyExperience: els.companyExperienceSelect.value,
-    companyLocation: els.companyLocationSelect.value,
-    companyRemoteMode: els.companyRemoteMode.value,
-    companyEmployment: els.companyEmploymentSelect.value,
-    companyAuthorization: els.companyAuthorizationSelect.value,
-    companyInclude: els.companyIncludeTerms.value,
-    companyExclude: els.companyExcludeTerms.value,
-    companySort: els.companySortSelect.value,
-    companyCategory: els.companyCategorySelect.value,
-    companySponsorTier: els.companySponsorTier.value,
-    companyKind: els.companyKind.value,
-    selectedCategories: Array.from(getSelectedCategories()),
-    favoriteCompanies: Array.from(state.favoriteCompanies),
-    pinnedPortals: Array.from(state.pinnedPortals),
-    selectedCompany: els.companySelect.value,
-    openBatchSize: els.openBatchSize.value,
-    checkedKeys: Array.from(state.checked),
-    checkedDate: getTodayStamp()
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-}
-
-function persistAndMaybeGenerate() {
-  savePreferences();
-  syncProfileDescription();
-  syncCompanyCard();
-  if (hasJobTitle()) {
-    generateResults();
+  if (job) {
+    els.jobTitle.value = decodeURIComponent(job.replace(/\+/g, " "));
+    generateResults(false);
   } else {
-    updateCounts();
+    updatePortalCount();
     updatePreviewForEmptyState();
   }
 }
 
-function applyProfile(profileId) {
-  const profile = SEARCH_PROFILES.find(item => item.id === profileId) || SEARCH_PROFILES[0];
-  if (profile.defaults.time) {
-    rebuildTimeOptions(els.engineSelect.value, profile.defaults.time);
-  }
-  setSelectIfValid(els.rolePackSelect, profile.defaults.rolePack);
-  setSelectIfValid(els.timeFilter, profile.defaults.time);
-  setSelectIfValid(els.sortSelect, profile.defaults.sort);
-  setSelectIfValid(els.authorizationSelect, profile.defaults.authorization);
-  setSelectIfValid(els.experienceSelect, profile.defaults.experience);
-  setSelectIfValid(els.matchMode, profile.defaults.matchMode);
-  if (profile.categories) {
-    setCategorySelection(new Set(profile.categories));
-  }
-}
-
-function applyPrecision(precision) {
-  switch (precision) {
-    case "latest1":
-      rebuildTimeOptions(els.engineSelect.value, "1hour");
-      setSelectIfValid(els.timeFilter, "1hour");
-      setSelectIfValid(els.sortSelect, "latest");
-      setSelectIfValid(els.authorizationSelect, "none");
-      setCategorySelection(new Set(["top", "direct", "signals", "general", "tech", "company"]));
-      break;
-    case "latest24":
-      rebuildTimeOptions(els.engineSelect.value, "24hours");
-      setSelectIfValid(els.timeFilter, "24hours");
-      setSelectIfValid(els.sortSelect, "latest");
-      setSelectIfValid(els.authorizationSelect, "none");
-      setCategorySelection(new Set(DEFAULT_CATEGORY_IDS));
-      break;
-    case "optSponsor":
-      setSelectIfValid(els.authorizationSelect, "optBroad");
-      setSelectIfValid(els.sortSelect, "coverage");
-      setCategorySelection(new Set(["top", "direct", "signals", "general", "tech", "company", "research"]));
-      break;
-    case "direct":
-      setSelectIfValid(els.sortSelect, "direct");
-      setCategorySelection(new Set(["top", "direct", "company"]));
-      break;
-    case "exact":
-      setSelectIfValid(els.matchMode, "exact");
-      setSelectIfValid(els.sortSelect, "recommended");
-      break;
-    default:
-      setSelectIfValid(els.authorizationSelect, "none");
-      setSelectIfValid(els.matchMode, "smart");
-      setSelectIfValid(els.sortSelect, "coverage");
-      setCategorySelection(new Set(DEFAULT_CATEGORY_IDS));
-      break;
-  }
-}
-
-function syncProfileDescription() {
-  const profile = SEARCH_PROFILES.find(item => item.id === els.profileSelect.value) || SEARCH_PROFILES[0];
-  const rolePack = getRolePack(els.rolePackSelect.value);
-  els.profileDescription.textContent = `${profile.description} Role pack: ${rolePack.label}. Mode: ${FILTER_LABELS.precision[getPrecisionFromProfile(profile.id)] || "Max Coverage"}.`;
-}
-
 function setSelectIfValid(select, value) {
-  if (!value) {
-    return;
-  }
   if ([...select.options].some(option => option.value === value)) {
     select.value = value;
   }
 }
 
-function setCategorySelection(selected) {
-  els.categoryFilters.querySelectorAll("input").forEach(input => {
-    input.checked = selected.has(input.value);
-  });
-}
-
 function hasJobTitle() {
-  return getSearchTitles().length > 0;
+  return els.jobTitle.value.trim().length > 0;
 }
 
+// ── GENERATE RESULTS ─────────────────────────────────────────────────────────
 function generateResults(updateUrl = true) {
-  const titles = getSearchTitles();
-  if (!titles.length) {
-    state.results = [];
-    state.checked.clear();
-    els.results.innerHTML = "";
-    const emptyMessage = els.emptyState.querySelector("strong");
-    if (emptyMessage) {
-      emptyMessage.textContent = "Ready when you are, Taran.";
-    }
-    setEmptyState(true);
-    updateCounts();
-    updatePreviewForEmptyState();
-    savePreferences();
-    return;
-  }
-
-  const context = getContext();
+  const titles = parseTitles(els.jobTitle.value);
   const portals = getSelectedPortals();
-  if (!portals.length) {
-    state.results = [];
-    state.checked.clear();
-    els.results.innerHTML = "";
-    const emptyMessage = els.emptyState.querySelector("strong");
-    if (emptyMessage) {
-      emptyMessage.textContent = "Select at least one source group.";
-    }
+  const context = getContext();
+
+  state.results = [];
+  state.checked.clear();
+  els.results.innerHTML = "";
+
+  if (titles.length === 0 || portals.length === 0) {
     setEmptyState(true);
     updateCounts();
     updatePreviewForEmptyState();
-    savePreferences();
-    if (updateUrl) {
-      updateAddressBar(titles, context);
-    }
     return;
   }
-
-  const nextResults = [];
 
   titles.forEach(title => {
-    portals.forEach(portal => {
-      const query = buildPortalQuery(title, portal, context);
-      const url = buildSearchUrl(portal, query, title, context);
-      nextResults.push({
-        key: `${title.toLowerCase()}::${portal.id}`,
-        title,
-        portal,
-        query,
-        url,
-        searchKind: getSearchKind(portal)
-      });
-    });
-  });
-
-  state.results = nextResults;
-  state.checked = new Set([...state.checked].filter(key => state.results.some(item => item.key === key)));
-  renderResults();
-  updateRelatedTitles(titles[0]);
-  setEmptyState(false);
-  updateCounts();
-  updatePreview(titles[0], portals[0], context);
-  savePreferences();
-  if (updateUrl) {
-    updateAddressBar(titles, context);
-  }
-}
-
-function renderResults() {
-  els.results.innerHTML = "";
-  const grouped = new Map();
-  state.results.forEach(item => {
-    if (!grouped.has(item.title)) {
-      grouped.set(item.title, []);
-    }
-    grouped.get(item.title).push(item);
-  });
-
-  const fragment = document.createDocumentFragment();
-  grouped.forEach((items, title) => {
     const group = document.createElement("section");
     group.className = "result-group";
 
     const heading = document.createElement("div");
     heading.className = "result-title";
+
     const h3 = document.createElement("h3");
     h3.textContent = title;
+
     const meta = document.createElement("p");
-    meta.textContent = `${items.length} source links`;
+    meta.textContent = getActiveFilterSummary(context);
+
     heading.append(h3, meta);
+    group.appendChild(heading);
 
     const grid = document.createElement("div");
     grid.className = "portal-grid";
-    items.forEach(item => grid.appendChild(renderPortalRow(item)));
 
-    group.append(heading, grid);
-    fragment.appendChild(group);
+    portals.forEach(portal => {
+      const query = buildPortalQuery(title, portal, context);
+      const url = buildSearchUrl(context.engine, query, context.time, portal, title, context);
+      const key = `${title}|${portal.id}|${context.engine}|${context.time}|${context.location}|${context.remoteMode}|${context.matchMode}|${context.experience}|${context.employment}|${context.authorization}|${context.sort}`;
+      const searchFormat = shouldUseNativeUrl(portal, context) ? "native filters" : context.engine;
+      state.results.push({ key, title, portal, query, url, searchFormat });
+      grid.appendChild(renderPortalRow({ key, title, portal, query, url, searchFormat }));
+    });
+
+    group.appendChild(grid);
+    els.results.appendChild(group);
   });
 
-  els.results.appendChild(fragment);
+  setEmptyState(false);
+  updateCounts();
+  updatePreview(titles[0], portals[0], context);
+  updateRelatedTitles(titles[0]);
+  if (updateUrl) {
+    updateAddressBar(titles, context);
+  }
 }
 
 function renderPortalRow(item) {
   const row = document.createElement("article");
   row.className = "portal-row";
-  if (state.checked.has(item.key)) {
-    row.classList.add("checked");
-  }
 
   const checkbox = document.createElement("input");
   checkbox.type = "checkbox";
-  checkbox.checked = state.checked.has(item.key);
-  checkbox.setAttribute("aria-label", `Select ${item.portal.name}`);
+  checkbox.setAttribute("aria-label", `Mark ${item.portal.name} checked`);
   checkbox.addEventListener("change", () => {
     if (checkbox.checked) {
       state.checked.add(item.key);
@@ -1430,129 +1288,71 @@ function renderPortalRow(item) {
       row.classList.remove("checked");
     }
     updateCounts();
-    savePreferences();
   });
 
-  const body = document.createElement("div");
-  body.className = "portal-body";
+  const content = document.createElement("div");
 
   const link = document.createElement("a");
+  link.className = "portal-link";
   link.href = item.url;
   link.target = "_blank";
-  link.rel = "noopener";
-  link.className = "portal-link";
+  link.rel = "noopener noreferrer";
   link.textContent = item.portal.name;
-  link.addEventListener("focus", () => updatePreview(item.title, item.portal, getContext()));
-  link.addEventListener("mouseenter", () => updatePreview(item.title, item.portal, getContext()));
   link.addEventListener("click", () => {
-    if (!state.checked.has(item.key)) {
-      state.checked.add(item.key);
-      checkbox.checked = true;
-      row.classList.add("checked");
-      updateCounts();
-      savePreferences();
-    }
+    checkbox.checked = true;
+    state.checked.add(item.key);
+    row.classList.add("checked");
+    updateCounts();
   });
-
-  const summary = document.createElement("p");
-  summary.className = "portal-summary";
-  summary.textContent = item.portal.note || getPortalScopeLabel(item.portal);
 
   const meta = document.createElement("div");
   meta.className = "portal-meta";
-  meta.append(createPill(CATEGORY_LABELS[item.portal.category] || item.portal.category));
-  meta.append(createPill(getPortalScopeLabel(item.portal)));
-  meta.append(createPill(item.searchKind));
-  (item.portal.tags || []).forEach(tag => meta.append(createPill(tag)));
+  meta.append(
+    createPill(item.portal.category),
+    createPill(getPortalScopeLabel(item.portal)),
+    createPill(item.searchFormat)
+  );
 
-  body.append(link, summary, meta);
-
-  const actions = document.createElement("div");
-  actions.className = "portal-actions";
-
-  const pinButton = document.createElement("button");
-  pinButton.type = "button";
-  pinButton.className = "copy-button";
-  pinButton.textContent = state.pinnedPortals.has(item.portal.id) ? "Unpin" : "Pin";
-  pinButton.addEventListener("click", () => togglePinnedPortal(item.portal.id));
+  content.append(link, meta);
 
   const copyButton = document.createElement("button");
   copyButton.type = "button";
   copyButton.className = "copy-button";
   copyButton.textContent = "Copy";
-  copyButton.addEventListener("click", () => copyLinks([item.url], `Copied ${item.portal.name}`));
+  copyButton.setAttribute("aria-label", `Copy ${item.portal.name} link`);
+  copyButton.addEventListener("click", () => copyLinks([item.url], "Copied link"));
 
-  actions.append(pinButton, copyButton);
-  row.append(checkbox, body, actions);
+  row.append(checkbox, content, copyButton);
   return row;
 }
 
 function getPortalScopeLabel(portal) {
-  const capability = getSourceCapability(portal);
-  if (capability) {
-    return capability.label;
-  }
-  return "Broad search";
-}
-
-function getSearchKind(portal) {
-  const capability = getSourceCapability(portal);
-  return capability ? capability.kind : SOURCE_CAPABILITIES.operator.kind;
-}
-
-function getSourceCapability(portal) {
-  if (portal.native && SOURCE_CAPABILITIES[portal.native]) {
-    return SOURCE_CAPABILITIES[portal.native];
-  }
-  if (portal.native) {
-    return SOURCE_CAPABILITIES.native;
-  }
-  if (portal.rawSiteQuery || portal.sites) {
-    return SOURCE_CAPABILITIES.operator;
-  }
-  return null;
+  if (portal.rawSiteQuery) return "operator set";
+  return portal.sites.length === 1 ? portal.sites[0] : `${portal.sites.length} domains`;
 }
 
 function createPill(text) {
-  const pill = document.createElement("span");
-  pill.className = "pill";
-  pill.textContent = text;
-  return pill;
-}
-
-function getSearchTitles() {
-  const typed = parseTitles(els.jobTitle.value);
-  if (typed.length) {
-    return typed;
-  }
-  const pack = getRolePack(els.rolePackSelect.value);
-  return [pack.primary];
-}
-
-function getRolePack(id) {
-  return ROLE_PACKS.find(pack => pack.id === id) || ROLE_PACKS[0];
+  const span = document.createElement("span");
+  span.className = "pill";
+  span.textContent = text;
+  return span;
 }
 
 function parseTitles(input) {
   return input
-    .split(/[,;\n]/)
-    .map(item => smartTitleCase(item.trim()))
+    .split(",")
+    .map(value => value.trim())
     .filter(Boolean)
-    .filter((item, index, items) => items.indexOf(item) === index);
+    .map(smartTitleCase);
 }
 
 function smartTitleCase(value) {
   return value
-    .replace(/\s+/g, " ")
-    .split(" ")
+    .split(/\s+/)
     .map(word => {
       const clean = word.replace(/[^a-zA-Z&]/g, "").toUpperCase();
-      if (ACRONYMS.has(clean)) {
-        return clean;
-      }
-      if (word.includes("-")) {
-        return word.split("-").map(smartTitleCase).join("-");
-      }
+      if (ACRONYMS.has(clean)) return clean;
+      if (word.includes("-")) return word.split("-").map(smartTitleCase).join("-");
       return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
     })
     .join(" ");
@@ -1560,45 +1360,47 @@ function smartTitleCase(value) {
 
 function getContext() {
   return {
-    profile: els.profileSelect.value,
-    rolePack: els.rolePackSelect.value,
-    precision: getPrecisionFromProfile(els.profileSelect.value),
     engine: els.engineSelect.value,
     time: els.timeFilter.value,
     location: els.locationSelect.value,
     sort: els.sortSelect.value,
     remoteMode: els.remoteMode.value,
     matchMode: els.matchMode.value,
-    hasTypedTitle: parseTitles(els.jobTitle.value).length > 0,
     experience: els.experienceSelect.value,
     employment: els.employmentSelect.value,
     authorization: els.authorizationSelect.value,
     includeTerms: parseTermList(els.includeTerms.value),
-    excludeTerms: parseTermList(els.excludeTerms.value),
-    cautionExcludes: els.cautionExcludes.checked,
-    strictTitle: els.strictTitle.checked
+    excludeTerms: parseTermList(els.excludeTerms.value)
   };
 }
 
-function getPrecisionFromProfile(profileId) {
-  const profile = SEARCH_PROFILES.find(item => item.id === profileId) || SEARCH_PROFILES[0];
-  return profile.defaults.precision || "coverage";
-}
-
 function parseTermList(value) {
-  return value
-    .split(",")
-    .map(term => term.trim())
-    .filter(Boolean);
+  return value.split(",").map(term => term.trim()).filter(Boolean);
 }
 
 function getSelectedPortals() {
-  const profile = SEARCH_PROFILES.find(item => item.id === els.profileSelect.value);
-  if (profile && Array.isArray(profile.portals)) {
-    return sortPortals(PORTALS.filter(portal => profile.portals.includes(portal.id)), els.sortSelect.value);
-  }
-  const selectedCategories = getSelectedCategories();
-  return sortPortals(PORTALS.filter(portal => selectedCategories.has(portal.category)), els.sortSelect.value);
+  const categories = getSelectedCategories();
+  const selected = PORTALS.filter(portal => categories.has(portal.category));
+  return sortPortals(selected, els.sortSelect.value);
+}
+
+function sortPortals(portals, sortMode) {
+  const categoryWeight = {
+    "Direct ATS": 70,
+    "General Boards": 60,
+    "Startup and Tech": 50,
+    "Company Career Pages": 45,
+    "Public and Nonprofit": 35,
+    "Remote Boards": 30
+  };
+  const modeBonus = {
+    recommended: portal => portal.priority * 10 + (categoryWeight[portal.category] || 0),
+    latest: portal => (portal.native ? 200 : 0) + portal.priority * 10,
+    direct: portal => (portal.category === "Direct ATS" ? 200 : 0) + (portal.category === "Company Career Pages" ? 120 : 0) + portal.priority * 10,
+    coverage: portal => (portal.category === "General Boards" ? 200 : 0) + (portal.category === "Company Career Pages" ? 150 : 0) + portal.priority * 10
+  };
+  const scorer = modeBonus[sortMode] || modeBonus.recommended;
+  return [...portals].sort((a, b) => scorer(b) - scorer(a) || a.name.localeCompare(b.name));
 }
 
 function getSelectedCategories() {
@@ -1607,83 +1409,18 @@ function getSelectedCategories() {
   return selected;
 }
 
-function sortPortals(portals, sortMode) {
-  const categoryBoost = {
-    top: 140,
-    direct: 130,
-    signals: 120,
-    general: 110,
-    tech: 100,
-    company: 90,
-    remote: 70,
-    public: 60,
-    research: 40
-  };
-
-  const score = portal => {
-    const base = portal.priority * 10 + (categoryBoost[portal.category] || 0);
-    const pinnedBoost = state.pinnedPortals.has(portal.id) ? 1200 : 0;
-    if (sortMode === "latest") {
-      const latestBoost = ["linkedinJobs", "indeed", "linkedinPosts", "google", "usajobs"].includes(portal.id) ? 600 : 0;
-      return base + latestBoost + pinnedBoost;
-    }
-    if (sortMode === "direct") {
-      const directBoost = portal.category === "direct" ? 700 : portal.category === "company" ? 450 : 0;
-      return base + directBoost + pinnedBoost;
-    }
-    if (sortMode === "coverage") {
-      const coverageBoost = ["top", "general", "tech", "company"].includes(portal.category) ? 450 : 0;
-      return base + coverageBoost + pinnedBoost;
-    }
-    return base + pinnedBoost;
-  };
-
-  return [...portals].sort((a, b) => score(b) - score(a) || a.order - b.order);
+function updatePortalCount() {
+  els.portalCount.textContent = String(getSelectedPortals().length);
 }
 
 function updateCounts() {
-  const selectedPortals = getSelectedPortals();
-  els.portalCount.textContent = String(selectedPortals.length);
+  els.portalCount.textContent = String(getSelectedPortals().length);
   els.checkedCount.textContent = String(state.checked.size);
   const hasResults = state.results.length > 0;
-  syncBatchControls();
   els.copyAllButton.disabled = !hasResults;
   els.copyCheckedButton.disabled = state.checked.size === 0;
   els.shareButton.disabled = !hasResults;
-  els.resultMeta.textContent = hasResults
-    ? `${state.results.length} links across ${selectedPortals.length} sources - ${getActiveFilterSummary(getContext())}`
-    : "Ready";
-  renderPinnedOperators();
-}
-
-function togglePinnedPortal(portalId) {
-  if (state.pinnedPortals.has(portalId)) {
-    state.pinnedPortals.delete(portalId);
-  } else {
-    state.pinnedPortals.add(portalId);
-  }
-  savePreferences();
-  renderPinnedOperators();
-  if (hasJobTitle()) {
-    generateResults();
-  } else {
-    updatePreviewForEmptyState();
-    updateAddressBar(getSearchTitles(), getContext());
-  }
-}
-
-function renderPinnedOperators() {
-  els.pinnedOperators.innerHTML = "";
-  const pinned = PORTALS.filter(portal => state.pinnedPortals.has(portal.id));
-  els.pinnedBlock.hidden = pinned.length === 0;
-  pinned.forEach(portal => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "tag-button";
-    button.dataset.pinRemove = portal.id;
-    button.textContent = `${portal.name} - remove`;
-    els.pinnedOperators.appendChild(button);
-  });
+  els.resultMeta.textContent = hasResults ? `${state.results.length} links across ${getSelectedPortals().length} portals` : "Ready";
 }
 
 function setEmptyState(show) {
@@ -1698,20 +1435,14 @@ function setEmptyState(show) {
 function updatePreviewForEmptyState() {
   const context = getContext();
   els.queryPreview.textContent = [
-    PROFILE_LABELS[context.profile],
-    ROLE_PACK_LABELS[context.rolePack],
-    FILTER_LABELS.precision[context.precision],
+    "US market default",
     FILTER_LABELS.authorization[context.authorization],
-    FILTER_LABELS.sort[context.sort],
-    getLocationLabel(context.location)
-  ].filter(Boolean).join("\n");
+    FILTER_LABELS.matchMode[context.matchMode],
+    FILTER_LABELS.sort[context.sort]
+  ].join("\n");
 }
 
 function updatePreview(title, portal, context) {
-  if (!portal) {
-    updatePreviewForEmptyState();
-    return;
-  }
   els.queryPreview.textContent = buildPortalQuery(title, portal, context);
 }
 
@@ -1719,7 +1450,6 @@ function updateRelatedTitles(title) {
   const related = findRelatedTitles(title);
   els.relatedTitles.innerHTML = "";
   els.relatedBlock.hidden = related.length === 0;
-
   related.forEach(item => {
     const button = document.createElement("button");
     button.type = "button";
@@ -1740,11 +1470,8 @@ function findRelatedTitles(title) {
   return group ? group.filter(item => item.toLowerCase() !== normalized) : [];
 }
 
+// ── QUERY BUILDERS ───────────────────────────────────────────────────────────
 function buildPortalQuery(title, portal, context) {
-  if (portal.native === "static") {
-    return `${title} ${portal.name}`;
-  }
-
   const parts = [
     buildTitleExpression(title, context),
     buildSiteExpression(portal),
@@ -1754,54 +1481,27 @@ function buildPortalQuery(title, portal, context) {
     getEmploymentQuery(context.employment),
     getAuthorizationQuery(context.authorization),
     buildIncludeQuery(context.includeTerms),
-    buildExcludeQuery([...context.excludeTerms, ...getCautionExcludes(context)])
+    buildExcludeQuery(context.excludeTerms)
   ].filter(Boolean);
-
   return parts.join(" ");
 }
 
 function buildTitleExpression(title, context) {
-  let expression;
-  if (context.matchMode === "exact") {
-    expression = quoteTerm(title);
-  } else if (!context.hasTypedTitle && getRolePack(context.rolePack).query) {
-    expression = getRolePack(context.rolePack).query;
-  } else {
-    const related = findTitleGroup(title);
-    expression = `(${related.map(quoteTerm).join(" OR ")})`;
-  }
-  return applyStrictTitle(expression, context);
-}
-
-// Opt-in precision: rewrite quoted titles as intitle:"..." so search-engine
-// results must carry the role in the page title. Off by default so nothing
-// is trimmed unless the user explicitly asks for it. Only used in operator
-// queries; native portal URLs use buildNativeTitleQuery and are unaffected.
-function applyStrictTitle(expression, context) {
-  if (!context.strictTitle) {
-    return expression;
-  }
-  return expression.replace(/"([^"]+)"/g, 'intitle:"$1"');
+  if (context.matchMode === "exact") return quoteTerm(title);
+  const related = findTitleGroup(title);
+  const titles = related.length ? related : [title];
+  return `(${titles.map(quoteTerm).join(" OR ")})`;
 }
 
 function findTitleGroup(title) {
   const normalized = title.toLowerCase();
-  return RELATED_TITLE_GROUPS.find(items => items.some(item => item.toLowerCase() === normalized)) || [title];
+  const group = RELATED_TITLE_GROUPS.find(items => items.some(item => item.toLowerCase() === normalized));
+  return group || [title];
 }
 
 function buildSiteExpression(portal) {
-  if (portal.native === "google") {
-    return "(job OR jobs OR careers OR hiring)";
-  }
-  if (portal.rawSiteQuery) {
-    return portal.rawSiteQuery;
-  }
-  if (!portal.sites || !portal.sites.length) {
-    return "";
-  }
-  if (portal.sites.length === 1) {
-    return `site:${portal.sites[0]}`;
-  }
+  if (portal.rawSiteQuery) return portal.rawSiteQuery;
+  if (portal.sites.length === 1) return `site:${portal.sites[0]}`;
   return `(${portal.sites.map(site => `site:${site}`).join(" OR ")})`;
 }
 
@@ -1822,71 +1522,44 @@ function getNativeLocation(value) {
 
 function getWorkSettingQuery(mode) {
   switch (mode) {
-    case "onsite-hybrid":
-      return '(onsite OR "on-site" OR hybrid OR "in office") -remote';
-    case "hybrid":
-      return '(hybrid OR "hybrid remote")';
-    case "onsite":
-      return '(onsite OR "on-site" OR "in office") -remote';
-    case "only":
-      return '(remote OR "work from home" OR "work from anywhere")';
-    case "exclude":
-      return '-remote -"work from home" -"work from anywhere"';
-    default:
-      return "";
+    case "onsite-hybrid": return '(onsite OR "on-site" OR hybrid OR "in office") -remote';
+    case "hybrid": return '(hybrid OR "hybrid remote")';
+    case "onsite": return '(onsite OR "on-site" OR "in office") -remote';
+    case "only": return '(remote OR "work from home" OR "work from anywhere")';
+    case "exclude": return '-remote -"work from home" -"work from anywhere"';
+    default: return "";
   }
 }
 
 function getExperienceQuery(value) {
   switch (value) {
-    case "entry":
-      return '("entry level" OR junior OR "new grad" OR "university graduate" OR "0-2 years" OR "early career")';
-    case "mid":
-      return '("mid level" OR "2+ years" OR "3+ years" OR associate) -senior -principal';
-    case "senior":
-      return '(senior OR lead OR staff OR principal OR "5+ years")';
-    case "manager":
-      return '(manager OR director OR "team lead" OR head)';
-    case "internship":
-      return '(intern OR internship OR co-op)';
-    default:
-      return "";
+    case "entry": return '("entry level" OR junior OR "new grad" OR university OR "0-2 years")';
+    case "mid": return '("mid level" OR "2+ years" OR "3+ years" OR associate) -senior -principal';
+    case "senior": return '(senior OR lead OR staff OR principal OR "5+ years")';
+    case "manager": return '(manager OR director OR "team lead" OR head)';
+    case "internship": return '(intern OR internship OR co-op)';
+    default: return "";
   }
-}
-
-function getCautionExcludes(context) {
-  return context.cautionExcludes ? CAUTION_EXCLUDE_TERMS : [];
 }
 
 function getEmploymentQuery(value) {
   switch (value) {
-    case "fulltime":
-      return '("full-time" OR "full time" OR FTE)';
-    case "contract":
-      return '(contract OR contractor OR "contract-to-hire" OR C2H)';
-    case "parttime":
-      return '("part-time" OR "part time")';
-    case "internship":
-      return '(internship OR intern OR co-op)';
-    default:
-      return "";
+    case "fulltime": return '("full-time" OR "full time" OR FTE)';
+    case "contract": return '(contract OR contractor OR "contract-to-hire" OR C2H)';
+    case "parttime": return '("part-time" OR "part time")';
+    case "internship": return '(internship OR intern OR co-op)';
+    default: return "";
   }
 }
 
 function getAuthorizationQuery(value) {
   switch (value) {
-    case "optBroad":
-      return '("OPT" OR "STEM OPT" OR "F-1" OR "E-Verify" OR "visa sponsorship" OR "H-1B" OR "work authorization" OR "authorized to work in the United States")';
-    case "currentAuthorized":
-      return '("authorized to work in the United States" OR "legally authorized" OR "work authorization" OR "US work authorization")';
-    case "sponsorNeeded":
-      return '("visa sponsorship" OR "H-1B sponsorship" OR "will sponsor" OR "sponsorship available" OR "OPT" OR "STEM OPT") -"unable to sponsor" -"no sponsorship" -"will not sponsor" -"cannot sponsor"';
-    case "everify":
-      return '("E-Verify" OR "e verify")';
-    case "optStrict":
-      return '("OPT" OR "STEM OPT" OR "F-1 OPT" OR "CPT")';
-    default:
-      return "";
+    case "optBroad": return '("OPT" OR "STEM OPT" OR "F-1" OR "E-Verify" OR "visa sponsorship" OR "H-1B" OR "work authorization" OR "authorized to work in the United States")';
+    case "currentAuthorized": return '("authorized to work in the United States" OR "legally authorized" OR "work authorization" OR "US work authorization")';
+    case "sponsorNeeded": return '("visa sponsorship" OR "H-1B sponsorship" OR "will sponsor" OR "sponsorship available" OR "OPT" OR "STEM OPT") -"unable to sponsor" -"no sponsorship" -"will not sponsor" -"cannot sponsor"';
+    case "everify": return '("E-Verify" OR "e verify")';
+    case "optStrict": return '("OPT" OR "STEM OPT" OR "F-1 OPT" OR "CPT")';
+    default: return "";
   }
 }
 
@@ -1900,12 +1573,8 @@ function buildExcludeQuery(terms) {
 
 function formatTerm(term) {
   const cleaned = term.trim();
-  if (!cleaned) {
-    return "";
-  }
-  if (/^[-+()"]/.test(cleaned) || /\bOR\b/i.test(cleaned)) {
-    return cleaned;
-  }
+  if (!cleaned) return "";
+  if (/^[-+()"]/.test(cleaned) || /\bOR\b/i.test(cleaned)) return cleaned;
   return cleaned.includes(" ") ? quoteTerm(cleaned) : cleaned;
 }
 
@@ -1913,193 +1582,94 @@ function quoteTerm(term) {
   return `"${term.replace(/"/g, "").trim()}"`;
 }
 
-function buildSearchUrl(portal, query, title, context) {
+// ── URL ROUTING ───────────────────────────────────────────────────────────────
+function buildSearchUrl(engine, query, time, portal, title, context) {
+  if (shouldUseNativeUrl(portal, context)) {
+    return buildNativeUrl(portal, title, context);
+  }
+  const queryWithOlder = addOlderOperator(query, time);
+  switch (engine) {
+    case "duckduckgo": return buildDuckDuckGoUrl(queryWithOlder, time);
+    case "bing": return buildBingUrl(queryWithOlder, time);
+    case "yahoo": return buildYahooUrl(queryWithOlder, time);
+    case "kagi": return buildKagiUrl(queryWithOlder, time);
+    case "qwant": return buildQwantUrl(queryWithOlder, time);
+    case "brave": return buildBraveUrl(queryWithOlder, time);
+    case "startpage": return buildStartpageUrl(queryWithOlder, time);
+    default: return buildGoogleUrl(query, time, context.sort);
+  }
+}
+
+function shouldUseNativeUrl(portal, context) {
+  if (!portal.native) return false;
+  if (portal.native === "linkedin" || portal.native === "indeed" || portal.native === "usajobs") return true;
+  if (context.sort === "latest" && (portal.native === "glassdoor" || portal.native === "ziprecruiter" || portal.native === "dice")) return true;
+  return false;
+}
+
+function buildNativeUrl(portal, title, context) {
   switch (portal.native) {
-    case "linkedinJobs":
-      return buildLinkedInJobsUrl(title, context);
-    case "linkedinPosts":
-      return buildLinkedInPostsUrl(title, context);
-    case "indeed":
-      return buildIndeedUrl(title, context);
-    case "usajobs":
-      return buildUSAJobsUrl(title, context);
-    case "google":
-      return buildGoogleUrl(query, context.time, context.sort);
-    case "glassdoor": {
-      const params = new URLSearchParams();
-      params.set("sc.keyword", buildNativeKeywordQuery(title, context));
-      const fromAge = getGlassdoorFromAge(context.time);
-      if (fromAge) {
-        params.set("fromAge", fromAge);
-      }
-      return `https://www.glassdoor.com/Job/jobs.htm?${params.toString()}`;
-    }
-    case "ziprecruiter": {
-      const params = new URLSearchParams();
-      params.set("search", buildNativeKeywordQuery(title, context));
-      params.set("location", getNativeLocation(context.location));
-      const days = getZipRecruiterDays(context.time);
-      if (days) {
-        params.set("days", days);
-      }
-      return `https://www.ziprecruiter.com/jobs-search?${params.toString()}`;
-    }
-    case "dice": {
-      const params = new URLSearchParams();
-      params.set("q", buildNativeKeywordQuery(title, context));
-      params.set("location", getNativeLocation(context.location));
-      const posted = getDicePostedDate(context.time);
-      if (posted) {
-        params.set("filters.postedDate", posted);
-      }
-      return `https://www.dice.com/jobs?${params.toString()}`;
-    }
-    case "builtin":
-      return `https://builtin.com/jobs?search=${encodeURIComponent(title)}&location=${encodeURIComponent(getNativeLocation(context.location))}`;
-    case "simplify":
-      return `https://simplify.jobs/jobs?query=${encodeURIComponent(buildNativeKeywordQuery(title, context))}`;
-    case "yc":
-      return `https://www.ycombinator.com/jobs?query=${encodeURIComponent(title)}`;
-    case "levels":
-      return `https://www.levels.fyi/jobs/?searchText=${encodeURIComponent(title)}`;
-    case "welcome":
-      return `https://www.welcometothejungle.com/en/jobs?query=${encodeURIComponent(title)}`;
-    case "monster":
-      return `https://www.monster.com/jobs/search?q=${encodeURIComponent(title)}&where=${encodeURIComponent(getNativeLocation(context.location))}`;
-    case "careerbuilder":
-      return `https://www.careerbuilder.com/jobs?keywords=${encodeURIComponent(title)}&location=${encodeURIComponent(getNativeLocation(context.location))}`;
-    case "remoteRocketship":
-      return `https://www.remoterocketship.com/?query=${encodeURIComponent(title)}`;
-    case "remotive":
-      return `https://remotive.com/?query=${encodeURIComponent(title)}`;
-    case "weWorkRemotely":
-      return `https://weworkremotely.com/remote-jobs/search?term=${encodeURIComponent(title)}`;
-    case "remoteOk":
-      return `https://remoteok.com/remote-${encodeURIComponent(title.toLowerCase().replace(/\s+/g, "-"))}-jobs`;
-    case "idealist":
-      return `https://www.idealist.org/en/jobs?q=${encodeURIComponent(title)}`;
-    case "higherEdJobs":
-      return `https://www.higheredjobs.com/search/advanced_action.cfm?Keyword=${encodeURIComponent(title)}`;
-    case "governmentJobs":
-      return `https://www.governmentjobs.com/jobs?keyword=${encodeURIComponent(title)}&location=${encodeURIComponent(getNativeLocation(context.location))}`;
-    case "static":
-      return portal.url;
-    default:
-      return buildSearchEngineUrl(context.engine, query, context.time, context.sort);
+    case "linkedin": return buildLinkedInUrl(title, context);
+    case "indeed": return buildIndeedUrl(title, context);
+    case "usajobs": return buildUSAJobsUrl(title, context);
+    case "glassdoor": return buildGlassdoorUrl(title, context);
+    case "ziprecruiter": return buildZipRecruiterUrl(title, context);
+    case "dice": return buildDiceUrl(title, context);
+    default: return buildGoogleUrl(buildPortalQuery(title, portal, context), context.time, context.sort);
   }
 }
 
 function buildNativeKeywordQuery(title, context) {
-  const parts = [buildNativeTitleQuery(title, context), ...context.includeTerms];
-  const auth = getNativeAuthorizationSuffix(context.authorization);
-  if (auth) {
-    parts.push(auth);
+  const parts = [title];
+  if (context.authorization === "optBroad") {
+    parts.push("OPT OR STEM OPT OR sponsorship OR E-Verify");
+  } else if (context.authorization === "sponsorNeeded") {
+    parts.push("visa sponsorship OR H-1B");
+  } else if (context.authorization === "optStrict") {
+    parts.push("OPT OR STEM OPT");
+  } else if (context.authorization === "everify") {
+    parts.push("E-Verify");
   }
-  [...context.excludeTerms, ...getCautionExcludes(context)].forEach(term => parts.push(`-${formatTerm(term)}`));
+  parts.push(...context.includeTerms);
   return parts.filter(Boolean).join(" ");
 }
 
-function buildNativeTitleQuery(title, context) {
-  if (context.matchMode === "exact") {
-    return title;
-  }
-  if (!context.hasTypedTitle) {
-    const pack = getRolePack(context.rolePack);
-    if (pack && pack.query) {
-      return pack.query;
-    }
-  }
-  const related = findTitleGroup(title);
-  return related.length > 1 ? `(${related.map(quoteTerm).join(" OR ")})` : title;
-}
-
-function getNativeAuthorizationSuffix(value) {
-  switch (value) {
-    case "optBroad":
-      return "OPT OR STEM OPT OR sponsorship OR E-Verify";
-    case "currentAuthorized":
-      return "authorized to work in the United States";
-    case "sponsorNeeded":
-      return "visa sponsorship OR H-1B sponsorship";
-    case "everify":
-      return "E-Verify";
-    case "optStrict":
-      return "OPT OR STEM OPT OR F-1 OPT";
-    default:
-      return "";
-  }
-}
-
-function buildLinkedInJobsUrl(title, context) {
+// ── IMPROVED LINKEDIN URL BUILDER ─────────────────────────────────────────────
+function buildLinkedInUrl(title, context) {
   const params = new URLSearchParams();
   params.set("keywords", buildNativeKeywordQuery(title, context));
-  params.set("geoId", "103644278");
   params.set("location", getNativeLocation(context.location));
-  params.set("origin", "JOB_SEARCH_PAGE_SEARCH_BUTTON");
-  params.set("refresh", "true");
+  params.set("geoId", "103644278");
   params.set("sortBy", context.sort === "latest" ? "DD" : "R");
   params.set("spellCorrectionEnabled", "true");
-
   const timeParam = getLinkedInTimeParam(context.time);
-  if (timeParam) {
-    params.set("f_TPR", timeParam);
-  }
-  const experience = getLinkedInExperienceParam(context.experience);
-  if (experience) {
-    params.set("f_E", experience);
-  }
-  const jobType = getLinkedInJobTypeParam(context.employment);
-  if (jobType) {
-    params.set("f_JT", jobType);
-  }
-  const workType = getLinkedInWorkTypeParam(context.remoteMode);
-  if (workType) {
-    params.set("f_WT", workType);
-  }
-  const functionParam = getLinkedInFunctionParam(title, context);
-  if (functionParam) {
-    params.set("f_F", functionParam);
-  }
-
+  if (timeParam) params.set("f_TPR", timeParam);
+  if (context.remoteMode === "only") params.set("f_WT", "2");
+  else if (context.remoteMode === "hybrid") params.set("f_WT", "3");
+  else if (context.remoteMode === "onsite") params.set("f_WT", "1");
+  else if (context.remoteMode === "onsite-hybrid") params.set("f_WT", "1,3");
+  if (context.experience === "entry") params.set("f_E", "1,2");
+  else if (context.experience === "mid") params.set("f_E", "3");
+  else if (context.experience === "senior") params.set("f_E", "4,5");
+  else if (context.experience === "manager") params.set("f_E", "5,6");
+  else if (context.experience === "internship") params.set("f_E", "1");
+  if (context.employment === "fulltime") params.set("f_JT", "F");
+  else if (context.employment === "contract") params.set("f_JT", "C");
+  else if (context.employment === "parttime") params.set("f_JT", "P");
+  else if (context.employment === "internship") params.set("f_JT", "I");
   return `https://www.linkedin.com/jobs/search/?${params.toString()}`;
 }
 
-function buildLinkedInPostsUrl(title, context) {
-  const keywords = [
-    '"hiring"',
-    quoteTerm(title),
-    context.authorization === "sponsorNeeded" ? '"visa sponsorship"' : "",
-    context.authorization === "optBroad" || context.authorization === "optStrict" ? '"OPT"' : "",
-    ...context.includeTerms.map(formatTerm),
-    getLocationLabel(context.location)
-  ].filter(Boolean).join(" ");
-
-  const params = new URLSearchParams();
-  params.set("keywords", keywords);
-  params.set("origin", "GLOBAL_SEARCH_HEADER");
-  params.set("sortBy", '["date_posted"]');
-  const datePosted = getLinkedInPostDateParam(context.time);
-  if (datePosted) {
-    params.set("datePosted", `["${datePosted}"]`);
-  }
-  params.set("contentType", '["jobs"]');
-  return `https://www.linkedin.com/search/results/content/?${params.toString()}`;
-}
-
+// ── IMPROVED INDEED URL BUILDER ───────────────────────────────────────────────
 function buildIndeedUrl(title, context) {
   const params = new URLSearchParams();
   params.set("q", buildNativeKeywordQuery(title, context));
   params.set("l", getNativeLocation(context.location));
-  if (context.sort === "latest") {
-    params.set("sort", "date");
-  }
+  if (context.sort === "latest") params.set("sort", "date");
   const fromage = getIndeedFromAge(context.time);
-  if (fromage) {
-    params.set("fromage", fromage);
-  }
-  if (context.remoteMode === "only") {
-    params.set("sc", "0kf:attr(DSQF7);");
-  }
+  if (fromage) params.set("fromage", fromage);
+  if (context.remoteMode === "only") params.set("sc", "0kf:attr(DSQF7);");
+  if (context.experience === "entry") params.set("sc", (params.get("sc") || "") + "0kf:explvl(ENTRY_LEVEL);");
   return `https://www.indeed.com/jobs?${params.toString()}`;
 }
 
@@ -2112,165 +1682,58 @@ function buildUSAJobsUrl(title, context) {
   return `https://www.usajobs.gov/Search/Results?${params.toString()}`;
 }
 
+// ── GLASSDOOR, ZIPRECRUITER, DICE NATIVE BUILDERS ────────────────────────────
+function buildGlassdoorUrl(title, context) {
+  const params = new URLSearchParams();
+  params.set("sc.keyword", buildNativeKeywordQuery(title, context));
+  params.set("locT", "N");
+  params.set("locId", "1");
+  const fromAge = { "24hours": "1", week: "3", month: "7", year: "30" }[context.time] || "";
+  if (fromAge) params.set("fromAge", fromAge);
+  if (context.sort === "latest") params.set("srs", "DATE_ASC");
+  return `https://www.glassdoor.com/Job/jobs.htm?${params.toString()}`;
+}
+
+function buildZipRecruiterUrl(title, context) {
+  const params = new URLSearchParams();
+  params.set("search", buildNativeKeywordQuery(title, context));
+  params.set("location", getNativeLocation(context.location));
+  const days = { "24hours": "1", week: "5", month: "30" }[context.time] || "";
+  if (days) params.set("days", days);
+  if (context.sort === "latest") params.set("sort_by_date", "1");
+  return `https://www.ziprecruiter.com/candidate/search?${params.toString()}`;
+}
+
+function buildDiceUrl(title, context) {
+  const params = new URLSearchParams();
+  params.set("q", buildNativeKeywordQuery(title, context));
+  params.set("countryCode", "US");
+  params.set("radius", "30");
+  params.set("radiusUnit", "mi");
+  params.set("page", "1");
+  params.set("pageSize", "20");
+  const posted = { "24hours": "ONE", "48hours": "ONE", "72hours": "THREE", week: "SEVEN", month: "THIRTY" }[context.time] || "";
+  if (posted) params.set("filters.postedDate", posted);
+  if (context.sort === "latest") params.set("filters.sortBy", "displayedDate");
+  return `https://www.dice.com/jobs?${params.toString()}`;
+}
+
+// ── TIME HELPERS ──────────────────────────────────────────────────────────────
 function getLinkedInTimeParam(time) {
   const map = {
-    "1hour": "r3600",
-    "4hours": "r14400",
-    "8hours": "r28800",
-    "12hours": "r43200",
-    "24hours": "r86400",
-    "48hours": "r172800",
-    "72hours": "r259200",
-    week: "r604800",
-    month: "r2592000",
-    year: "r31536000"
+    "1hour": "r3600", "4hours": "r14400", "8hours": "r28800", "12hours": "r43200",
+    "24hours": "r86400", "48hours": "r172800", "72hours": "r259200",
+    week: "r604800", month: "r2592000", year: "r31536000"
   };
   return map[time] || "";
-}
-
-function getLinkedInPostDateParam(time) {
-  if (["1hour", "4hours", "8hours", "12hours", "24hours", "48hours", "72hours"].includes(time)) {
-    return "past-24h";
-  }
-  if (time === "week") {
-    return "past-week";
-  }
-  if (time === "month") {
-    return "past-month";
-  }
-  return "";
-}
-
-function getLinkedInExperienceParam(value) {
-  const map = {
-    internship: "1",
-    entry: "1,2",
-    mid: "3,4",
-    senior: "4,5",
-    manager: "5,6"
-  };
-  return map[value] || "";
-}
-
-function getLinkedInJobTypeParam(value) {
-  const map = {
-    fulltime: "F",
-    contract: "C",
-    parttime: "P",
-    internship: "I"
-  };
-  return map[value] || "";
-}
-
-function getLinkedInWorkTypeParam(value) {
-  const map = {
-    onsite: "1",
-    "onsite-hybrid": "1,3",
-    only: "2",
-    hybrid: "3",
-    exclude: "1,3"
-  };
-  return map[value] || "";
-}
-
-function getLinkedInFunctionParam(title, context) {
-  if (context.matchMode !== "exact") {
-    return "";
-  }
-  const normalized = title.toLowerCase();
-  if (/data|analyst|analytics|intelligence|scientist|machine learning/.test(normalized)) {
-    return "it,anls,rsch";
-  }
-  if (/software|developer|engineer|devops|sre|cloud|security/.test(normalized)) {
-    return "eng,it";
-  }
-  if (/product/.test(normalized)) {
-    return "prd";
-  }
-  return "";
 }
 
 function getIndeedFromAge(time) {
-  const map = {
-    "1hour": "1",
-    "4hours": "1",
-    "8hours": "1",
-    "12hours": "1",
-    "24hours": "1",
-    "48hours": "2",
-    "72hours": "3",
-    week: "7",
-    month: "30"
-  };
+  const map = { "1hour": "1", "4hours": "1", "8hours": "1", "12hours": "1", "24hours": "1", "48hours": "3", "72hours": "3", week: "7", month: "30" };
   return map[time] || "";
 }
 
-function getGlassdoorFromAge(time) {
-  const map = {
-    "1hour": "1",
-    "4hours": "1",
-    "8hours": "1",
-    "12hours": "1",
-    "24hours": "1",
-    "48hours": "3",
-    "72hours": "3",
-    week: "7",
-    month: "30"
-  };
-  return map[time] || "";
-}
-
-function getZipRecruiterDays(time) {
-  const map = {
-    "1hour": "1",
-    "4hours": "1",
-    "8hours": "1",
-    "12hours": "1",
-    "24hours": "1",
-    "48hours": "5",
-    "72hours": "5",
-    week: "10",
-    month: "30"
-  };
-  return map[time] || "";
-}
-
-function getDicePostedDate(time) {
-  const map = {
-    "1hour": "ONE",
-    "4hours": "ONE",
-    "8hours": "ONE",
-    "12hours": "ONE",
-    "24hours": "ONE",
-    "48hours": "THREE",
-    "72hours": "THREE",
-    week: "SEVEN"
-  };
-  return map[time] || "";
-}
-
-function buildSearchEngineUrl(engine, query, time, sort) {
-  const queryWithOlder = addOlderOperator(query, time);
-  switch (engine) {
-    case "duckduckgo":
-      return buildDuckDuckGoUrl(queryWithOlder, time);
-    case "bing":
-      return buildBingUrl(queryWithOlder, time);
-    case "brave":
-      return buildBraveUrl(queryWithOlder, time);
-    case "startpage":
-      return buildStartpageUrl(queryWithOlder, time);
-    case "yahoo":
-      return buildYahooUrl(queryWithOlder, time);
-    case "kagi":
-      return buildKagiUrl(queryWithOlder, time);
-    case "qwant":
-      return buildQwantUrl(queryWithOlder, time);
-    default:
-      return buildGoogleUrl(query, time, sort);
-  }
-}
-
+// ── SEARCH ENGINE URL BUILDERS ────────────────────────────────────────────────
 function buildGoogleUrl(query, time, sort) {
   const tbs = getGoogleTbs(time, sort);
   return `https://www.google.com/search?q=${encodeURIComponent(query)}${tbs ? `&tbs=${encodeURIComponent(tbs)}` : ""}`;
@@ -2278,33 +1741,22 @@ function buildGoogleUrl(query, time, sort) {
 
 function getGoogleTbs(time, sort) {
   const map = {
-    "1hour": "qdr:h1",
-    "4hours": "qdr:h4",
-    "8hours": "qdr:h8",
-    "12hours": "qdr:h12",
-    "24hours": "qdr:d",
-    "48hours": "qdr:h48",
-    "72hours": "qdr:h72",
-    week: "qdr:w",
-    month: "qdr:m",
-    year: "qdr:y",
+    "1hour": "qdr:h1", "4hours": "qdr:h4", "8hours": "qdr:h8", "12hours": "qdr:h12",
+    "24hours": "qdr:d", "48hours": "qdr:h48", "72hours": "qdr:h72",
+    week: "qdr:w", month: "qdr:m", year: "qdr:y",
     older1month: `cdr:1,cd_max:${getPastDate(1, "us")}`,
     older3months: `cdr:1,cd_max:${getPastDate(3, "us")}`,
     older6months: `cdr:1,cd_max:${getPastDate(6, "us")}`
   };
   const timePart = map[time] || "";
-  if (sort === "latest") {
-    return timePart ? `${timePart},sbd:1` : "sbd:1";
-  }
+  if (sort === "latest") return timePart ? `${timePart},sbd:1` : "sbd:1";
   return timePart;
 }
 
 function buildDuckDuckGoUrl(query, time) {
   const map = { "24hours": "d", week: "w", month: "m", year: "y" };
   const params = new URLSearchParams({ q: query });
-  if (map[time]) {
-    params.set("df", map[time]);
-  }
+  if (map[time]) params.set("df", map[time]);
   return `https://duckduckgo.com/?${params.toString()}`;
 }
 
@@ -2312,18 +1764,6 @@ function buildBingUrl(query, time) {
   const map = { "24hours": "ez1", week: "ez2", month: "ez3" };
   const filter = map[time] ? `&filters=ex1%3a%22${map[time]}%22` : "";
   return `https://www.bing.com/search?q=${encodeURIComponent(query)}${filter}`;
-}
-
-function buildBraveUrl(query, time) {
-  const map = { "24hours": "pd", week: "pw", month: "pm", year: "py" };
-  const filter = map[time] ? `&tf=${map[time]}` : "";
-  return `https://search.brave.com/search?q=${encodeURIComponent(query)}&source=web${filter}`;
-}
-
-function buildStartpageUrl(query, time) {
-  const afterDate = getStartpageAfterDate(time);
-  const finalQuery = afterDate ? `${query} after:${afterDate}` : query;
-  return `https://www.startpage.com/sp/search?query=${encodeURIComponent(finalQuery)}`;
 }
 
 function buildYahooUrl(query, time) {
@@ -2344,6 +1784,18 @@ function buildQwantUrl(query, time) {
   return `https://www.qwant.com/?q=${encodeURIComponent(query)}&t=web${filter}`;
 }
 
+function buildBraveUrl(query, time) {
+  const map = { "24hours": "pd", week: "pw", month: "pm", year: "py" };
+  const filter = map[time] ? `&tf=${map[time]}` : "";
+  return `https://search.brave.com/search?q=${encodeURIComponent(query)}&source=web${filter}`;
+}
+
+function buildStartpageUrl(query, time) {
+  const afterDate = getStartpageAfterDate(time);
+  const finalQuery = afterDate ? `${query} after:${afterDate}` : query;
+  return `https://www.startpage.com/sp/search?query=${encodeURIComponent(finalQuery)}`;
+}
+
 function addOlderOperator(query, time) {
   const months = getOlderMonths(time);
   return months ? `${query} before:${getPastDate(months, "iso")}` : query;
@@ -2351,9 +1803,7 @@ function addOlderOperator(query, time) {
 
 function getStartpageAfterDate(time) {
   const dayMap = { "24hours": 1, week: 7, month: 30, year: 365 };
-  if (!dayMap[time]) {
-    return "";
-  }
+  if (!dayMap[time]) return "";
   const date = new Date(Date.now() - dayMap[time] * 24 * 60 * 60 * 1000);
   return date.toISOString().slice(0, 10);
 }
@@ -2368,636 +1818,51 @@ function getPastDate(monthsBack, format) {
 }
 
 function getOlderMonths(time) {
-  if (time === "older1month") {
-    return 1;
-  }
-  if (time === "older3months") {
-    return 3;
-  }
-  if (time === "older6months") {
-    return 6;
-  }
+  if (time === "older1month") return 1;
+  if (time === "older3months") return 3;
+  if (time === "older6months") return 6;
   return 0;
 }
 
 function getTimeLabel(value) {
-  const option = Object.values(TIME_OPTIONS).flat().find(([timeValue]) => timeValue === value);
-  return option ? option[1] : "All";
+  const option = Object.values(TIME_OPTIONS).flat().find(item => item.value === value);
+  return option ? option.label : "All";
 }
 
 function getActiveFilterSummary(context) {
   return [
-    PROFILE_LABELS[context.profile],
-    ROLE_PACK_LABELS[context.rolePack],
-    FILTER_LABELS.precision[context.precision],
     getLocationLabel(context.location),
     getTimeLabel(context.time),
     FILTER_LABELS.sort[context.sort],
-    FILTER_LABELS.authorization[context.authorization]
+    FILTER_LABELS.remoteMode[context.remoteMode],
+    FILTER_LABELS.authorization[context.authorization],
+    FILTER_LABELS.experience[context.experience],
+    FILTER_LABELS.employment[context.employment]
   ].filter(Boolean).join(" - ");
 }
 
+// ── ADDRESS BAR & CLIPBOARD ───────────────────────────────────────────────────
 function updateAddressBar(titles, context) {
   const params = new URLSearchParams();
-  if (els.jobTitle.value.trim()) {
-    params.set("job", titles.join(","));
-  }
-  params.set("profile", context.profile);
-  params.set("rolePack", context.rolePack);
+  params.set("job", titles.join(","));
   params.set("location", context.location);
   params.set("time", context.time);
-  params.set("sort", context.sort);
-  if (context.engine !== "google") {
-    params.set("engine", context.engine);
-  }
-  if (context.remoteMode !== "neutral") {
-    params.set("remote", context.remoteMode);
-  }
-  if (context.matchMode !== "smart") {
-    params.set("match", context.matchMode);
-  }
-  if (context.experience !== "any") {
-    params.set("experience", context.experience);
-  }
-  if (context.employment !== "any") {
-    params.set("employment", context.employment);
-  }
-  params.set("authorization", context.authorization);
-  if (context.includeTerms.length) {
-    params.set("include", context.includeTerms.join(","));
-  }
-  if (context.excludeTerms.length) {
-    params.set("exclude", context.excludeTerms.join(","));
-  }
-  if (context.cautionExcludes) {
-    params.set("caution", "1");
-  }
-  if (context.strictTitle) {
-    params.set("strict", "1");
-  }
-  if (state.pinnedPortals.size) {
-    params.set("pins", Array.from(state.pinnedPortals).join(","));
-  }
+  if (context.sort !== "recommended") params.set("sort", context.sort);
+  if (context.engine !== "google") params.set("engine", context.engine);
+  if (context.remoteMode !== "neutral") params.set("remote", context.remoteMode);
+  if (context.matchMode !== "smart") params.set("match", context.matchMode);
+  if (context.experience !== "any") params.set("experience", context.experience);
+  if (context.employment !== "any") params.set("employment", context.employment);
+  if (context.authorization !== "optBroad") params.set("authorization", context.authorization);
+  if (context.includeTerms.length) params.set("include", context.includeTerms.join(","));
+  if (context.excludeTerms.length) params.set("exclude", context.excludeTerms.join(","));
   const categories = Array.from(getSelectedCategories());
-  if (!categories.length) {
-    params.set("groups", "none");
-  } else if (categories.join(",") !== DEFAULT_CATEGORY_IDS.join(",")) {
-    params.set("groups", categories.join(","));
-  }
+  if (categories.length !== CATEGORIES.length) params.set("groups", categories.join(","));
   history.pushState(null, "", `${window.location.pathname}?${params.toString()}`);
 }
 
-function renderCompanyOptions(filterText) {
-  const normalized = filterText.trim().toLowerCase();
-  const previousValue = els.companySelect.value || ALL_COMPANIES_ID;
-  state.visibleCompanies = sortCompaniesForView(COMPANIES.filter(company => {
-    if (!normalized) {
-      return companyMatchesFilters(company);
-    }
-    return [
-      company.name,
-      company.category,
-      company.tags.join(" "),
-      company.aliases.join(" "),
-      company.sponsorTier,
-      company.companyKind,
-      company.caution,
-      state.favoriteCompanies.has(company.id) ? "favorite" : ""
-    ].join(" ").toLowerCase().includes(normalized) && companyMatchesFilters(company);
-  }));
-
-  els.companySelect.innerHTML = "";
-  if (!state.visibleCompanies.length) {
-    const option = document.createElement("option");
-    option.textContent = "No matching companies";
-    option.value = "";
-    els.companySelect.appendChild(option);
-    els.companyCount.textContent = `0 of ${COMPANIES.length} companies`;
-    return;
-  }
-
-  const allOption = document.createElement("option");
-  allOption.value = ALL_COMPANIES_ID;
-  allOption.textContent = `All companies (${state.visibleCompanies.length})`;
-  els.companySelect.appendChild(allOption);
-
-  const byCategory = new Map();
-  state.visibleCompanies.forEach(company => {
-    if (!byCategory.has(company.category)) {
-      byCategory.set(company.category, []);
-    }
-    byCategory.get(company.category).push(company);
-  });
-
-  byCategory.forEach((companies, category) => {
-    const group = document.createElement("optgroup");
-    group.label = category;
-    companies.forEach(company => {
-      const option = document.createElement("option");
-      option.value = company.id;
-      option.textContent = `${company.rank}. ${company.name}`;
-      group.appendChild(option);
-    });
-    els.companySelect.appendChild(group);
-  });
-
-  if (previousValue === ALL_COMPANIES_ID) {
-    els.companySelect.value = ALL_COMPANIES_ID;
-  } else if (state.visibleCompanies.some(company => company.id === previousValue)) {
-    els.companySelect.value = previousValue;
-  } else {
-    els.companySelect.value = ALL_COMPANIES_ID;
-  }
-  const sponsorCount = state.visibleCompanies.filter(company => company.h1bFilings > 0).length;
-  els.companyCount.textContent = `${state.visibleCompanies.length} of ${COMPANIES.length} companies - ${sponsorCount} H1B sponsors`;
-}
-
-function companyMatchesFilters(company) {
-  const category = els.companyCategorySelect.value;
-  if (category !== "all" && company.category !== category) {
-    return false;
-  }
-  const sponsorTier = els.companySponsorTier.value;
-  if (sponsorTier !== "all" && company.sponsorTier !== sponsorTier) {
-    return false;
-  }
-  const kind = els.companyKind.value;
-  if (kind !== "all" && company.companyKind !== kind) {
-    return false;
-  }
-  return true;
-}
-
-function sortCompaniesForView(companies) {
-  const mode = els.companySortSelect.value;
-  return [...companies].sort((a, b) => {
-    if (mode === "favorites") {
-      const favDiff = Number(state.favoriteCompanies.has(b.id)) - Number(state.favoriteCompanies.has(a.id));
-      if (favDiff) {
-        return favDiff;
-      }
-    }
-    if (mode === "sponsor") {
-      return b.h1bFilings - a.h1bFilings || a.rank - b.rank;
-    }
-    if (mode === "recommended") {
-      return getCompanyRecommendationScore(b) - getCompanyRecommendationScore(a) || a.rank - b.rank;
-    }
-    return a.rank - b.rank;
-  });
-}
-
-function getCompanyRecommendationScore(company) {
-  const favoriteBoost = state.favoriteCompanies.has(company.id) ? 200000 : 0;
-  const sponsorBoost = company.h1bFilings * 20;
-  const directBoost = company.companyKind === "direct" ? 1000 : 0;
-  const cautionPenalty = company.caution ? 250 : 0;
-  return favoriteBoost + sponsorBoost + directBoost - cautionPenalty;
-}
-
-function isAllCompaniesSelected() {
-  return els.companySelect.value === ALL_COMPANIES_ID;
-}
-
-function getSelectedCompany() {
-  if (isAllCompaniesSelected()) {
-    return null;
-  }
-  return COMPANIES.find(company => company.id === els.companySelect.value) || state.visibleCompanies[0] || null;
-}
-
-function syncCompanyCard() {
-  if (isAllCompaniesSelected()) {
-    renderAllCompanyCard();
-    return;
-  }
-
-  const company = getSelectedCompany();
-  if (!company) {
-    els.companyCard.textContent = "No company selected.";
-    return;
-  }
-  els.companySelect.value = company.id;
-  const favorite = state.favoriteCompanies.has(company.id);
-  els.openCompanyButton.textContent = "Open Careers";
-  els.searchCompanyButton.textContent = "Search This Company";
-  els.searchCompanyButton.disabled = !getCompanySearchTitle();
-  els.favoriteCompanyButton.hidden = false;
-  els.favoriteCompanyButton.disabled = false;
-  els.favoriteCompanyButton.textContent = favorite ? "Unfavorite" : "Favorite";
-
-  els.companyCard.innerHTML = "";
-  const title = document.createElement("div");
-  title.className = "company-title";
-  const name = document.createElement("h3");
-  name.textContent = company.name;
-  const rank = createPill(`#${company.rank}`);
-  title.append(name, rank);
-
-  const meta = document.createElement("div");
-  meta.className = "portal-meta";
-  meta.append(createPill(company.category));
-  meta.append(createPill(FILTER_LABELS.companyKind[company.companyKind]));
-  if (company.h1bFilings) {
-    meta.append(createPill(`${company.h1bFilings.toLocaleString()} H1B filings`));
-    meta.append(createPill(FILTER_LABELS.sponsorTier[company.sponsorTier] || company.sponsorTier));
-  }
-  company.tags.forEach(tag => meta.append(createPill(tag)));
-  if (favorite) {
-    meta.append(createPill("favorite"));
-  }
-
-  const url = document.createElement("a");
-  url.href = company.careersUrl;
-  url.target = "_blank";
-  url.rel = "noopener";
-  url.textContent = company.careersUrl;
-
-  els.companyCard.append(title, meta, url);
-  if (company.aliases.length) {
-    const aliases = document.createElement("p");
-    aliases.className = "company-note";
-    aliases.textContent = `Aliases: ${company.aliases.join(", ")}`;
-    els.companyCard.appendChild(aliases);
-  }
-  if (company.caution) {
-    const caution = document.createElement("p");
-    caution.className = "caution";
-    caution.textContent = company.caution;
-    els.companyCard.appendChild(caution);
-  }
-}
-
-function renderAllCompanyCard() {
-  els.companyCard.innerHTML = "";
-  els.openCompanyButton.textContent = "Copy Career Pages";
-  els.searchCompanyButton.textContent = "Copy All Search Links";
-  els.favoriteCompanyButton.hidden = true;
-  els.favoriteCompanyButton.disabled = true;
-
-  const titleText = getCompanySearchTitle();
-  const hasRole = Boolean(titleText);
-  const context = getCompanyContext();
-  const rows = hasRole ? getCompanySearchRows(titleText, context) : state.visibleCompanies.map(company => ({ company, searchUrl: "" }));
-  els.searchCompanyButton.disabled = !hasRole;
-
-  const title = document.createElement("div");
-  title.className = "company-title";
-  const name = document.createElement("h3");
-  name.textContent = "All companies";
-  const count = createPill(hasRole ? `${rows.length} search links` : `${rows.length} companies`);
-  title.append(name, count);
-
-  const meta = document.createElement("div");
-  meta.className = "portal-meta";
-  meta.append(createPill(getLocationLabel(context.location)));
-  meta.append(createPill(getTimeLabel(context.time)));
-  meta.append(createPill(FILTER_LABELS.authorization[context.authorization]));
-  meta.append(createPill(FILTER_LABELS.companyKind[els.companyKind.value] || "Direct and vendors"));
-  meta.append(createPill(FILTER_LABELS.sponsorTier[els.companySponsorTier.value] || "All sponsor tiers"));
-  meta.append(createPill(hasRole ? `Role: ${titleText}` : "Role required"));
-
-  const note = document.createElement("p");
-  note.className = "company-note";
-  note.textContent = hasRole
-    ? "Every filtered search link below uses the company search role, location, freshness, authorization, include terms, exclude terms, and sort settings."
-    : "Enter a company search role to create filtered company searches.";
-
-  const list = document.createElement("div");
-  list.className = "company-link-list";
-  rows.forEach(row => {
-    const item = document.createElement("article");
-    item.className = "company-link-row";
-
-    const companyName = document.createElement("strong");
-    companyName.textContent = `${row.company.rank}. ${row.company.name}`;
-
-    const category = document.createElement("span");
-    category.className = "company-link-category";
-    category.textContent = row.company.h1bFilings
-      ? `${row.company.category} - ${row.company.h1bFilings.toLocaleString()} H1B filings`
-      : row.company.category;
-
-    const links = document.createElement("div");
-    links.className = "company-link-actions";
-
-    const careers = document.createElement("a");
-    careers.href = row.company.careersUrl;
-    careers.target = "_blank";
-    careers.rel = "noopener";
-    careers.textContent = "Careers";
-
-    links.appendChild(careers);
-    if (hasRole) {
-      const search = document.createElement("a");
-      search.href = row.searchUrl;
-      search.target = "_blank";
-      search.rel = "noopener";
-      search.textContent = "Filtered search";
-      links.appendChild(search);
-    } else {
-      const missing = document.createElement("span");
-      missing.className = "company-link-muted";
-      missing.textContent = "Add role";
-      links.appendChild(missing);
-    }
-    item.append(companyName, category, links);
-    list.appendChild(item);
-  });
-
-  els.companyCard.append(title, meta, note, list);
-}
-
-function openSelectedCompany() {
-  if (isAllCompaniesSelected()) {
-    copyLinks(state.visibleCompanies.map(company => company.careersUrl), "Copied all company career pages");
-    return;
-  }
-
-  const company = getSelectedCompany();
-  if (!company) {
-    return;
-  }
-  window.open(company.careersUrl, "_blank", "noopener");
-}
-
-function searchSelectedCompany() {
-  if (isAllCompaniesSelected()) {
-    const title = getCompanySearchTitle();
-    if (!title) {
-      showToast("Enter a company search role");
-      return;
-    }
-    const context = getCompanyContext();
-    const links = getCompanySearchRows(title, context).map(row => row.searchUrl);
-    copyLinks(links, "Copied all company search links");
-    return;
-  }
-
-  const company = getSelectedCompany();
-  if (!company) {
-    return;
-  }
-  const title = getCompanySearchTitle();
-  if (!title) {
-    showToast("Enter a company search role");
-    return;
-  }
-  const context = getCompanyContext();
-  window.open(buildCompanySearchUrl(company, title, context), "_blank", "noopener");
-}
-
-function openCompanySearchType(type) {
-  const title = getCompanySearchTitle();
-  if (!title) {
-    showToast("Enter a company search role");
-    return;
-  }
-  const companies = getCompaniesForAction();
-  const context = getCompanyContext();
-  const urls = companies.flatMap(company => getCompanyActionUrls(company, title, context, type));
-  if (!urls.length) {
-    return;
-  }
-  if (companies.length === 1 && urls.length <= 2) {
-    urls.forEach(url => window.open(url, "_blank", "noopener"));
-    showToast(`Opened ${type === "indeedGoogle" ? "Indeed/Google" : type}`);
-    return;
-  }
-  copyLinks(urls, `Copied ${urls.length} company ${type} links`);
-}
-
-function copySelectedCompanyLinks() {
-  const title = getCompanySearchTitle();
-  if (!title) {
-    showToast("Enter a company search role");
-    return;
-  }
-  const context = getCompanyContext();
-  const links = getCompaniesForAction().flatMap(company => [
-    company.careersUrl,
-    buildCompanySearchUrl(company, title, context),
-    ...getCompanyActionUrls(company, title, context, "linkedinJobs"),
-    ...getCompanyActionUrls(company, title, context, "linkedinPosts"),
-    ...getCompanyActionUrls(company, title, context, "indeedGoogle")
-  ]);
-  copyLinks(links, `Copied ${links.length} selected company links`);
-}
-
-function openTopSponsorSearches() {
-  const title = getCompanySearchTitle();
-  const context = getCompanyContext();
-  const topSponsors = COMPANIES
-    .filter(company => company.h1bFilings > 0 && company.companyKind === "direct")
-    .sort((a, b) => b.h1bFilings - a.h1bFilings)
-    .slice(0, 5);
-  topSponsors.forEach(company => window.open(buildCompanySearchUrl(company, title, context), "_blank", "noopener"));
-  showToast("Opened top 5 sponsor searches");
-}
-
-function getCompaniesForAction() {
-  if (isAllCompaniesSelected()) {
-    return state.visibleCompanies;
-  }
-  const selected = getSelectedCompany();
-  return selected ? [selected] : [];
-}
-
-function getCompanyActionUrls(company, title, context, type) {
-  const companyContext = {
-    ...context,
-    includeTerms: mergeUnique(context.includeTerms, [company.name])
-  };
-  switch (type) {
-    case "linkedinJobs":
-      return [buildLinkedInJobsUrl(title, companyContext)];
-    case "linkedinPosts":
-      return [buildLinkedInPostsUrl(title, companyContext)];
-    case "indeedGoogle":
-      return [buildIndeedUrl(title, companyContext), buildCompanySearchUrl(company, title, context)];
-    default:
-      return [buildCompanySearchUrl(company, title, context)];
-  }
-}
-
-function toggleFavoriteCompany() {
-  if (isAllCompaniesSelected()) {
-    return;
-  }
-
-  const company = getSelectedCompany();
-  if (!company) {
-    return;
-  }
-  if (state.favoriteCompanies.has(company.id)) {
-    state.favoriteCompanies.delete(company.id);
-  } else {
-    state.favoriteCompanies.add(company.id);
-  }
-  savePreferences();
-  renderCompanyOptions(els.companyFilter.value);
-  els.companySelect.value = company.id;
-  syncCompanyCard();
-}
-
-function getCompanySearchTitle() {
-  const typed = parseTitles(els.companyRole.value)[0] || parseTitles(els.jobTitle.value)[0];
-  if (typed) {
-    return typed;
-  }
-  return getRolePack(els.companyRolePack.value || els.rolePackSelect.value).primary;
-}
-
-function getCompanyContext() {
-  const hasCompanyTypedTitle = Boolean(parseTitles(els.companyRole.value)[0] || parseTitles(els.jobTitle.value)[0]);
-  return {
-    ...getContext(),
-    rolePack: els.companyRolePack.value || els.rolePackSelect.value,
-    hasTypedTitle: hasCompanyTypedTitle,
-    time: els.companyTimeFilter.value,
-    sort: els.companySortSelect.value === "latest" ? "latest" : "coverage",
-    experience: els.companyExperienceSelect.value,
-    location: els.companyLocationSelect.value,
-    remoteMode: els.companyRemoteMode.value,
-    employment: els.companyEmploymentSelect.value,
-    authorization: els.companyAuthorizationSelect.value,
-    includeTerms: mergeUnique(parseTermList(els.includeTerms.value), parseTermList(els.companyIncludeTerms.value)),
-    excludeTerms: mergeUnique(parseTermList(els.excludeTerms.value), parseTermList(els.companyExcludeTerms.value))
-  };
-}
-
-function getCompanySearchRows(title, context) {
-  return state.visibleCompanies.map(company => ({
-    company,
-    searchUrl: buildCompanySearchUrl(company, title, context)
-  }));
-}
-
-function buildCompanySearchUrl(company, title, context) {
-  const query = [
-    buildTitleExpression(title, context),
-    buildCompanyNameExpression(company),
-    getLocationQuery(context.location),
-    "(job OR jobs OR careers OR hiring OR openings)",
-    company.careersUrl ? `site:${urlToSiteHost(company.careersUrl)}` : "",
-    getAuthorizationQuery(context.authorization),
-    buildIncludeQuery(context.includeTerms),
-    buildExcludeQuery([...context.excludeTerms, ...getCautionExcludes(context)])
-  ].filter(Boolean).join(" ");
-  return buildGoogleUrl(query, context.time, context.sort);
-}
-
-function buildCompanyNameExpression(company) {
-  const names = [company.name, ...(company.aliases || [])].slice(0, 4).map(quoteTerm);
-  return names.length > 1 ? `(${names.join(" OR ")})` : names[0];
-}
-
-function urlToSiteScope(url) {
-  if (!url) {
-    return "";
-  }
-  try {
-    const parsed = new URL(url);
-    const host = parsed.hostname.replace(/^www\./, "");
-    const path = parsed.pathname && parsed.pathname !== "/" ? parsed.pathname.replace(/\/$/, "") : "";
-    return `${host}${path}`;
-  } catch (error) {
-    return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
-  }
-}
-
-function urlToSiteHost(url) {
-  if (!url) {
-    return "";
-  }
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch (error) {
-    return url.replace(/^https?:\/\//, "").split("/")[0].replace(/^www\./, "");
-  }
-}
-
-function getOpenBatchSize() {
-  return parseInt(els.openBatchSize.value, 10) || 5;
-}
-
-function getUncheckedResults() {
-  return state.results.filter(item => !state.checked.has(item.key));
-}
-
-// Keeps the batch button honest: "Open Top N" before anything is checked,
-// "Open Next N" once a batch has been opened, disabled when nothing is left.
-function syncBatchControls() {
-  const unchecked = getUncheckedResults();
-  const size = getOpenBatchSize();
-  const label = state.checked.size === 0 ? "Open Top" : "Open Next";
-  els.openBatchButton.textContent = `${label} ${Math.min(size, unchecked.length) || size}`;
-  els.openBatchButton.disabled = unchecked.length === 0;
-  els.openAllButton.textContent = unchecked.length ? `Open All Links (${unchecked.length})` : "Open All Links";
-  els.openAllButton.disabled = unchecked.length === 0;
-}
-
-function openLinkBatch(items, doneMessage) {
-  items.forEach(item => {
-    state.checked.add(item.key);
-    window.open(item.url, "_blank", "noopener");
-  });
-  savePreferences();
-  renderResults();
-  updateCounts();
-  const remaining = getUncheckedResults().length;
-  showToast(`${doneMessage}${remaining ? ` - ${remaining} left` : " - all done"}`);
-}
-
-function openNextBatch() {
-  const next = getUncheckedResults().slice(0, getOpenBatchSize());
-  if (!next.length) {
-    showToast("All links opened. Run a new search or uncheck rows.");
-    return;
-  }
-  openLinkBatch(next, `Opened ${next.length} links`);
-}
-
-function openAllLinks() {
-  const unchecked = getUncheckedResults();
-  if (!unchecked.length) {
-    showToast("All links opened. Run a new search or uncheck rows.");
-    return;
-  }
-  if (unchecked.length > 15 && !window.confirm(`This will open ${unchecked.length} tabs at once. Continue?`)) {
-    return;
-  }
-  openLinkBatch(unchecked, `Opened all ${unchecked.length} links`);
-}
-
-function exportSettings() {
-  savePreferences();
-  const payload = localStorage.getItem(STORAGE_KEY) || "{}";
-  copyLinks([payload], "Copied settings JSON. Paste it in Import Settings on another browser.");
-}
-
-function importSettings() {
-  const raw = window.prompt("Paste settings JSON exported from another browser:");
-  if (!raw || !raw.trim()) {
-    return;
-  }
-  try {
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-      throw new Error("not an object");
-    }
-  } catch (error) {
-    showToast("Invalid settings JSON");
-    return;
-  }
-  localStorage.setItem(STORAGE_KEY, raw.trim());
-  window.location.replace(window.location.pathname);
-}
-
 async function copyLinks(links, message) {
-  if (!links.length) {
-    return;
-  }
+  if (!links.length) return;
   try {
     await navigator.clipboard.writeText(links.join("\n"));
     showToast(message);
@@ -3009,93 +1874,42 @@ async function copyLinks(links, message) {
 function showToast(message) {
   els.toast.textContent = message;
   clearTimeout(showToast.timeout);
-  showToast.timeout = setTimeout(() => {
-    els.toast.textContent = "";
-  }, 2200);
-}
-
-function applyQuickApplyFlow() {
-  els.profileSelect.value = "dailyQuickApply";
-  applyProfile("dailyQuickApply");
-  syncProfileDescription();
-  generateResults();
-  window.scrollTo({ top: 0, behavior: "smooth" });
-  showToast("Daily Quick Apply ready");
-}
-
-function applyLatestOneHourFlow() {
-  els.profileSelect.value = "latest1";
-  applyProfile("latest1");
-  applyPrecision("latest1");
-  generateResults();
-  window.scrollTo({ top: 0, behavior: "smooth" });
-  showToast("Latest 1h search ready");
+  showToast.timeout = setTimeout(() => { els.toast.textContent = ""; }, 2200);
 }
 
 function resetSearch() {
   els.jobTitle.value = "";
-  els.profileSelect.value = DEFAULT_PROFILE_ID;
-  els.rolePackSelect.value = DEFAULT_ROLE_PACK_ID;
   els.engineSelect.value = "google";
-  rebuildTimeOptions("google", "all");
+  rebuildTimeOptions("google", "24hours");
   els.locationSelect.value = "usa";
-  els.sortSelect.value = "coverage";
+  els.sortSelect.value = "recommended";
   els.remoteMode.value = "neutral";
   els.matchMode.value = "smart";
-  els.experienceSelect.value = "entry";
+  els.experienceSelect.value = "any";
   els.employmentSelect.value = "any";
-  els.authorizationSelect.value = "none";
+  els.authorizationSelect.value = "optBroad";
   els.includeTerms.value = "";
   els.excludeTerms.value = "";
-  els.cautionExcludes.checked = false;
-  els.strictTitle.checked = false;
-  els.companyRole.value = "";
-  els.companyRolePack.value = DEFAULT_ROLE_PACK_ID;
-  els.companyTimeFilter.value = "24hours";
-  els.companyExperienceSelect.value = "entry";
-  els.companyLocationSelect.value = "usa";
-  els.companyRemoteMode.value = "neutral";
-  els.companyEmploymentSelect.value = "any";
-  els.companyAuthorizationSelect.value = "none";
-  els.companyIncludeTerms.value = "";
-  els.companyExcludeTerms.value = "";
-  els.companySortSelect.value = "latest";
-  els.companyCategorySelect.value = "all";
-  els.companySponsorTier.value = "all";
-  els.companyKind.value = "all";
-  els.companyFilter.value = "";
-  setCategorySelection(new Set(DEFAULT_CATEGORY_IDS));
-  renderCompanyOptions("");
-  els.companySelect.value = ALL_COMPANIES_ID;
-  syncCompanyCard();
-  syncProfileDescription();
+  els.categoryFilters.querySelectorAll("input").forEach(input => { input.checked = true; });
   state.results = [];
   state.checked.clear();
   els.results.innerHTML = "";
-  const emptyMessage = els.emptyState.querySelector("strong");
-  if (emptyMessage) {
-    emptyMessage.textContent = "Ready when you are, Taran.";
-  }
   setEmptyState(true);
   updateCounts();
   updatePreviewForEmptyState();
-  savePreferences();
   history.pushState(null, "", window.location.pathname);
 }
 
+// ── THEME ─────────────────────────────────────────────────────────────────────
 function toggleTheme() {
   document.documentElement.classList.toggle("dark");
-  localStorage.setItem(THEME_KEY, document.documentElement.classList.contains("dark") ? "dark" : "light");
+  localStorage.setItem("portalScoutTheme", document.documentElement.classList.contains("dark") ? "dark" : "light");
   syncThemeButton();
 }
 
 function loadTheme() {
-  const stored = localStorage.getItem(THEME_KEY);
-  if (stored === "light") {
-    document.documentElement.classList.remove("dark");
-  } else {
-    document.documentElement.classList.add("dark");
-  }
+  const stored = localStorage.getItem("portalScoutTheme");
+  if (stored === "dark") document.documentElement.classList.add("dark");
   syncThemeButton();
 }
 
@@ -3105,11 +1919,150 @@ function syncThemeButton() {
   els.themeToggle.setAttribute("aria-pressed", String(isDark));
 }
 
-function slugify(value) {
-  return value
-    .toLowerCase()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
+// ── COMPANY DATA FUNCTIONS ────────────────────────────────────────────────────
+function buildCompanies() {
+  const seen = new Map();
+  [...SPONSOR_COMPANY_ROWS, ...STAFFING_VENDOR_ROWS].forEach(c => {
+    const key = c.name.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (!seen.has(key) || (c.careersUrl && !seen.get(key).careersUrl)) {
+      seen.set(key, c);
+    }
+  });
+  return [...seen.values()].sort((a, b) => b.filings - a.filings || a.name.localeCompare(b.name));
 }
 
+const ALL_COMPANIES = buildCompanies();
+
+function getCompanyById(name) {
+  return ALL_COMPANIES.find(c => c.name === name);
+}
+
+function buildCompanyLinkedInUrl(company, role, context) {
+  const ctx = { ...context, includeTerms: [company.name, ...(context.includeTerms || [])] };
+  const title = role || context.jobTitle || company.name;
+  return buildLinkedInUrl(title, ctx);
+}
+
+function buildCompanyIndeedUrl(company, role, context) {
+  const params = new URLSearchParams();
+  params.set("q", `"${company.name}" ${role || context.jobTitle || ""}`);
+  params.set("l", getNativeLocation(context.location));
+  if (context.sort === "latest") params.set("sort", "date");
+  return `https://www.indeed.com/jobs?${params.toString()}`;
+}
+
+function buildCompanyGoogleUrl(company, role, context) {
+  let host;
+  try {
+    host = company.careersUrl ? new URL(company.careersUrl).hostname : "careers." + company.name.toLowerCase().replace(/[^a-z0-9]/g, "") + ".com";
+  } catch (e) {
+    host = "careers." + company.name.toLowerCase().replace(/[^a-z0-9]/g, "") + ".com";
+  }
+  const q = `site:${host} "${role || context.jobTitle || "software engineer"}"`;
+  return buildGoogleUrl(q, context.time, context.sort);
+}
+
+function populateCompanySelect(filter, sponsorTier, category, companyType) {
+  const companySelect = document.getElementById("companySelect");
+  if (!companySelect) return;
+  companySelect.innerHTML = '<option value="">— Select a company —</option>';
+  let companies = ALL_COMPANIES;
+  if (filter) {
+    const f = filter.toLowerCase();
+    companies = companies.filter(c => c.name.toLowerCase().includes(f) || (c.aliases && c.aliases.toLowerCase().includes(f)));
+  }
+  if (sponsorTier && sponsorTier !== "all") {
+    companies = companies.filter(c => c.tier === sponsorTier);
+  }
+  if (category && category !== "all") {
+    companies = companies.filter(c => c.category === category);
+  }
+  if (companyType === "direct") {
+    companies = companies.filter(c => c.kind === "direct");
+  } else if (companyType === "staffing") {
+    companies = companies.filter(c => c.kind === "staffing");
+  }
+  companies.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c.name;
+    opt.textContent = `${c.name} (${c.filings} H1B filings)`;
+    companySelect.appendChild(opt);
+  });
+  const countEl = document.getElementById("companyCount");
+  if (countEl) countEl.textContent = companies.length;
+}
+
+function openCompanyCareers() {
+  const sel = document.getElementById("companySelect");
+  if (!sel || !sel.value) return;
+  const company = getCompanyById(sel.value);
+  if (company && company.careersUrl) {
+    window.open(company.careersUrl, "_blank", "noopener,noreferrer");
+  } else {
+    const q = `${sel.value} careers jobs`;
+    window.open(buildGoogleUrl(q, "all", "recommended"), "_blank", "noopener,noreferrer");
+  }
+}
+
+function openCompanyLinkedIn() {
+  const sel = document.getElementById("companySelect");
+  const roleEl = document.getElementById("companyRoleInput");
+  if (!sel || !sel.value) return;
+  const company = getCompanyById(sel.value);
+  const role = roleEl ? roleEl.value.trim() : "";
+  const context = getContext();
+  window.open(buildCompanyLinkedInUrl(company, role, context), "_blank", "noopener,noreferrer");
+}
+
+function openCompanyIndeed() {
+  const sel = document.getElementById("companySelect");
+  const roleEl = document.getElementById("companyRoleInput");
+  if (!sel || !sel.value) return;
+  const company = getCompanyById(sel.value);
+  const role = roleEl ? roleEl.value.trim() : "";
+  const context = getContext();
+  window.open(buildCompanyIndeedUrl(company, role, context), "_blank", "noopener,noreferrer");
+}
+
+function initCompanySection() {
+  const filterInput = document.getElementById("companyFilter");
+  const tierSelect = document.getElementById("companySponsorTier");
+  const categorySelect = document.getElementById("companyCategorySelect");
+  const typeSelect = document.getElementById("companyTypeSelect");
+
+  function refresh() {
+    populateCompanySelect(
+      filterInput ? filterInput.value : "",
+      tierSelect ? tierSelect.value : "all",
+      categorySelect ? categorySelect.value : "all",
+      typeSelect ? typeSelect.value : "all"
+    );
+  }
+
+  if (filterInput) filterInput.addEventListener("input", refresh);
+  if (tierSelect) tierSelect.addEventListener("change", refresh);
+  if (categorySelect) categorySelect.addEventListener("change", refresh);
+  if (typeSelect) typeSelect.addEventListener("change", refresh);
+
+  const careersBtn = document.getElementById("openCareersBtn");
+  const linkedInBtn = document.getElementById("companyLinkedInBtn");
+  const indeedBtn = document.getElementById("companyIndeedBtn");
+
+  if (careersBtn) careersBtn.addEventListener("click", openCompanyCareers);
+  if (linkedInBtn) linkedInBtn.addEventListener("click", openCompanyLinkedIn);
+  if (indeedBtn) indeedBtn.addEventListener("click", openCompanyIndeed);
+
+  // Populate category options
+  const cats = [...new Set(ALL_COMPANIES.map(c => c.category))].sort();
+  if (categorySelect) {
+    categorySelect.innerHTML = '<option value="all">All categories</option>';
+    cats.forEach(cat => {
+      const opt = document.createElement("option");
+      opt.value = cat;
+      opt.textContent = cat;
+      categorySelect.appendChild(opt);
+    });
+  }
+
+  refresh();
+}
