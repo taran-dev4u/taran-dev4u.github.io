@@ -22,6 +22,13 @@ Taran's Job Command Center is a US-focused static job-search launcher. It builds
 - Vendor safety reminders based on official job-scam guidance: avoid upfront placement fees, fake-check/equipment scams, and unverified recruiter identities.
 - Pinned search operators, copy-all, copy-checked, checked-progress, shareable URLs, related-title suggestions, and company search bundles.
 
+## Recent Updates
+
+- Google Advanced Search precision: single-domain source searches use `as_sitesearch=` instead of burying `site:` inside the main query.
+- Company career page searches use working `inurl:` patterns for careers, jobs, people, talent, employment, openings, and join-us pages.
+- iCIMS searches use the root `icims.com` domain so subdomain-hosted jobs are included.
+- ZipRecruiter freshness mapping now uses tighter 3-day, 7-day, and 30-day windows where supported.
+
 ## Run Locally
 
 Open `index.html` in a browser. No build step is required.
