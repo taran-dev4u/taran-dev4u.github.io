@@ -14,8 +14,7 @@ const CATEGORY_ROWS = [
   ["general", "General Boards", true],
   ["tech", "Tech and Startups", true],
   ["company", "Company Careers", true],
-  ["remote", "Remote Boards", true],
-  ["public", "Public and Nonprofit", true],
+  ["highered", "Higher Ed / Research Employers", true],
   ["research", "Research Tools", false]
 ];
 
@@ -113,16 +112,7 @@ const PORTAL_ROWS = [
   { id: "wayup", name: "WayUp", category: "general", sites: ["wayup.com/s/jobs"], priority: 83, tags: ["students"] },
   { id: "monster", name: "Monster", category: "general", native: "monster", sites: ["monster.com/jobs", "monster.com/job-openings"], priority: 82, tags: ["general board"] },
   { id: "careerbuilder", name: "CareerBuilder", category: "general", native: "careerbuilder", sites: ["careerbuilder.com/jobs", "careerbuilder.com/job"], priority: 81, tags: ["general board"] },
-  { id: "ladders", name: "Ladders", category: "general", sites: ["theladders.com/job"], priority: 80, tags: ["professional"] },
-  { id: "flexjobs", name: "FlexJobs", category: "remote", sites: ["flexjobs.com/search"], priority: 79, tags: ["remote", "hybrid"] },
-  { id: "remoteRocketship", name: "Remote Rocketship", category: "remote", native: "remoteRocketship", sites: ["remoterocketship.com"], priority: 78, tags: ["remote tech"] },
-  { id: "remotive", name: "Remotive", category: "remote", native: "remotive", sites: ["remotive.com"], priority: 77.5, tags: ["remote"] },
-  { id: "weWorkRemotely", name: "We Work Remotely", category: "remote", native: "weWorkRemotely", sites: ["weworkremotely.com/remote-jobs"], priority: 77, tags: ["remote"] },
-  { id: "remoteOk", name: "Remote OK", category: "remote", native: "remoteOk", sites: ["remoteok.com/remote-jobs"], priority: 76, tags: ["remote"] },
-  { id: "usajobs", name: "USAJOBS", category: "public", native: "usajobs", sites: ["usajobs.gov/job"], priority: 75, tags: ["public sector"], note: "Some federal roles require citizenship or clearance. Read eligibility carefully." },
-  { id: "idealist", name: "Idealist", category: "public", native: "idealist", sites: ["idealist.org/en/jobs"], priority: 74, tags: ["nonprofit"] },
-  { id: "higherEdJobs", name: "HigherEdJobs", category: "public", native: "higherEdJobs", sites: ["higheredjobs.com"], priority: 73, tags: ["universities"] },
-  { id: "governmentJobs", name: "GovernmentJobs", category: "public", native: "governmentJobs", sites: ["governmentjobs.com/careers"], priority: 72, tags: ["state/local"] },
+  { id: "higherEdJobs", name: "HigherEdJobs", category: "highered", sites: ["higheredjobs.com"], priority: 80, tags: ["universities", "research employers"], note: "Kept for university and research-employer roles; use employer pages to verify E-Verify/STEM OPT readiness." },
   { id: "careersSubdomains", name: "Careers Subdomains", category: "company", rawSiteQuery: "(inurl:careers OR inurl:career)", priority: 71, tags: ["company pages"] },
   { id: "jobsSubdomains", name: "Jobs Subdomains", category: "company", rawSiteQuery: "(inurl:jobs OR inurl:job)", priority: 70, tags: ["company pages"] },
   { id: "peopleSubdomains", name: "People Subdomains", category: "company", rawSiteQuery: "(inurl:people)", priority: 69.8, tags: ["company pages"] },
@@ -170,7 +160,16 @@ const SOURCE_CAPABILITIES = {
   linkedinPosts: { kind: "native-filtered", label: "Native post search", supports: ["date posted", "content type", "company keywords"] },
   indeed: { kind: "native-filtered", label: "Native filtered", supports: ["date", "sort", "location", "remote keyword"] },
   google: { kind: "native-filtered", label: "Google date tools", supports: ["time", "sort", "operators"] },
-  usajobs: { kind: "native-filtered", label: "Native public search", supports: ["date sort", "location"] },
+  glassdoor: { kind: "native-filtered", label: "Native keyword/date", supports: ["keyword", "posted age"] },
+  ziprecruiter: { kind: "native-filtered", label: "Native keyword/date", supports: ["keyword", "location", "posted age"] },
+  dice: { kind: "native-filtered", label: "Native tech/date", supports: ["keyword", "location", "posted age"] },
+  builtin: { kind: "native-filtered", label: "Native broad search", supports: ["keyword", "location"] },
+  simplify: { kind: "native-filtered", label: "Native broad search", supports: ["keyword"] },
+  yc: { kind: "native-filtered", label: "Native startup search", supports: ["keyword"] },
+  levels: { kind: "native-filtered", label: "Native tech search", supports: ["keyword"] },
+  welcome: { kind: "native-filtered", label: "Native tech search", supports: ["keyword"] },
+  monster: { kind: "native-filtered", label: "Native broad search", supports: ["keyword", "location"] },
+  careerbuilder: { kind: "native-filtered", label: "Native broad search", supports: ["keyword", "location"] },
   static: { kind: "companion-search", label: "Research link", supports: ["manual research"] },
   native: { kind: "broad-search", label: "Native broad search", supports: ["keyword", "location where supported"] },
   operator: { kind: "broad-search", label: "Broad search operator", supports: ["site operators", "date where engine supports it"] }
@@ -9340,8 +9339,7 @@ function sortPortals(portals, sortMode) {
     general: 110,
     tech: 100,
     company: 90,
-    remote: 70,
-    public: 60,
+    highered: 80,
     research: 40
   };
 
@@ -9349,7 +9347,7 @@ function sortPortals(portals, sortMode) {
     const base = portal.priority * 10 + (categoryBoost[portal.category] || 0);
     const pinnedBoost = state.pinnedPortals.has(portal.id) ? 1200 : 0;
     if (sortMode === "latest") {
-      const latestBoost = ["linkedinJobs", "indeed", "linkedinPosts", "google", "usajobs"].includes(portal.id) ? 600 : 0;
+      const latestBoost = ["linkedinJobs", "indeed", "linkedinPosts", "google", "directATS", "glassdoor", "ziprecruiter", "dice"].includes(portal.id) ? 600 : 0;
       return base + latestBoost + pinnedBoost;
     }
     if (sortMode === "direct") {
@@ -9660,13 +9658,12 @@ function buildSearchUrl(portal, query, title, context) {
       return buildLinkedInPostsUrl(title, context);
     case "indeed":
       return buildIndeedUrl(title, context);
-    case "usajobs":
-      return buildUSAJobsUrl(title, context);
     case "google":
       return buildGoogleUrl(buildGoogleStructuredQuery(title, context, { includeJobTerms: true }), context.time, context.sort);
     case "glassdoor": {
       const params = new URLSearchParams();
-      params.set("sc.keyword", buildNativeKeywordQuery(title, context));
+      params.set("sc.keyword", buildBoardKeywordQuery(title, context, { includeAuthorization: true }));
+      params.set("locKeyword", getNativeLocation(context.location));
       const fromAge = getGlassdoorFromAge(context.time);
       if (fromAge) {
         params.set("fromAge", fromAge);
@@ -9675,7 +9672,7 @@ function buildSearchUrl(portal, query, title, context) {
     }
     case "ziprecruiter": {
       const params = new URLSearchParams();
-      params.set("search", buildNativeKeywordQuery(title, context));
+      params.set("search", buildBoardKeywordQuery(title, context, { includeAuthorization: true }));
       params.set("location", getNativeLocation(context.location));
       const days = getZipRecruiterDays(context.time);
       if (days) {
@@ -9685,7 +9682,7 @@ function buildSearchUrl(portal, query, title, context) {
     }
     case "dice": {
       const params = new URLSearchParams();
-      params.set("q", buildNativeKeywordQuery(title, context));
+      params.set("q", buildBoardKeywordQuery(title, context, { includeAuthorization: true }));
       params.set("location", getNativeLocation(context.location));
       const posted = getDicePostedDate(context.time);
       if (posted) {
@@ -9694,33 +9691,19 @@ function buildSearchUrl(portal, query, title, context) {
       return `https://www.dice.com/jobs?${params.toString()}`;
     }
     case "builtin":
-      return `https://builtin.com/jobs?search=${encodeURIComponent(title)}&location=${encodeURIComponent(getNativeLocation(context.location))}`;
+      return `https://builtin.com/jobs?search=${encodeURIComponent(buildBoardKeywordQuery(title, context))}&location=${encodeURIComponent(getNativeLocation(context.location))}`;
     case "simplify":
-      return `https://simplify.jobs/jobs?query=${encodeURIComponent(buildNativeKeywordQuery(title, context))}`;
+      return `https://simplify.jobs/jobs?query=${encodeURIComponent(buildBoardKeywordQuery(title, context))}`;
     case "yc":
-      return `https://www.ycombinator.com/jobs?query=${encodeURIComponent(title)}`;
+      return `https://www.ycombinator.com/jobs?query=${encodeURIComponent(buildBoardTitleQuery(title, context))}`;
     case "levels":
-      return `https://www.levels.fyi/jobs/?searchText=${encodeURIComponent(title)}`;
+      return `https://www.levels.fyi/jobs/?searchText=${encodeURIComponent(buildBoardTitleQuery(title, context))}`;
     case "welcome":
-      return `https://www.welcometothejungle.com/en/jobs?query=${encodeURIComponent(title)}`;
+      return `https://www.welcometothejungle.com/en/jobs?query=${encodeURIComponent(buildBoardTitleQuery(title, context))}`;
     case "monster":
-      return `https://www.monster.com/jobs/search?q=${encodeURIComponent(title)}&where=${encodeURIComponent(getNativeLocation(context.location))}`;
+      return `https://www.monster.com/jobs/search?q=${encodeURIComponent(buildBoardKeywordQuery(title, context))}&where=${encodeURIComponent(getNativeLocation(context.location))}`;
     case "careerbuilder":
-      return `https://www.careerbuilder.com/jobs?keywords=${encodeURIComponent(title)}&location=${encodeURIComponent(getNativeLocation(context.location))}`;
-    case "remoteRocketship":
-      return `https://www.remoterocketship.com/?query=${encodeURIComponent(title)}`;
-    case "remotive":
-      return `https://remotive.com/?query=${encodeURIComponent(title)}`;
-    case "weWorkRemotely":
-      return `https://weworkremotely.com/remote-jobs/search?term=${encodeURIComponent(title)}`;
-    case "remoteOk":
-      return `https://remoteok.com/remote-${encodeURIComponent(title.toLowerCase().replace(/\s+/g, "-"))}-jobs`;
-    case "idealist":
-      return `https://www.idealist.org/en/jobs?q=${encodeURIComponent(title)}`;
-    case "higherEdJobs":
-      return `https://www.higheredjobs.com/search/advanced_action.cfm?Keyword=${encodeURIComponent(title)}`;
-    case "governmentJobs":
-      return `https://www.governmentjobs.com/jobs?keyword=${encodeURIComponent(title)}&location=${encodeURIComponent(getNativeLocation(context.location))}`;
+      return `https://www.careerbuilder.com/jobs?keywords=${encodeURIComponent(buildBoardKeywordQuery(title, context))}&location=${encodeURIComponent(getNativeLocation(context.location))}`;
     case "static":
       return portal.url;
     default:
@@ -9759,6 +9742,25 @@ function buildNativeTitleQuery(title, context) {
   return related.length > 1 ? `(${related.map(quoteTerm).join(" OR ")})` : title;
 }
 
+function buildBoardKeywordQuery(title, context, options = {}) {
+  const parts = [buildBoardTitleQuery(title, context), ...context.includeTerms];
+  if (options.includeAuthorization) {
+    const auth = getBoardAuthorizationSuffix(context.authorization);
+    if (auth) {
+      parts.push(auth);
+    }
+  }
+  return parts.filter(Boolean).join(" ");
+}
+
+function buildBoardTitleQuery(title, context) {
+  if (context.matchMode === "exact" || context.hasTypedTitle) {
+    return title;
+  }
+  const pack = getRolePack(context.rolePack);
+  return pack.primary || title;
+}
+
 function getNativeAuthorizationSuffix(value) {
   switch (value) {
     case "optBroad":
@@ -9771,6 +9773,23 @@ function getNativeAuthorizationSuffix(value) {
       return "E-Verify";
     case "optStrict":
       return "OPT OR STEM OPT OR F-1 OPT";
+    default:
+      return "";
+  }
+}
+
+function getBoardAuthorizationSuffix(value) {
+  switch (value) {
+    case "optBroad":
+      return "OPT sponsorship E-Verify";
+    case "currentAuthorized":
+      return "authorized to work";
+    case "sponsorNeeded":
+      return "visa sponsorship";
+    case "everify":
+      return "E-Verify";
+    case "optStrict":
+      return "OPT STEM OPT";
     default:
       return "";
   }
@@ -9798,7 +9817,7 @@ function buildLinkedInJobsUrl(title, context) {
   if (jobType) {
     params.set("f_JT", jobType);
   }
-  const workType = getLinkedInWorkTypeParam(context.remoteMode);
+  const workType = getLinkedInWorkTypeParam(context.remoteMode, context.location);
   if (workType) {
     params.set("f_WT", workType);
   }
@@ -9813,7 +9832,7 @@ function buildLinkedInJobsUrl(title, context) {
 function buildLinkedInPostsUrl(title, context) {
   const keywords = [
     '"hiring"',
-    quoteTerm(title),
+    buildLinkedInPostTitleQuery(title, context),
     context.authorization === "sponsorNeeded" ? '"visa sponsorship"' : "",
     context.authorization === "optBroad" || context.authorization === "optStrict" ? '"OPT"' : "",
     ...context.includeTerms.map(formatTerm),
@@ -9832,9 +9851,23 @@ function buildLinkedInPostsUrl(title, context) {
   return `https://www.linkedin.com/search/results/content/?${params.toString()}`;
 }
 
+function buildLinkedInPostTitleQuery(title, context) {
+  if (context.matchMode === "exact") {
+    return quoteTerm(title);
+  }
+  if (!context.hasTypedTitle) {
+    const pack = getRolePack(context.rolePack);
+    if (pack && pack.query) {
+      return pack.query;
+    }
+  }
+  const related = findTitleGroup(title);
+  return related.length > 1 ? `(${related.map(quoteTerm).join(" OR ")})` : quoteTerm(title);
+}
+
 function buildIndeedUrl(title, context) {
   const params = new URLSearchParams();
-  params.set("q", buildNativeKeywordQuery(title, context));
+  params.set("q", buildIndeedKeywordQuery(title, context));
   params.set("l", getNativeLocation(context.location));
   if (context.sort === "latest") {
     params.set("sort", "date");
@@ -9849,13 +9882,14 @@ function buildIndeedUrl(title, context) {
   return `https://www.indeed.com/jobs?${params.toString()}`;
 }
 
-function buildUSAJobsUrl(title, context) {
-  const params = new URLSearchParams();
-  params.set("k", title);
-  params.set("l", getNativeLocation(context.location));
-  params.set("s", "startdate");
-  params.set("sd", "desc");
-  return `https://www.usajobs.gov/Search/Results?${params.toString()}`;
+function buildIndeedKeywordQuery(title, context) {
+  const parts = [buildNativeKeywordQuery(title, context)];
+  if (["onsite", "onsite-hybrid", "exclude"].includes(context.remoteMode)) {
+    parts.push("-remote", '-"work from home"');
+  } else if (context.remoteMode === "hybrid") {
+    parts.push("hybrid");
+  }
+  return parts.filter(Boolean).join(" ");
 }
 
 function getLinkedInTimeParam(time) {
@@ -9908,7 +9942,10 @@ function getLinkedInJobTypeParam(value) {
   return map[value] || "";
 }
 
-function getLinkedInWorkTypeParam(value) {
+function getLinkedInWorkTypeParam(value, location) {
+  if (location === "remote-us" && value === "neutral") {
+    return "2";
+  }
   const map = {
     onsite: "1",
     "onsite-hybrid": "1,3",

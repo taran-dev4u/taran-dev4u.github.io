@@ -11,11 +11,11 @@ Taran's Job Command Center is a US-focused static job-search launcher. It builds
 - Freshness filters from past hour through older-than ranges.
 - Google, DuckDuckGo, Bing, Yahoo, Kagi, Qwant, Brave, and Startpage.
 - US market default with major US tech and hiring metros.
-- Latest-job ordering for search engines and native LinkedIn, Indeed, and USAJobs searches.
+- Latest-job ordering for search engines and native LinkedIn, Indeed, Glassdoor, ZipRecruiter, and Dice searches where the source supports it.
 - Work-setting, title-match, experience, employment-type, include-keyword, and exclude-keyword filters.
 - Profile-driven coverage rules that avoid hiding useful jobs unless the user chooses stricter filters.
 - OPT-aware authorization modes: broad OPT, no auth filter, current US work authorization, future sponsorship, E-Verify, and exact OPT/STEM OPT.
-- More than 50 portal targets across ATS, job board, startup, remote, nonprofit, government, and company career-page categories.
+- More than 50 portal targets across ATS, job board, startup, higher-ed/research, H1B sponsor, vendor, and company career-page categories.
 - H1B sponsor company layer with direct-employer/vendor separation, sponsor tiers, aliases, favorites, and company-specific LinkedIn/Indeed/Google search actions.
 - Expanded company data from the workbook-backed layer: 500 direct employer rows and 200 staffing/vendor rows, normalized into the restored command-center format.
 - Vendor Outreach section with role/location/vendor filters, vendor fit score, LinkedIn recruiter search, LinkedIn Jobs, Indeed, Google contact search, and copy-ready outreach templates.
@@ -28,6 +28,8 @@ Taran's Job Command Center is a US-focused static job-search launcher. It builds
 - Company career page searches use working `inurl:` patterns for careers, jobs, people, talent, employment, openings, and join-us pages.
 - iCIMS searches use the root `icims.com` domain so subdomain-hosted jobs are included.
 - ZipRecruiter freshness mapping now uses tighter 3-day, 7-day, and 30-day windows where supported.
+- OPT/STEM-OPT source curation: removed low-yield remote-only, government/public-sector, nonprofit, and senior-only boards from the launcher while keeping higher-ed/research employer search.
+- Board-specific query formatting: LinkedIn/Indeed keep Boolean role packs, while simpler boards use plain role keywords so their search boxes do not misread Google-style operators.
 
 ## Run Locally
 
