@@ -29,8 +29,10 @@
     <main class="app-shell">
       <nav class="quick-rail" aria-label="Command center views">
         <a href="#searchHeading">Daily Search</a>
+        <button type="button" id="minuteRadarButton">Minute Radar</button>
         <button type="button" id="latestOneHourButton">Latest 1h</button>
         <button type="button" id="quickApplyButton">Quick Apply</button>
+        <button type="button" id="freshDirectButton">Fresh ATS</button>
         <a href="#careersHeading">Companies</a>
         <a href="#sponsorsHeading">H1B Sponsors</a>
         <a href="#vendorHeading">Vendors</a>
@@ -291,8 +293,14 @@
             <span>Company freshness</span>
             <select id="companyTimeFilter">
               <option value="all">All</option>
+              <option value="15minutes">Minute signals / 15m</option>
+              <option value="30minutes">Minute signals / 30m</option>
+              <option value="45minutes">Minute signals / 45m</option>
               <option value="1hour">Past Hour</option>
+              <option value="2hours">Past 2 Hours</option>
+              <option value="3hours">Past 3 Hours</option>
               <option value="4hours">Past 4 Hours</option>
+              <option value="6hours">Past 6 Hours</option>
               <option value="8hours">Past 8 Hours</option>
               <option value="12hours">Past 12 Hours</option>
               <option value="24hours" selected>Past 24 Hours</option>

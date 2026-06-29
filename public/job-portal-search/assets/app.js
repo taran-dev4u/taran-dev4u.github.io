@@ -6,6 +6,7 @@ const ALL_COMPANIES_ID = "__all_companies__";
 const DEFAULT_PROFILE_ID = "softwareAiDataEntryOpt";
 const DEFAULT_ROLE_PACK_ID = "all-role-families";
 const CAUTION_EXCLUDE_TERMS = ["unpaid", "commission only", "clearance", "US citizenship required", "must be a US citizen"];
+const MINUTE_SIGNAL_TIMES = new Set(["15minutes", "30minutes", "45minutes"]);
 
 const CATEGORY_ROWS = [
   ["top", "Top Sources", true],
@@ -31,19 +32,34 @@ const SEARCH_PROFILES = [
     categories: DEFAULT_CATEGORY_IDS
   },
   {
+    id: "minuteRadar",
+    label: "Minute Radar",
+    description: "Highest-urgency scan for jobs that may have appeared minutes ago. Uses Google minute-signal wording plus each board's closest reliable native freshness filter.",
+    defaults: { engine: "google", time: "15minutes", sort: "latest", authorization: "none", experience: "entry", rolePack: "all-role-families", precision: "minuteRadar", matchMode: "smart" },
+    categories: ["top", "direct", "signals", "general", "tech", "company"],
+    portals: ["linkedinJobs", "google", "directATS", "linkedinPosts", "indeed", "dice", "glassdoor", "ziprecruiter", "builtin", "simplify", "hiringCafe"]
+  },
+  {
     id: "latest1",
     label: "Latest 1h",
     description: "Urgent apply flow for postings from the last hour on sources with reliable date filters.",
-    defaults: { time: "1hour", sort: "latest", authorization: "none", experience: "entry", rolePack: "all-role-families", precision: "latest1", matchMode: "smart" },
+    defaults: { engine: "google", time: "1hour", sort: "latest", authorization: "none", experience: "entry", rolePack: "all-role-families", precision: "latest1", matchMode: "smart" },
     categories: ["top", "direct", "signals", "general", "tech", "company"]
   },
   {
     id: "dailyQuickApply",
     label: "Daily Quick Apply",
     description: "Focused daily flow: only the nine highest-yield apply sources, newest-first within the past 24 hours.",
-    defaults: { time: "24hours", sort: "latest", authorization: "none", precision: "latest24", matchMode: "smart" },
+    defaults: { engine: "google", time: "24hours", sort: "latest", authorization: "none", precision: "latest24", matchMode: "smart" },
     categories: ["top", "direct", "signals", "general", "tech"],
     portals: ["linkedinJobs", "indeed", "directATS", "linkedinPosts", "google", "simplify", "hiringCafe", "builtin", "dice"]
+  },
+  {
+    id: "freshDirect",
+    label: "Fresh Direct ATS",
+    description: "Direct employer and ATS-first search for new postings before they fully spread across aggregators.",
+    defaults: { engine: "google", time: "1hour", sort: "direct", authorization: "none", experience: "entry", rolePack: "all-role-families", precision: "direct", matchMode: "smart" },
+    categories: ["top", "direct", "company"]
   },
   {
     id: "maxCoverage",
@@ -178,8 +194,14 @@ const SOURCE_CAPABILITIES = {
 const TIME_OPTIONS = {
   google: [
     ["all", "All"],
+    ["15minutes", "Minute signals / 15m"],
+    ["30minutes", "Minute signals / 30m"],
+    ["45minutes", "Minute signals / 45m"],
     ["1hour", "Past Hour"],
+    ["2hours", "Past 2 Hours"],
+    ["3hours", "Past 3 Hours"],
     ["4hours", "Past 4 Hours"],
+    ["6hours", "Past 6 Hours"],
     ["8hours", "Past 8 Hours"],
     ["12hours", "Past 12 Hours"],
     ["24hours", "Past 24 Hours"],
@@ -341,6 +363,7 @@ const FILTER_LABELS = {
     coverage: "Broad coverage"
   },
   precision: {
+    minuteRadar: "Minute Radar",
     coverage: "Max Coverage",
     latest1: "Latest 1h",
     latest24: "Latest 24h",
@@ -8451,8 +8474,10 @@ function cacheElements() {
     copyCheckedButton: document.getElementById("copyCheckedButton"),
     shareButton: document.getElementById("shareButton"),
     resetButton: document.getElementById("resetButton"),
+    minuteRadarButton: document.getElementById("minuteRadarButton"),
     latestOneHourButton: document.getElementById("latestOneHourButton"),
     quickApplyButton: document.getElementById("quickApplyButton"),
+    freshDirectButton: document.getElementById("freshDirectButton"),
     themeToggle: document.getElementById("themeToggle"),
     results: document.getElementById("results"),
     emptyState: document.getElementById("emptyState"),
@@ -8585,8 +8610,10 @@ function bindEvents() {
   });
   els.shareButton.addEventListener("click", () => copyLinks([window.location.href], "Copied share link"));
   els.resetButton.addEventListener("click", resetSearch);
+  els.minuteRadarButton.addEventListener("click", applyMinuteRadarFlow);
   els.latestOneHourButton.addEventListener("click", applyLatestOneHourFlow);
   els.quickApplyButton.addEventListener("click", applyQuickApplyFlow);
+  els.freshDirectButton.addEventListener("click", applyFreshDirectFlow);
   els.themeToggle.addEventListener("click", toggleTheme);
 
   els.pinnedOperators.addEventListener("click", event => {
@@ -8956,6 +8983,9 @@ function persistAndMaybeGenerate() {
 
 function applyProfile(profileId) {
   const profile = SEARCH_PROFILES.find(item => item.id === profileId) || SEARCH_PROFILES[0];
+  if (profile.defaults.engine) {
+    setSelectIfValid(els.engineSelect, profile.defaults.engine);
+  }
   if (profile.defaults.time) {
     rebuildTimeOptions(els.engineSelect.value, profile.defaults.time);
   }
@@ -8972,7 +9002,16 @@ function applyProfile(profileId) {
 
 function applyPrecision(precision) {
   switch (precision) {
+    case "minuteRadar":
+      setSelectIfValid(els.engineSelect, "google");
+      rebuildTimeOptions("google", "15minutes");
+      setSelectIfValid(els.timeFilter, "15minutes");
+      setSelectIfValid(els.sortSelect, "latest");
+      setSelectIfValid(els.authorizationSelect, "none");
+      setCategorySelection(new Set(["top", "direct", "signals", "general", "tech", "company"]));
+      break;
     case "latest1":
+      setSelectIfValid(els.engineSelect, "google");
       rebuildTimeOptions(els.engineSelect.value, "1hour");
       setSelectIfValid(els.timeFilter, "1hour");
       setSelectIfValid(els.sortSelect, "latest");
@@ -9082,7 +9121,8 @@ function generateResults(updateUrl = true) {
         portal,
         query,
         url,
-        searchKind: getSearchKind(portal)
+        searchKind: getSearchKind(portal),
+        freshnessLabel: getPortalFreshnessLabel(portal, context)
       });
     });
   });
@@ -9187,6 +9227,9 @@ function renderPortalRow(item) {
   meta.append(createPill(CATEGORY_LABELS[item.portal.category] || item.portal.category));
   meta.append(createPill(getPortalScopeLabel(item.portal)));
   meta.append(createPill(item.searchKind));
+  if (item.freshnessLabel) {
+    meta.append(createPill(item.freshnessLabel));
+  }
   (item.portal.tags || []).forEach(tag => meta.append(createPill(tag)));
 
   body.append(link, summary, meta);
@@ -9222,6 +9265,39 @@ function getPortalScopeLabel(portal) {
 function getSearchKind(portal) {
   const capability = getSourceCapability(portal);
   return capability ? capability.kind : SOURCE_CAPABILITIES.operator.kind;
+}
+
+function getPortalFreshnessLabel(portal, context) {
+  if (!context || !context.time || context.time === "all") {
+    return "";
+  }
+  if (MINUTE_SIGNAL_TIMES.has(context.time)) {
+    if (portal.native === "linkedinJobs") {
+      return "native last hour";
+    }
+    if (portal.native === "google" || portal.rawSiteQuery || canUseGoogleAdvancedSiteSearch(portal)) {
+      return "minute signals";
+    }
+    if (["indeed", "glassdoor", "ziprecruiter", "dice"].includes(portal.native)) {
+      return "newest native window";
+    }
+    if (portal.native === "linkedinPosts") {
+      return "newest posts";
+    }
+    return "freshness assisted";
+  }
+  if (["1hour", "2hours", "3hours", "4hours", "6hours", "8hours", "12hours"].includes(context.time)) {
+    if (portal.native === "linkedinJobs") {
+      return "native hour filter";
+    }
+    if (portal.native === "google" || portal.rawSiteQuery || canUseGoogleAdvancedSiteSearch(portal)) {
+      return "search date tools";
+    }
+    if (["indeed", "glassdoor", "ziprecruiter", "dice"].includes(portal.native)) {
+      return "nearest native date";
+    }
+  }
+  return "";
 }
 
 function getSourceCapability(portal) {
@@ -9476,6 +9552,7 @@ function buildPortalQuery(title, portal, context) {
     getExperienceQuery(context.experience),
     getEmploymentQuery(context.employment),
     getAuthorizationQuery(context.authorization),
+    getFreshPostingSignalQuery(context.time),
     buildIncludeQuery(context.includeTerms),
     buildExcludeQuery([...context.excludeTerms, ...getCautionExcludes(context)])
   ].filter(Boolean);
@@ -9492,6 +9569,7 @@ function buildGoogleStructuredQuery(title, context, options = {}) {
     getExperienceQuery(context.experience),
     getEmploymentQuery(context.employment),
     getAuthorizationQuery(context.authorization),
+    getFreshPostingSignalQuery(context.time),
     buildIncludeQuery(context.includeTerms),
     buildExcludeQuery([...context.excludeTerms, ...getCautionExcludes(context)])
   ].filter(Boolean).join(" ");
@@ -9625,6 +9703,13 @@ function getAuthorizationQuery(value) {
     default:
       return "";
   }
+}
+
+function getFreshPostingSignalQuery(time) {
+  if (!MINUTE_SIGNAL_TIMES.has(time)) {
+    return "";
+  }
+  return '("minutes ago" OR "minute ago" OR "just posted" OR "newly posted" OR "posted today")';
 }
 
 function buildIncludeQuery(terms) {
@@ -9894,8 +9979,14 @@ function buildIndeedKeywordQuery(title, context) {
 
 function getLinkedInTimeParam(time) {
   const map = {
+    "15minutes": "r3600",
+    "30minutes": "r3600",
+    "45minutes": "r3600",
     "1hour": "r3600",
+    "2hours": "r7200",
+    "3hours": "r10800",
     "4hours": "r14400",
+    "6hours": "r21600",
     "8hours": "r28800",
     "12hours": "r43200",
     "24hours": "r86400",
@@ -9909,7 +10000,7 @@ function getLinkedInTimeParam(time) {
 }
 
 function getLinkedInPostDateParam(time) {
-  if (["1hour", "4hours", "8hours", "12hours", "24hours", "48hours", "72hours"].includes(time)) {
+  if (["15minutes", "30minutes", "45minutes", "1hour", "2hours", "3hours", "4hours", "6hours", "8hours", "12hours", "24hours", "48hours", "72hours"].includes(time)) {
     return "past-24h";
   }
   if (time === "week") {
@@ -9975,8 +10066,14 @@ function getLinkedInFunctionParam(title, context) {
 
 function getIndeedFromAge(time) {
   const map = {
+    "15minutes": "1",
+    "30minutes": "1",
+    "45minutes": "1",
     "1hour": "1",
+    "2hours": "1",
+    "3hours": "1",
     "4hours": "1",
+    "6hours": "1",
     "8hours": "1",
     "12hours": "1",
     "24hours": "1",
@@ -9990,8 +10087,14 @@ function getIndeedFromAge(time) {
 
 function getGlassdoorFromAge(time) {
   const map = {
+    "15minutes": "1",
+    "30minutes": "1",
+    "45minutes": "1",
     "1hour": "1",
+    "2hours": "1",
+    "3hours": "1",
     "4hours": "1",
+    "6hours": "1",
     "8hours": "1",
     "12hours": "1",
     "24hours": "1",
@@ -10005,8 +10108,14 @@ function getGlassdoorFromAge(time) {
 
 function getZipRecruiterDays(time) {
   const map = {
+    "15minutes": "1",
+    "30minutes": "1",
+    "45minutes": "1",
     "1hour": "1",
+    "2hours": "1",
+    "3hours": "1",
     "4hours": "1",
+    "6hours": "1",
     "8hours": "1",
     "12hours": "1",
     "24hours": "1",
@@ -10020,8 +10129,14 @@ function getZipRecruiterDays(time) {
 
 function getDicePostedDate(time) {
   const map = {
+    "15minutes": "ONE",
+    "30minutes": "ONE",
+    "45minutes": "ONE",
     "1hour": "ONE",
+    "2hours": "ONE",
+    "3hours": "ONE",
     "4hours": "ONE",
+    "6hours": "ONE",
     "8hours": "ONE",
     "12hours": "ONE",
     "24hours": "ONE",
@@ -10078,8 +10193,14 @@ function normalizeGoogleSiteSearch(site) {
 
 function getGoogleTbs(time, sort) {
   const map = {
+    "15minutes": "qdr:h1",
+    "30minutes": "qdr:h1",
+    "45minutes": "qdr:h1",
     "1hour": "qdr:h1",
+    "2hours": "qdr:h2",
+    "3hours": "qdr:h3",
     "4hours": "qdr:h4",
+    "6hours": "qdr:h6",
     "8hours": "qdr:h8",
     "12hours": "qdr:h12",
     "24hours": "qdr:d",
@@ -10962,6 +11083,7 @@ function buildCompanySearchUrl(company, title, context) {
     getLocationQuery(context.location),
     "(job OR jobs OR careers OR hiring OR openings)",
     getAuthorizationQuery(context.authorization),
+    getFreshPostingSignalQuery(context.time),
     buildIncludeQuery(context.includeTerms),
     buildExcludeQuery([...context.excludeTerms, ...getCautionExcludes(context)])
   ].filter(Boolean).join(" ");
@@ -11096,6 +11218,16 @@ function showToast(message) {
   }, 2200);
 }
 
+function applyMinuteRadarFlow() {
+  els.profileSelect.value = "minuteRadar";
+  applyProfile("minuteRadar");
+  applyPrecision("minuteRadar");
+  syncProfileDescription();
+  generateResults();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  showToast("Minute Radar search ready");
+}
+
 function applyQuickApplyFlow() {
   els.profileSelect.value = "dailyQuickApply";
   applyProfile("dailyQuickApply");
@@ -11103,6 +11235,16 @@ function applyQuickApplyFlow() {
   generateResults();
   window.scrollTo({ top: 0, behavior: "smooth" });
   showToast("Daily Quick Apply ready");
+}
+
+function applyFreshDirectFlow() {
+  els.profileSelect.value = "freshDirect";
+  applyProfile("freshDirect");
+  applyPrecision("direct");
+  syncProfileDescription();
+  generateResults();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  showToast("Fresh ATS search ready");
 }
 
 function applyLatestOneHourFlow() {
