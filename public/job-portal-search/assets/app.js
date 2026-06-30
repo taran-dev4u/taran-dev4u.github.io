@@ -6,13 +6,15 @@ const ALL_COMPANIES_ID = "__all_companies__";
 const DEFAULT_PROFILE_ID = "softwareAiDataEntryOpt";
 const DEFAULT_ROLE_PACK_ID = "all-role-families";
 const CAUTION_EXCLUDE_TERMS = ["unpaid", "commission only", "clearance", "US citizenship required", "must be a US citizen"];
-const MINUTE_SIGNAL_TIMES = new Set(["15minutes", "30minutes", "45minutes"]);
+const MINUTE_SIGNAL_TIMES = new Set(["5minutes", "10minutes", "15minutes", "30minutes", "45minutes"]);
 
 const CATEGORY_ROWS = [
   ["top", "Top Sources", true],
   ["direct", "Direct ATS", true],
+  ["extraAts", "Extra ATS", false],
   ["signals", "LinkedIn Signals", true],
   ["general", "General Boards", true],
+  ["legacy", "Legacy Boards", false],
   ["tech", "Tech and Startups", true],
   ["company", "Company Careers", true],
   ["highered", "Higher Ed / Research Employers", true],
@@ -28,14 +30,14 @@ const SEARCH_PROFILES = [
     id: "softwareAiDataEntryOpt",
     label: "Software / AI / Data - Entry OPT",
     description: "Personal default for US-wide entry/new-grad software, AI, and data searches. Keeps coverage broad and uses OPT/sponsor wording as companion research.",
-    defaults: { time: "all", sort: "coverage", authorization: "none", experience: "entry", rolePack: "all-role-families", precision: "coverage", matchMode: "smart" },
+    defaults: { time: "all", sort: "coverage", authorization: "none", experience: "entry", rolePack: "all-role-families", precision: "coverage", matchMode: "smart", queryStyle: "balanced" },
     categories: DEFAULT_CATEGORY_IDS
   },
   {
     id: "minuteRadar",
     label: "Minute Radar",
     description: "Highest-urgency scan for jobs that may have appeared minutes ago. Uses Google minute-signal wording plus each board's closest reliable native freshness filter.",
-    defaults: { engine: "google", time: "15minutes", sort: "latest", authorization: "none", experience: "entry", rolePack: "all-role-families", precision: "minuteRadar", matchMode: "smart" },
+    defaults: { engine: "google", time: "15minutes", sort: "latest", authorization: "none", experience: "entry", rolePack: "all-role-families", precision: "minuteRadar", matchMode: "smart", queryStyle: "balanced" },
     categories: ["top", "direct", "signals", "general", "tech", "company"],
     portals: ["linkedinJobs", "google", "directATS", "linkedinPosts", "indeed", "dice", "glassdoor", "ziprecruiter", "builtin", "simplify", "hiringCafe"]
   },
@@ -43,14 +45,14 @@ const SEARCH_PROFILES = [
     id: "latest1",
     label: "Latest 1h",
     description: "Urgent apply flow for postings from the last hour on sources with reliable date filters.",
-    defaults: { engine: "google", time: "1hour", sort: "latest", authorization: "none", experience: "entry", rolePack: "all-role-families", precision: "latest1", matchMode: "smart" },
+    defaults: { engine: "google", time: "1hour", sort: "latest", authorization: "none", experience: "entry", rolePack: "all-role-families", precision: "latest1", matchMode: "smart", queryStyle: "balanced" },
     categories: ["top", "direct", "signals", "general", "tech", "company"]
   },
   {
     id: "dailyQuickApply",
     label: "Daily Quick Apply",
     description: "Focused daily flow: only the nine highest-yield apply sources, newest-first within the past 24 hours.",
-    defaults: { engine: "google", time: "24hours", sort: "latest", authorization: "none", precision: "latest24", matchMode: "smart" },
+    defaults: { engine: "google", time: "24hours", sort: "latest", authorization: "none", precision: "latest24", matchMode: "smart", queryStyle: "balanced" },
     categories: ["top", "direct", "signals", "general", "tech"],
     portals: ["linkedinJobs", "indeed", "directATS", "linkedinPosts", "google", "simplify", "hiringCafe", "builtin", "dice"]
   },
@@ -58,7 +60,7 @@ const SEARCH_PROFILES = [
     id: "freshDirect",
     label: "Fresh Direct ATS",
     description: "Direct employer and ATS-first search for new postings before they fully spread across aggregators.",
-    defaults: { engine: "google", time: "1hour", sort: "direct", authorization: "none", experience: "entry", rolePack: "all-role-families", precision: "direct", matchMode: "smart" },
+    defaults: { engine: "google", time: "1hour", sort: "direct", authorization: "none", experience: "entry", rolePack: "all-role-families", precision: "direct", matchMode: "smart", queryStyle: "balanced" },
     categories: ["top", "direct", "company"]
   },
   {
@@ -110,7 +112,7 @@ const PROFILE_LABELS = Object.fromEntries(SEARCH_PROFILES.map(profile => [profil
 const PORTAL_ROWS = [
   { id: "linkedinJobs", name: "LinkedIn Jobs", category: "top", native: "linkedinJobs", sites: ["linkedin.com/jobs"], priority: 100, tags: ["native filters", "high reach"], note: "Uses LinkedIn date, experience, job type, work setting, and newest-first filters when selected." },
   { id: "indeed", name: "Indeed", category: "top", native: "indeed", sites: ["indeed.com/jobs"], priority: 99, tags: ["native filters", "high reach"], note: "Uses Indeed query, location, date, remote, and newest sorting when selected." },
-  { id: "directATS", name: "Direct ATS Search", category: "direct", rawSiteQuery: "(site:greenhouse.io OR site:lever.co OR site:ashbyhq.com OR site:myworkdayjobs.com OR site:pinpointhq.com OR site:recruiting.paylocity.com OR site:keka.com OR site:jobs.workable.com OR site:breezy.hr OR site:wellfound.com OR site:workatastartup.com OR site:oraclecloud.com OR site:recruitee.com OR site:rippling.com OR site:rippling-ats.com OR site:jobs.gusto.com OR site:careerpuck.com OR site:teamtailor.com OR site:jobs.smartrecruiters.com OR site:jobappnetwork.com OR site:homerun.co OR site:gem.com OR site:trakstar.com OR site:catsone.com OR site:applytojob.com OR site:jobvite.com OR site:icims.com OR site:dover.io OR site:notion.site OR site:workforcenow.adp.com OR site:myjobs.adp.com OR site:factorialhr.com OR site:trinethire.com)", priority: 98, tags: ["direct apply", "ATS"], note: "Searches Brian's ATS/source set together for fresher direct postings." },
+  { id: "directATS", name: "Direct ATS Search", category: "direct", rawSiteQuery: "(site:greenhouse.io OR site:lever.co OR site:ashbyhq.com OR site:myworkdayjobs.com OR site:jobs.smartrecruiters.com OR site:icims.com)", priority: 98, tags: ["direct apply", "ATS"], note: "Short high-use ATS bundle. Extra ATS engines are available as an optional source group." },
   { id: "linkedinPosts", name: "LinkedIn Posts", category: "signals", native: "linkedinPosts", sites: ["linkedin.com/search/results/content"], priority: 97, tags: ["hiring posts", "fresh"], note: "Uses LinkedIn content search with hiring keywords and date-posted sorting." },
   { id: "google", name: "Google Jobs Web Search", category: "top", native: "google", priority: 96, tags: ["broad web", "date tools"], note: "Broad Google query across job posts, career pages, and hiring pages." },
   { id: "glassdoor", name: "Glassdoor", category: "general", native: "glassdoor", sites: ["glassdoor.com/Job", "glassdoor.com/job-listing"], priority: 95, tags: ["salary context", "native date filter"] },
@@ -126,8 +128,8 @@ const PORTAL_ROWS = [
   { id: "welcome", name: "Welcome to the Jungle", category: "tech", native: "welcome", sites: ["welcometothejungle.com/en/jobs"], priority: 85, tags: ["startups"] },
   { id: "ripplematch", name: "RippleMatch", category: "general", sites: ["ripplematch.com/careers"], priority: 84, tags: ["early career"] },
   { id: "wayup", name: "WayUp", category: "general", sites: ["wayup.com/s/jobs"], priority: 83, tags: ["students"] },
-  { id: "monster", name: "Monster", category: "general", native: "monster", sites: ["monster.com/jobs", "monster.com/job-openings"], priority: 82, tags: ["general board"] },
-  { id: "careerbuilder", name: "CareerBuilder", category: "general", native: "careerbuilder", sites: ["careerbuilder.com/jobs", "careerbuilder.com/job"], priority: 81, tags: ["general board"] },
+  { id: "monster", name: "Monster", category: "legacy", native: "monster", sites: ["monster.com/jobs", "monster.com/job-openings"], priority: 82, tags: ["legacy board"] },
+  { id: "careerbuilder", name: "CareerBuilder", category: "legacy", native: "careerbuilder", sites: ["careerbuilder.com/jobs", "careerbuilder.com/job"], priority: 81, tags: ["legacy board"] },
   { id: "higherEdJobs", name: "HigherEdJobs", category: "highered", sites: ["higheredjobs.com"], priority: 80, tags: ["universities", "research employers"], note: "Kept for university and research-employer roles; use employer pages to verify E-Verify/STEM OPT readiness." },
   { id: "careersSubdomains", name: "Careers Subdomains", category: "company", rawSiteQuery: "(inurl:careers OR inurl:career)", priority: 71, tags: ["company pages"] },
   { id: "jobsSubdomains", name: "Jobs Subdomains", category: "company", rawSiteQuery: "(inurl:jobs OR inurl:job)", priority: 70, tags: ["company pages"] },
@@ -142,27 +144,27 @@ const PORTAL_ROWS = [
   { id: "icims", name: "iCIMS", category: "direct", sites: ["icims.com"], priority: 64, tags: ["ATS"] },
   { id: "pinpoint", name: "Pinpoint", category: "direct", sites: ["pinpointhq.com"], priority: 63.8, tags: ["ATS", "Brian source"] },
   { id: "paylocity", name: "Paylocity", category: "direct", sites: ["recruiting.paylocity.com"], priority: 63.6, tags: ["ATS", "Brian source"] },
-  { id: "keka", name: "Keka", category: "direct", sites: ["keka.com"], priority: 63.4, tags: ["ATS", "Brian source"] },
+  { id: "keka", name: "Keka", category: "extraAts", sites: ["keka.com"], priority: 63.4, tags: ["ATS", "optional"] },
   { id: "workable", name: "Workable", category: "direct", sites: ["jobs.workable.com"], priority: 63.2, tags: ["ATS", "Brian source"] },
   { id: "breezy", name: "BreezyHR", category: "direct", sites: ["breezy.hr"], priority: 63, tags: ["ATS", "Brian source"] },
   { id: "oracleCloud", name: "Oracle Cloud", category: "direct", sites: ["oraclecloud.com"], priority: 62.8, tags: ["ATS", "Brian source"] },
   { id: "recruitee", name: "Recruitee", category: "direct", sites: ["recruitee.com"], priority: 62.6, tags: ["ATS", "Brian source"] },
-  { id: "ripplingAts", name: "Rippling", category: "direct", rawSiteQuery: "(site:rippling.com OR site:rippling-ats.com)", priority: 62.4, tags: ["ATS", "Brian source"] },
-  { id: "gustoJobs", name: "Gusto Jobs", category: "direct", sites: ["jobs.gusto.com"], priority: 62.2, tags: ["ATS", "Brian source"] },
-  { id: "careerPuck", name: "CareerPuck", category: "direct", sites: ["careerpuck.com"], priority: 62, tags: ["ATS", "Brian source"] },
+  { id: "ripplingAts", name: "Rippling", category: "extraAts", rawSiteQuery: "(site:rippling.com OR site:rippling-ats.com)", priority: 62.4, tags: ["ATS", "optional"] },
+  { id: "gustoJobs", name: "Gusto Jobs", category: "extraAts", sites: ["jobs.gusto.com"], priority: 62.2, tags: ["ATS", "optional"] },
+  { id: "careerPuck", name: "CareerPuck", category: "extraAts", sites: ["careerpuck.com"], priority: 62, tags: ["ATS", "optional"] },
   { id: "teamtailor", name: "Teamtailor", category: "direct", sites: ["teamtailor.com"], priority: 61.8, tags: ["ATS", "Brian source"] },
-  { id: "talentReef", name: "TalentReef", category: "direct", sites: ["jobappnetwork.com"], priority: 61.6, tags: ["ATS", "Brian source"] },
-  { id: "homerun", name: "Homerun", category: "direct", sites: ["homerun.co"], priority: 61.4, tags: ["ATS", "Brian source"] },
-  { id: "gem", name: "Gem", category: "direct", sites: ["gem.com"], priority: 61.2, tags: ["ATS", "Brian source"] },
-  { id: "trakstar", name: "Trakstar", category: "direct", sites: ["trakstar.com"], priority: 61, tags: ["ATS", "Brian source"] },
-  { id: "cats", name: "Cats", category: "direct", sites: ["catsone.com"], priority: 60.8, tags: ["ATS", "Brian source"] },
+  { id: "talentReef", name: "TalentReef", category: "extraAts", sites: ["jobappnetwork.com"], priority: 61.6, tags: ["ATS", "optional"] },
+  { id: "homerun", name: "Homerun", category: "extraAts", sites: ["homerun.co"], priority: 61.4, tags: ["ATS", "optional"] },
+  { id: "gem", name: "Gem", category: "extraAts", sites: ["gem.com"], priority: 61.2, tags: ["ATS", "optional"] },
+  { id: "trakstar", name: "Trakstar", category: "extraAts", sites: ["trakstar.com"], priority: 61, tags: ["ATS", "optional"] },
+  { id: "cats", name: "Cats", category: "extraAts", sites: ["catsone.com"], priority: 60.8, tags: ["ATS", "optional"] },
   { id: "jazzhr", name: "JazzHR", category: "direct", sites: ["applytojob.com"], priority: 60.6, tags: ["ATS", "Brian source"] },
   { id: "jobvite", name: "Jobvite", category: "direct", sites: ["jobvite.com"], priority: 60.4, tags: ["ATS", "Brian source"] },
-  { id: "dover", name: "Dover", category: "direct", sites: ["dover.io"], priority: 60.2, tags: ["ATS", "Brian source"] },
-  { id: "notionCareers", name: "Notion Career Pages", category: "direct", sites: ["notion.site"], priority: 60, tags: ["ATS", "Brian source"] },
+  { id: "dover", name: "Dover", category: "extraAts", sites: ["dover.io"], priority: 60.2, tags: ["ATS", "optional"] },
+  { id: "notionCareers", name: "Notion Career Pages", category: "extraAts", sites: ["notion.site"], priority: 60, tags: ["ATS", "optional"] },
   { id: "adpAts", name: "ADP", category: "direct", rawSiteQuery: "(site:workforcenow.adp.com OR site:myjobs.adp.com)", priority: 59.8, tags: ["ATS", "Brian source"] },
-  { id: "factorial", name: "Factorial", category: "direct", sites: ["factorialhr.com"], priority: 59.6, tags: ["ATS", "Brian source"] },
-  { id: "trinet", name: "TriNet Hire", category: "direct", sites: ["trinethire.com"], priority: 59.4, tags: ["ATS", "Brian source"] },
+  { id: "factorial", name: "Factorial", category: "extraAts", sites: ["factorialhr.com"], priority: 59.6, tags: ["ATS", "optional"] },
+  { id: "trinet", name: "TriNet Hire", category: "extraAts", sites: ["trinethire.com"], priority: 59.4, tags: ["ATS", "optional"] },
   { id: "myVisaJobs", name: "MyVisaJobs Sponsor Search", category: "research", sites: ["myvisajobs.com"], priority: 45, tags: ["H-1B", "sponsor"] },
   { id: "h1bData", name: "H1BData", category: "research", sites: ["h1bdata.info"], priority: 44, tags: ["salary", "H-1B"] },
   { id: "uscisHub", name: "USCIS H-1B Employer Data Hub", category: "research", native: "static", url: "https://www.uscis.gov/tools/reports-and-studies/h-1b-employer-data-hub", priority: 43, tags: ["official", "H-1B"] },
@@ -194,6 +196,8 @@ const SOURCE_CAPABILITIES = {
 const TIME_OPTIONS = {
   google: [
     ["all", "All"],
+    ["5minutes", "Minute signals / 5m"],
+    ["10minutes", "Minute signals / 10m"],
     ["15minutes", "Minute signals / 15m"],
     ["30minutes", "Minute signals / 30m"],
     ["45minutes", "Minute signals / 45m"],
@@ -272,7 +276,49 @@ const ROLE_PACKS = [
     primary: "Software Engineer",
     titles: ["Software Engineer", "Software Developer", "AI Engineer", "Machine Learning Engineer", "Data Scientist", "Data Engineer", "Data Analyst", "Analytics Engineer", "Business Intelligence Analyst", "Cloud Engineer", "DevOps Engineer"],
     includes: ["Python", "SQL", "cloud", "AI", "data", "analytics"],
+    compactQuery: '"software engineer"',
+    balancedQuery: '("software engineer" OR "data analyst" OR "data engineer" OR "machine learning engineer")',
     query: '("software engineer" OR "software developer" OR "AI engineer" OR "machine learning engineer" OR "data scientist" OR "data engineer" OR "data analyst" OR "analytics engineer" OR "business intelligence analyst" OR "cloud engineer" OR "DevOps engineer")'
+  },
+  {
+    id: "software-engineer",
+    label: "Software Engineer",
+    primary: "Software Engineer",
+    titles: ["Software Engineer", "Software Developer", "Application Developer"],
+    includes: ["Python", "Java", "JavaScript", "API"],
+    compactQuery: '"software engineer"',
+    balancedQuery: '("software engineer" OR "software developer" OR "application developer")',
+    query: '("software engineer" OR "software developer" OR "application developer" OR "software development engineer" OR SDE)'
+  },
+  {
+    id: "full-stack",
+    label: "Full-Stack Engineer",
+    primary: "Full Stack Developer",
+    titles: ["Full Stack Developer", "Full Stack Engineer", "Software Engineer", "Web Developer"],
+    includes: ["JavaScript", "React", "Node", "API"],
+    compactQuery: '"full stack developer"',
+    balancedQuery: '("full stack developer" OR "full stack engineer" OR "software engineer")',
+    query: '("full stack developer" OR "full stack engineer" OR "full-stack developer" OR "full-stack engineer" OR "software engineer" OR "web developer")'
+  },
+  {
+    id: "backend",
+    label: "Backend Engineer",
+    primary: "Backend Developer",
+    titles: ["Backend Developer", "Backend Engineer", "Software Engineer", "API Engineer"],
+    includes: ["Python", "Java", "API", "SQL"],
+    compactQuery: '"backend developer"',
+    balancedQuery: '("backend developer" OR "backend engineer" OR "software engineer")',
+    query: '("backend developer" OR "backend engineer" OR "back end developer" OR "back end engineer" OR "API engineer" OR "software engineer")'
+  },
+  {
+    id: "frontend",
+    label: "Frontend Engineer",
+    primary: "Frontend Developer",
+    titles: ["Frontend Developer", "Frontend Engineer", "UI Engineer", "React Developer"],
+    includes: ["JavaScript", "React", "TypeScript", "UI"],
+    compactQuery: '"frontend developer"',
+    balancedQuery: '("frontend developer" OR "frontend engineer" OR "React developer")',
+    query: '("frontend developer" OR "frontend engineer" OR "front end developer" OR "front end engineer" OR "React developer" OR "UI engineer")'
   },
   {
     id: "software-ai-data",
@@ -280,6 +326,8 @@ const ROLE_PACKS = [
     primary: "Software Engineer",
     titles: ["Software Engineer", "Software Developer", "AI Engineer", "Machine Learning Engineer", "Data Engineer", "Data Analyst", "Analytics Engineer", "Business Intelligence Analyst"],
     includes: ["Python", "SQL", "cloud", "AI", "data"],
+    compactQuery: '"software engineer"',
+    balancedQuery: '("software engineer" OR "data engineer" OR "data analyst" OR "machine learning engineer")',
     query: '("software engineer" OR "software developer" OR "AI engineer" OR "machine learning engineer" OR "data engineer" OR "data analyst" OR "analytics engineer" OR "business intelligence analyst")'
   },
   {
@@ -288,6 +336,8 @@ const ROLE_PACKS = [
     primary: "Software Engineer",
     titles: ["Software Engineer", "Software Developer", "Full Stack Developer", "Backend Developer", "Frontend Developer", "Application Developer"],
     includes: ["JavaScript", "Python", "Java", "API"],
+    compactQuery: '"software engineer"',
+    balancedQuery: '("software engineer" OR "software developer" OR "full stack developer" OR "backend developer")',
     query: '("software engineer" OR "software developer" OR "full stack developer" OR "backend developer" OR "frontend developer" OR "application developer")'
   },
   {
@@ -296,7 +346,49 @@ const ROLE_PACKS = [
     primary: "Machine Learning Engineer",
     titles: ["Machine Learning Engineer", "AI Engineer", "Applied Scientist", "ML Engineer", "Data Scientist", "AI Data Engineer"],
     includes: ["Python", "machine learning", "LLM", "AI"],
+    compactQuery: '"machine learning engineer"',
+    balancedQuery: '("machine learning engineer" OR "AI engineer" OR "data scientist")',
     query: '("machine learning engineer" OR "AI engineer" OR "applied scientist" OR "ML engineer" OR "data scientist" OR "LLM")'
+  },
+  {
+    id: "ai-engineer",
+    label: "AI Engineer",
+    primary: "AI Engineer",
+    titles: ["AI Engineer", "Machine Learning Engineer", "LLM Engineer", "Applied AI Engineer"],
+    includes: ["Python", "LLM", "RAG", "machine learning"],
+    compactQuery: '"AI engineer"',
+    balancedQuery: '("AI engineer" OR "LLM engineer" OR "machine learning engineer")',
+    query: '("AI engineer" OR "artificial intelligence engineer" OR "LLM engineer" OR "applied AI engineer" OR "machine learning engineer")'
+  },
+  {
+    id: "ml-engineer",
+    label: "Machine Learning Engineer",
+    primary: "Machine Learning Engineer",
+    titles: ["Machine Learning Engineer", "ML Engineer", "Applied Scientist", "Data Scientist"],
+    includes: ["Python", "machine learning", "MLOps", "modeling"],
+    compactQuery: '"machine learning engineer"',
+    balancedQuery: '("machine learning engineer" OR "ML engineer" OR "applied scientist")',
+    query: '("machine learning engineer" OR "ML engineer" OR "machine learning scientist" OR "applied scientist" OR "MLOps engineer")'
+  },
+  {
+    id: "data-scientist",
+    label: "Data Scientist",
+    primary: "Data Scientist",
+    titles: ["Data Scientist", "Applied Scientist", "Machine Learning Engineer"],
+    includes: ["Python", "SQL", "statistics", "machine learning"],
+    compactQuery: '"data scientist"',
+    balancedQuery: '("data scientist" OR "applied scientist" OR "machine learning engineer")',
+    query: '("data scientist" OR "applied scientist" OR "machine learning scientist" OR "decision scientist" OR "product data scientist")'
+  },
+  {
+    id: "data-engineer",
+    label: "Data Engineer",
+    primary: "Data Engineer",
+    titles: ["Data Engineer", "Analytics Engineer", "ETL Developer", "Data Platform Engineer"],
+    includes: ["SQL", "Python", "ETL", "cloud"],
+    compactQuery: '"data engineer"',
+    balancedQuery: '("data engineer" OR "analytics engineer" OR "ETL developer")',
+    query: '("data engineer" OR "analytics engineer" OR "ETL developer" OR "data platform engineer" OR "pipeline engineer")'
   },
   {
     id: "data-analytics",
@@ -304,7 +396,29 @@ const ROLE_PACKS = [
     primary: "Data Analyst",
     titles: ["Data Analyst", "Business Intelligence Analyst", "Analytics Engineer", "SQL Analyst", "Reporting Analyst", "Data Scientist", "Data Engineer"],
     includes: ["SQL", "Python", "Tableau", "Power BI"],
+    compactQuery: '"data analyst"',
+    balancedQuery: '("data analyst" OR "business intelligence analyst" OR "analytics engineer")',
     query: '("data analyst" OR "business intelligence analyst" OR "analytics engineer" OR "SQL analyst" OR "reporting analyst" OR "data scientist" OR "data engineer")'
+  },
+  {
+    id: "analytics-engineer",
+    label: "Analytics Engineer",
+    primary: "Analytics Engineer",
+    titles: ["Analytics Engineer", "Data Analyst", "BI Engineer", "SQL Analyst"],
+    includes: ["SQL", "dbt", "analytics", "data modeling"],
+    compactQuery: '"analytics engineer"',
+    balancedQuery: '("analytics engineer" OR "BI engineer" OR "SQL analyst")',
+    query: '("analytics engineer" OR "BI engineer" OR "business intelligence engineer" OR "SQL analyst" OR "data modeling")'
+  },
+  {
+    id: "bi-analyst",
+    label: "BI Analyst",
+    primary: "Business Intelligence Analyst",
+    titles: ["Business Intelligence Analyst", "BI Analyst", "Reporting Analyst", "Power BI Developer", "Tableau Developer"],
+    includes: ["SQL", "Power BI", "Tableau", "dashboard"],
+    compactQuery: '"business intelligence analyst"',
+    balancedQuery: '("business intelligence analyst" OR "BI analyst" OR "reporting analyst")',
+    query: '("business intelligence analyst" OR "BI analyst" OR "reporting analyst" OR "Power BI developer" OR "Tableau developer")'
   },
   {
     id: "cloud-devops",
@@ -312,13 +426,25 @@ const ROLE_PACKS = [
     primary: "Cloud Engineer",
     titles: ["Cloud Engineer", "DevOps Engineer", "Site Reliability Engineer", "Platform Engineer", "Infrastructure Engineer"],
     includes: ["AWS", "Azure", "Kubernetes", "Terraform"],
+    compactQuery: '"cloud engineer"',
+    balancedQuery: '("cloud engineer" OR "DevOps engineer" OR "platform engineer")',
     query: '("cloud engineer" OR "DevOps engineer" OR "site reliability engineer" OR "platform engineer" OR "infrastructure engineer")'
+  },
+  {
+    id: "new-grad-software",
+    label: "New Grad Software",
+    primary: "Software Engineer",
+    titles: ["Software Engineer", "Software Developer", "New Grad Software Engineer", "Early Career Software Engineer"],
+    includes: ["new grad", "early career", "entry level"],
+    compactQuery: '"software engineer"',
+    balancedQuery: '("software engineer" OR "software developer") ("new grad" OR "early career" OR "entry level")',
+    query: '("software engineer" OR "software developer" OR "software development engineer" OR SDE) ("new grad" OR "university graduate" OR "early career" OR "entry level")'
   }
 ];
 
 const ROLE_PACK_LABELS = Object.fromEntries(ROLE_PACKS.map(pack => [pack.id, pack.label]));
 
-const ACRONYMS = new Set(["AI", "API", "BI", "CRM", "FP&A", "GRC", "HR", "ML", "QA", "SEO", "SOC", "SRE", "SQL", "UI", "UX"]);
+const ACRONYMS = new Set(["AI", "API", "AWS", "BI", "CRM", "FP&A", "GRC", "HR", "LLM", "ML", "MLOPS", "QA", "RAG", "SDE", "SEO", "SOC", "SRE", "SQL", "UI", "UX"]);
 
 const FILTER_LABELS = {
   remoteMode: {
@@ -332,6 +458,12 @@ const FILTER_LABELS = {
   matchMode: {
     smart: "Smart related titles",
     exact: "Exact title only"
+  },
+  queryStyle: {
+    balanced: "Balanced smart",
+    compact: "Compact title",
+    broad: "Broad Boolean",
+    custom: "Custom query"
   },
   experience: {
     any: "Any level",
@@ -8408,6 +8540,8 @@ function cacheElements() {
     jobTitle: document.getElementById("jobTitle"),
     rolePackSelect: document.getElementById("rolePackSelect"),
     profileSelect: document.getElementById("profileSelect"),
+    queryStyleSelect: document.getElementById("queryStyleSelect"),
+    customQuery: document.getElementById("customQuery"),
     timeFilter: document.getElementById("timeFilter"),
     locationSelect: document.getElementById("locationSelect"),
     sortSelect: document.getElementById("sortSelect"),
@@ -8439,14 +8573,19 @@ function cacheElements() {
     companySponsorTier: document.getElementById("companySponsorTier"),
     companyKind: document.getElementById("companyKind"),
     companyCount: document.getElementById("companyCount"),
+    companySuggestions: document.getElementById("companySuggestions"),
     companyCard: document.getElementById("companyCard"),
     openCompanyButton: document.getElementById("openCompanyButton"),
     searchCompanyButton: document.getElementById("searchCompanyButton"),
     companyLinkedInJobsButton: document.getElementById("companyLinkedInJobsButton"),
     companyLinkedInPostsButton: document.getElementById("companyLinkedInPostsButton"),
+    companyLinkedInRecruitersButton: document.getElementById("companyLinkedInRecruitersButton"),
+    companyLinkedInPageButton: document.getElementById("companyLinkedInPageButton"),
     companyIndeedButton: document.getElementById("companyIndeedButton"),
+    companyGoogleButton: document.getElementById("companyGoogleButton"),
     copyCompanyLinksButton: document.getElementById("copyCompanyLinksButton"),
     openTopSponsorButton: document.getElementById("openTopSponsorButton"),
+    resetCompanySearchButton: document.getElementById("resetCompanySearchButton"),
     favoriteCompanyButton: document.getElementById("favoriteCompanyButton"),
     sponsorGrid: document.getElementById("sponsorGrid"),
     vendorRole: document.getElementById("vendorRole"),
@@ -8462,6 +8601,7 @@ function cacheElements() {
     openTopVendorSearchesButton: document.getElementById("openTopVendorSearchesButton"),
     pinnedBlock: document.getElementById("pinnedBlock"),
     pinnedOperators: document.getElementById("pinnedOperators"),
+    copyPinSyncButton: document.getElementById("copyPinSyncButton"),
     resourceGrid: document.getElementById("resourceGrid"),
     portalCount: document.getElementById("portalCount"),
     checkedCount: document.getElementById("checkedCount"),
@@ -8502,7 +8642,9 @@ function bindEvents() {
     persistAndMaybeGenerate();
   });
 
-  els.rolePackSelect.addEventListener("change", persistAndMaybeGenerate);
+  [els.rolePackSelect, els.queryStyleSelect].forEach(control => {
+    control.addEventListener("change", persistAndMaybeGenerate);
+  });
 
   els.engineSelect.addEventListener("change", () => {
     rebuildTimeOptions(els.engineSelect.value);
@@ -8522,7 +8664,7 @@ function bindEvents() {
     els.strictTitle
   ].forEach(control => control.addEventListener("change", persistAndMaybeGenerate));
 
-  [els.jobTitle, els.includeTerms, els.excludeTerms].forEach(input => {
+  [els.jobTitle, els.customQuery, els.includeTerms, els.excludeTerms].forEach(input => {
     input.addEventListener("change", persistAndMaybeGenerate);
   });
 
@@ -8575,9 +8717,13 @@ function bindEvents() {
   els.searchCompanyButton.addEventListener("click", searchSelectedCompany);
   els.companyLinkedInJobsButton.addEventListener("click", () => openCompanySearchType("linkedinJobs"));
   els.companyLinkedInPostsButton.addEventListener("click", () => openCompanySearchType("linkedinPosts"));
+  els.companyLinkedInRecruitersButton.addEventListener("click", () => openCompanySearchType("linkedinRecruiters"));
+  els.companyLinkedInPageButton.addEventListener("click", () => openCompanySearchType("linkedinCompany"));
   els.companyIndeedButton.addEventListener("click", () => openCompanySearchType("indeedGoogle"));
+  els.companyGoogleButton.addEventListener("click", () => openCompanySearchType("googleCompany"));
   els.copyCompanyLinksButton.addEventListener("click", copySelectedCompanyLinks);
   els.openTopSponsorButton.addEventListener("click", openTopSponsorSearches);
+  els.resetCompanySearchButton.addEventListener("click", resetCompanySearch);
   els.favoriteCompanyButton.addEventListener("click", toggleFavoriteCompany);
 
   [els.vendorRole, els.vendorFilter].forEach(input => {
@@ -8610,6 +8756,7 @@ function bindEvents() {
   });
   els.shareButton.addEventListener("click", () => copyLinks([window.location.href], "Copied share link"));
   els.resetButton.addEventListener("click", resetSearch);
+  els.copyPinSyncButton.addEventListener("click", copyPinSyncLink);
   els.minuteRadarButton.addEventListener("click", applyMinuteRadarFlow);
   els.latestOneHourButton.addEventListener("click", applyLatestOneHourFlow);
   els.quickApplyButton.addEventListener("click", applyQuickApplyFlow);
@@ -8736,10 +8883,18 @@ function populateResources() {
 
 function renderSponsorGrid() {
   els.sponsorGrid.innerHTML = "";
-  const sponsors = COMPANIES
+  const sponsorPool = state.visibleCompanies && state.visibleCompanies.length ? state.visibleCompanies : COMPANIES;
+  const sponsors = sponsorPool
     .filter(company => company.h1bFilings > 0)
     .sort((a, b) => b.h1bFilings - a.h1bFilings)
     .slice(0, 16);
+  if (!sponsors.length) {
+    const note = document.createElement("p");
+    note.className = "empty-note";
+    note.textContent = "No H1B sponsor matches for the current company filters.";
+    els.sponsorGrid.appendChild(note);
+    return;
+  }
   const fragment = document.createDocumentFragment();
   sponsors.forEach(company => {
     const card = document.createElement("article");
@@ -8811,6 +8966,7 @@ function hydrateFromUrl() {
   setSelectIfValid(els.sortSelect, params.get("sort"));
   setSelectIfValid(els.remoteMode, params.get("remote"));
   setSelectIfValid(els.matchMode, params.get("match"));
+  setSelectIfValid(els.queryStyleSelect, params.get("queryStyle"));
   setSelectIfValid(els.experienceSelect, params.get("experience"));
   setSelectIfValid(els.employmentSelect, params.get("employment"));
   setSelectIfValid(els.authorizationSelect, params.get("authorization"));
@@ -8823,6 +8979,9 @@ function hydrateFromUrl() {
 
   if (params.has("job")) {
     els.jobTitle.value = params.get("job") || "";
+  }
+  if (params.has("customQuery")) {
+    els.customQuery.value = params.get("customQuery") || "";
   }
   if (params.has("include")) {
     els.includeTerms.value = params.get("include") || "";
@@ -8861,6 +9020,7 @@ function loadPreferences() {
   setSelectIfValid(els.sortSelect, data.sort || "coverage");
   setSelectIfValid(els.remoteMode, data.remoteMode || "neutral");
   setSelectIfValid(els.matchMode, data.matchMode || "smart");
+  setSelectIfValid(els.queryStyleSelect, data.queryStyle || "balanced");
   setSelectIfValid(els.experienceSelect, data.experience || "entry");
   setSelectIfValid(els.employmentSelect, data.employment || "any");
   setSelectIfValid(els.authorizationSelect, data.authorization || "none");
@@ -8868,6 +9028,7 @@ function loadPreferences() {
   els.strictTitle.checked = Boolean(data.strictTitle);
 
   els.jobTitle.value = data.jobTitle || "";
+  els.customQuery.value = data.customQuery || "";
   els.includeTerms.value = data.includeTerms || "";
   els.excludeTerms.value = data.excludeTerms || "";
   els.companyRole.value = data.companyRole || "";
@@ -8927,10 +9088,12 @@ function savePreferences() {
     sort: els.sortSelect.value,
     remoteMode: els.remoteMode.value,
     matchMode: els.matchMode.value,
+    queryStyle: els.queryStyleSelect.value,
     hasTypedTitle: parseTitles(els.jobTitle.value).length > 0,
     experience: els.experienceSelect.value,
     employment: els.employmentSelect.value,
     authorization: els.authorizationSelect.value,
+    customQuery: els.customQuery.value,
     includeTerms: els.includeTerms.value,
     excludeTerms: els.excludeTerms.value,
     cautionExcludes: els.cautionExcludes.checked,
@@ -8995,6 +9158,7 @@ function applyProfile(profileId) {
   setSelectIfValid(els.authorizationSelect, profile.defaults.authorization);
   setSelectIfValid(els.experienceSelect, profile.defaults.experience);
   setSelectIfValid(els.matchMode, profile.defaults.matchMode);
+  setSelectIfValid(els.queryStyleSelect, profile.defaults.queryStyle);
   if (profile.categories) {
     setCategorySelection(new Set(profile.categories));
   }
@@ -9050,7 +9214,7 @@ function applyPrecision(precision) {
 function syncProfileDescription() {
   const profile = SEARCH_PROFILES.find(item => item.id === els.profileSelect.value) || SEARCH_PROFILES[0];
   const rolePack = getRolePack(els.rolePackSelect.value);
-  els.profileDescription.textContent = `${profile.description} Role pack: ${rolePack.label}. Mode: ${FILTER_LABELS.precision[getPrecisionFromProfile(profile.id)] || "Max Coverage"}.`;
+  els.profileDescription.textContent = `${profile.description} Role pack: ${rolePack.label}. Query: ${FILTER_LABELS.queryStyle[els.queryStyleSelect.value] || "Balanced smart"}. Mode: ${FILTER_LABELS.precision[getPrecisionFromProfile(profile.id)] || "Max Coverage"}.`;
 }
 
 function setSelectIfValid(select, value) {
@@ -9369,6 +9533,8 @@ function getContext() {
     sort: els.sortSelect.value,
     remoteMode: els.remoteMode.value,
     matchMode: els.matchMode.value,
+    queryStyle: els.queryStyleSelect.value,
+    customQuery: els.customQuery.value.trim(),
     hasTypedTitle: parseTitles(els.jobTitle.value).length > 0,
     experience: els.experienceSelect.value,
     employment: els.employmentSelect.value,
@@ -9411,8 +9577,10 @@ function sortPortals(portals, sortMode) {
   const categoryBoost = {
     top: 140,
     direct: 130,
+    extraAts: 70,
     signals: 120,
     general: 110,
+    legacy: 50,
     tech: 100,
     company: 90,
     highered: 80,
@@ -9485,6 +9653,11 @@ function renderPinnedOperators() {
   });
 }
 
+function copyPinSyncLink() {
+  updateAddressBar(getSearchTitles(), getContext());
+  copyLinks([window.location.href], "Copied pin sync link");
+}
+
 function setEmptyState(show) {
   els.emptyState.hidden = !show;
   els.results.hidden = show;
@@ -9500,6 +9673,8 @@ function updatePreviewForEmptyState() {
     PROFILE_LABELS[context.profile],
     ROLE_PACK_LABELS[context.rolePack],
     FILTER_LABELS.precision[context.precision],
+    FILTER_LABELS.queryStyle[context.queryStyle],
+    getActiveCustomQuery(context) ? `Custom: ${context.customQuery}` : "",
     FILTER_LABELS.authorization[context.authorization],
     FILTER_LABELS.sort[context.sort],
     getLocationLabel(context.location)
@@ -9576,16 +9751,44 @@ function buildGoogleStructuredQuery(title, context, options = {}) {
 }
 
 function buildTitleExpression(title, context) {
+  const custom = getActiveCustomQuery(context);
+  if (custom) {
+    return custom;
+  }
+
   let expression;
   if (context.matchMode === "exact") {
     expression = quoteTerm(title);
-  } else if (!context.hasTypedTitle && getRolePack(context.rolePack).query) {
-    expression = getRolePack(context.rolePack).query;
+  } else if (!context.hasTypedTitle) {
+    expression = getRolePackSearchExpression(getRolePack(context.rolePack), context);
   } else {
     const related = findTitleGroup(title);
-    expression = `(${related.map(quoteTerm).join(" OR ")})`;
+    if (context.queryStyle === "compact") {
+      expression = quoteTerm(title);
+    } else if (context.queryStyle === "broad") {
+      expression = `(${related.map(quoteTerm).join(" OR ")})`;
+    } else {
+      expression = `(${related.slice(0, 3).map(quoteTerm).join(" OR ")})`;
+    }
   }
   return applyStrictTitle(expression, context);
+}
+
+function getActiveCustomQuery(context) {
+  return context.queryStyle === "custom" ? String(context.customQuery || "").trim() : "";
+}
+
+function getRolePackSearchExpression(pack, context) {
+  if (!pack) {
+    return "";
+  }
+  if (context.queryStyle === "compact") {
+    return pack.compactQuery || quoteTerm(pack.primary);
+  }
+  if (context.queryStyle === "broad") {
+    return pack.query || pack.balancedQuery || pack.compactQuery || quoteTerm(pack.primary);
+  }
+  return pack.balancedQuery || pack.compactQuery || pack.query || quoteTerm(pack.primary);
 }
 
 // Opt-in precision: rewrite quoted titles as intitle:"..." so search-engine
@@ -9709,7 +9912,14 @@ function getFreshPostingSignalQuery(time) {
   if (!MINUTE_SIGNAL_TIMES.has(time)) {
     return "";
   }
-  return '("minutes ago" OR "minute ago" OR "just posted" OR "newly posted" OR "posted today")';
+  const minuteMap = {
+    "5minutes": '"5 minutes ago"',
+    "10minutes": '"10 minutes ago"',
+    "15minutes": '"15 minutes ago"',
+    "30minutes": '"30 minutes ago"',
+    "45minutes": '"45 minutes ago"'
+  };
+  return `(${[minuteMap[time], '"minutes ago"', '"minute ago"', '"just posted"', '"newly posted"', '"posted today"'].filter(Boolean).join(" OR ")})`;
 }
 
 function buildIncludeQuery(terms) {
@@ -9814,17 +10024,24 @@ function buildNativeKeywordQuery(title, context) {
 }
 
 function buildNativeTitleQuery(title, context) {
+  const custom = getActiveCustomQuery(context);
+  if (custom) {
+    return custom;
+  }
   if (context.matchMode === "exact") {
     return title;
   }
   if (!context.hasTypedTitle) {
-    const pack = getRolePack(context.rolePack);
-    if (pack && pack.query) {
-      return pack.query;
-    }
+    return getRolePackSearchExpression(getRolePack(context.rolePack), context);
   }
   const related = findTitleGroup(title);
-  return related.length > 1 ? `(${related.map(quoteTerm).join(" OR ")})` : title;
+  if (context.queryStyle === "compact") {
+    return title;
+  }
+  if (context.queryStyle === "broad") {
+    return related.length > 1 ? `(${related.map(quoteTerm).join(" OR ")})` : title;
+  }
+  return related.length > 1 ? `(${related.slice(0, 3).map(quoteTerm).join(" OR ")})` : title;
 }
 
 function buildBoardKeywordQuery(title, context, options = {}) {
@@ -9839,6 +10056,10 @@ function buildBoardKeywordQuery(title, context, options = {}) {
 }
 
 function buildBoardTitleQuery(title, context) {
+  const custom = getActiveCustomQuery(context);
+  if (custom) {
+    return custom;
+  }
   if (context.matchMode === "exact" || context.hasTypedTitle) {
     return title;
   }
@@ -9937,17 +10158,24 @@ function buildLinkedInPostsUrl(title, context) {
 }
 
 function buildLinkedInPostTitleQuery(title, context) {
+  const custom = getActiveCustomQuery(context);
+  if (custom) {
+    return custom;
+  }
   if (context.matchMode === "exact") {
     return quoteTerm(title);
   }
   if (!context.hasTypedTitle) {
-    const pack = getRolePack(context.rolePack);
-    if (pack && pack.query) {
-      return pack.query;
-    }
+    return getRolePackSearchExpression(getRolePack(context.rolePack), context);
   }
   const related = findTitleGroup(title);
-  return related.length > 1 ? `(${related.map(quoteTerm).join(" OR ")})` : quoteTerm(title);
+  if (context.queryStyle === "compact") {
+    return quoteTerm(title);
+  }
+  if (context.queryStyle === "broad") {
+    return related.length > 1 ? `(${related.map(quoteTerm).join(" OR ")})` : quoteTerm(title);
+  }
+  return related.length > 1 ? `(${related.slice(0, 3).map(quoteTerm).join(" OR ")})` : quoteTerm(title);
 }
 
 function buildIndeedUrl(title, context) {
@@ -9979,6 +10207,8 @@ function buildIndeedKeywordQuery(title, context) {
 
 function getLinkedInTimeParam(time) {
   const map = {
+    "5minutes": "r3600",
+    "10minutes": "r3600",
     "15minutes": "r3600",
     "30minutes": "r3600",
     "45minutes": "r3600",
@@ -10000,7 +10230,7 @@ function getLinkedInTimeParam(time) {
 }
 
 function getLinkedInPostDateParam(time) {
-  if (["15minutes", "30minutes", "45minutes", "1hour", "2hours", "3hours", "4hours", "6hours", "8hours", "12hours", "24hours", "48hours", "72hours"].includes(time)) {
+  if (["5minutes", "10minutes", "15minutes", "30minutes", "45minutes", "1hour", "2hours", "3hours", "4hours", "6hours", "8hours", "12hours", "24hours", "48hours", "72hours"].includes(time)) {
     return "past-24h";
   }
   if (time === "week") {
@@ -10066,6 +10296,8 @@ function getLinkedInFunctionParam(title, context) {
 
 function getIndeedFromAge(time) {
   const map = {
+    "5minutes": "1",
+    "10minutes": "1",
     "15minutes": "1",
     "30minutes": "1",
     "45minutes": "1",
@@ -10087,6 +10319,8 @@ function getIndeedFromAge(time) {
 
 function getGlassdoorFromAge(time) {
   const map = {
+    "5minutes": "1",
+    "10minutes": "1",
     "15minutes": "1",
     "30minutes": "1",
     "45minutes": "1",
@@ -10108,6 +10342,8 @@ function getGlassdoorFromAge(time) {
 
 function getZipRecruiterDays(time) {
   const map = {
+    "5minutes": "1",
+    "10minutes": "1",
     "15minutes": "1",
     "30minutes": "1",
     "45minutes": "1",
@@ -10129,6 +10365,8 @@ function getZipRecruiterDays(time) {
 
 function getDicePostedDate(time) {
   const map = {
+    "5minutes": "ONE",
+    "10minutes": "ONE",
     "15minutes": "ONE",
     "30minutes": "ONE",
     "45minutes": "ONE",
@@ -10193,6 +10431,8 @@ function normalizeGoogleSiteSearch(site) {
 
 function getGoogleTbs(time, sort) {
   const map = {
+    "5minutes": "qdr:h1",
+    "10minutes": "qdr:h1",
     "15minutes": "qdr:h1",
     "30minutes": "qdr:h1",
     "45minutes": "qdr:h1",
@@ -10314,6 +10554,7 @@ function getActiveFilterSummary(context) {
     getLocationLabel(context.location),
     getTimeLabel(context.time),
     FILTER_LABELS.sort[context.sort],
+    FILTER_LABELS.queryStyle[context.queryStyle],
     FILTER_LABELS.authorization[context.authorization]
   ].filter(Boolean).join(" - ");
 }
@@ -10336,6 +10577,12 @@ function updateAddressBar(titles, context) {
   }
   if (context.matchMode !== "smart") {
     params.set("match", context.matchMode);
+  }
+  if (context.queryStyle !== "balanced") {
+    params.set("queryStyle", context.queryStyle);
+  }
+  if (context.customQuery) {
+    params.set("customQuery", context.customQuery);
   }
   if (context.experience !== "any") {
     params.set("experience", context.experience);
@@ -10394,6 +10641,7 @@ function renderCompanyOptions(filterText) {
     option.value = "";
     els.companySelect.appendChild(option);
     els.companyCount.textContent = `0 of ${COMPANIES.length} companies`;
+    renderCompanySuggestions();
     return;
   }
 
@@ -10431,6 +10679,77 @@ function renderCompanyOptions(filterText) {
   }
   const sponsorCount = state.visibleCompanies.filter(company => company.h1bFilings > 0).length;
   els.companyCount.textContent = `${state.visibleCompanies.length} of ${COMPANIES.length} companies - ${sponsorCount} H1B sponsors`;
+  renderCompanySuggestions();
+}
+
+function renderCompanySuggestions() {
+  els.companySuggestions.innerHTML = "";
+  const companies = state.visibleCompanies.slice(0, 12);
+  if (!companies.length) {
+    const note = document.createElement("p");
+    note.className = "empty-note";
+    note.textContent = "No related companies for these filters.";
+    els.companySuggestions.appendChild(note);
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  companies.forEach(company => {
+    const card = document.createElement("article");
+    card.className = "sponsor-card company-suggestion-card";
+    const title = document.createElement("div");
+    title.className = "sponsor-title";
+    const name = document.createElement("strong");
+    name.textContent = company.name;
+    const rank = createPill(`#${company.rank}`);
+    title.append(name, rank);
+
+    const meta = document.createElement("div");
+    meta.className = "portal-meta";
+    meta.append(createPill(company.companyKind === "vendor" ? "Vendor" : "Direct employer"));
+    meta.append(createPill(FILTER_LABELS.sponsorTier[company.sponsorTier] || company.sponsorTier));
+    meta.append(createPill(company.category));
+    if (company.h1bFilings) {
+      meta.append(createPill(`${company.h1bFilings.toLocaleString()} H1B`));
+    }
+
+    const actions = document.createElement("div");
+    actions.className = "company-mini-actions";
+    actions.append(
+      createCompanySuggestionButton("Use", company, () => selectCompanySuggestion(company)),
+      createCompanySuggestionLink("Careers", company.careersUrl || buildCompanySearchUrl(company, getCompanySearchTitle(), getCompanyContext())),
+      createCompanySuggestionLink("LinkedIn", buildLinkedInCompanySearchUrl(company)),
+      createCompanySuggestionLink("Google", buildGoogleCompanyProfileSearchUrl(company, getCompanySearchTitle(), getCompanyContext()))
+    );
+
+    card.append(title, meta, actions);
+    fragment.appendChild(card);
+  });
+  els.companySuggestions.appendChild(fragment);
+}
+
+function createCompanySuggestionButton(label, company, handler) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "secondary-button";
+  button.textContent = label;
+  button.addEventListener("click", handler);
+  return button;
+}
+
+function createCompanySuggestionLink(label, url) {
+  const link = document.createElement("a");
+  link.href = url;
+  link.target = "_blank";
+  link.rel = "noopener";
+  link.textContent = label;
+  return link;
+}
+
+function selectCompanySuggestion(company) {
+  els.companySelect.value = company.id;
+  syncCompanyCard();
+  savePreferences();
 }
 
 function companyMatchesFilters(company) {
@@ -10670,7 +10989,7 @@ function searchSelectedCompany() {
 
 function openCompanySearchType(type) {
   const title = getCompanySearchTitle();
-  if (!title) {
+  if (!title && !["linkedinCompany", "googleCompany"].includes(type)) {
     showToast("Enter a company search role");
     return;
   }
@@ -10700,7 +11019,10 @@ function copySelectedCompanyLinks() {
     buildCompanySearchUrl(company, title, context),
     ...getCompanyActionUrls(company, title, context, "linkedinJobs"),
     ...getCompanyActionUrls(company, title, context, "linkedinPosts"),
-    ...getCompanyActionUrls(company, title, context, "indeedGoogle")
+    ...getCompanyActionUrls(company, title, context, "linkedinRecruiters"),
+    ...getCompanyActionUrls(company, title, context, "linkedinCompany"),
+    ...getCompanyActionUrls(company, title, context, "indeedGoogle"),
+    ...getCompanyActionUrls(company, title, context, "googleCompany")
   ]);
   copyLinks(links, `Copied ${links.length} selected company links`);
 }
@@ -10734,11 +11056,41 @@ function getCompanyActionUrls(company, title, context, type) {
       return [buildLinkedInJobsUrl(title, companyContext)];
     case "linkedinPosts":
       return [buildLinkedInPostsUrl(title, companyContext)];
+    case "linkedinRecruiters":
+      return [buildLinkedInRecruiterSearchUrl(company, title, context)];
+    case "linkedinCompany":
+      return [buildLinkedInCompanySearchUrl(company)];
+    case "googleCompany":
+      return [buildGoogleCompanyProfileSearchUrl(company, title, context)];
     case "indeedGoogle":
       return [buildIndeedUrl(title, companyContext), buildCompanySearchUrl(company, title, context)];
     default:
       return [buildCompanySearchUrl(company, title, context)];
   }
+}
+
+function resetCompanySearch() {
+  els.companyRole.value = "";
+  els.companyFilter.value = "";
+  els.companyRolePack.value = els.rolePackSelect.value || DEFAULT_ROLE_PACK_ID;
+  els.companyTimeFilter.value = "24hours";
+  els.companyExperienceSelect.value = "entry";
+  els.companyLocationSelect.value = els.locationSelect.value || "usa";
+  els.companyRemoteMode.value = els.remoteMode.value || "neutral";
+  els.companyEmploymentSelect.value = "any";
+  els.companyAuthorizationSelect.value = "none";
+  els.companyIncludeTerms.value = "";
+  els.companyExcludeTerms.value = "";
+  els.companySortSelect.value = "latest";
+  els.companyCategorySelect.value = "all";
+  els.companySponsorTier.value = "all";
+  els.companyKind.value = "all";
+  renderCompanyOptions("");
+  els.companySelect.value = ALL_COMPANIES_ID;
+  syncCompanyCard();
+  renderSponsorGrid();
+  savePreferences();
+  showToast("Company search reset");
 }
 
 function getVendorCompanies() {
@@ -10956,6 +11308,23 @@ function buildLinkedInRecruiterSearchUrl(company, title, context) {
   params.set("keywords", keywords);
   params.set("origin", "GLOBAL_SEARCH_HEADER");
   return `https://www.linkedin.com/search/results/people/?${params.toString()}`;
+}
+
+function buildLinkedInCompanySearchUrl(company) {
+  const params = new URLSearchParams();
+  params.set("keywords", company.name);
+  params.set("origin", "GLOBAL_SEARCH_HEADER");
+  return `https://www.linkedin.com/search/results/companies/?${params.toString()}`;
+}
+
+function buildGoogleCompanyProfileSearchUrl(company, title, context) {
+  const query = [
+    buildCompanyNameExpression(company),
+    title ? quoteTerm(title) : "",
+    "(careers OR jobs OR hiring OR recruiters OR \"talent acquisition\")",
+    getLocationQuery(context.location)
+  ].filter(Boolean).join(" ");
+  return buildGoogleUrl(query, context.time || "24hours", context.sort || "latest");
 }
 
 function buildVendorContactSearchUrl(company, title, context) {
@@ -11266,9 +11635,11 @@ function resetSearch() {
   els.sortSelect.value = "coverage";
   els.remoteMode.value = "neutral";
   els.matchMode.value = "smart";
+  els.queryStyleSelect.value = "balanced";
   els.experienceSelect.value = "entry";
   els.employmentSelect.value = "any";
   els.authorizationSelect.value = "none";
+  els.customQuery.value = "";
   els.includeTerms.value = "";
   els.excludeTerms.value = "";
   els.cautionExcludes.checked = false;

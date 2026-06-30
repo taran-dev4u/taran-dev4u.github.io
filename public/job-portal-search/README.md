@@ -7,6 +7,8 @@ Taran's Job Command Center is a US-focused static job-search launcher. It builds
 - Dark theme by default, with an explicit saved light-mode option.
 - Personal US OPT default profile with a max-coverage role pack for software, AI/ML, data, analytics, and cloud/DevOps roles.
 - Role packs for broad target coverage, software, AI/ML, data analytics, and cloud/DevOps searches.
+- Specific role packs for software engineer, full-stack, backend, frontend, AI engineer, ML engineer, data scientist, data engineer, analytics engineer, BI analyst, cloud/devops, and new-grad software searches.
+- Query customization with balanced smart, compact title, broad Boolean, and custom raw-query modes.
 - Multi-title search with comma-separated roles.
 - Freshness filters from minute-signal searches through older-than ranges.
 - Google, DuckDuckGo, Bing, Yahoo, Kagi, Qwant, Brave, and Startpage.
@@ -23,6 +25,8 @@ Taran's Job Command Center is a US-focused static job-search launcher. It builds
 - Vendor Outreach section with role/location/vendor filters, vendor fit score, LinkedIn recruiter search, LinkedIn Jobs, Indeed, Google contact search, and copy-ready outreach templates.
 - Vendor safety reminders based on official job-scam guidance: avoid upfront placement fees, fake-check/equipment scams, and unverified recruiter identities.
 - Pinned search operators, copy-all, copy-checked, checked-progress, shareable URLs, related-title suggestions, and company search bundles.
+- Pin sync links for carrying pinned portals and settings to another browser or computer without a backend.
+- Company search cards with related company results, reset, careers, LinkedIn recruiter/company, LinkedIn jobs/posts, Indeed, and Google shortcuts.
 
 ## Recent Updates
 
@@ -32,7 +36,9 @@ Taran's Job Command Center is a US-focused static job-search launcher. It builds
 - ZipRecruiter freshness mapping now uses tighter 3-day, 7-day, and 30-day windows where supported.
 - OPT/STEM-OPT source curation: removed low-yield remote-only, government/public-sector, nonprofit, and senior-only boards from the launcher while keeping higher-ed/research employer search.
 - Board-specific query formatting: LinkedIn/Indeed keep Boolean role packs, while simpler boards use plain role keywords so their search boxes do not misread Google-style operators.
-- Minute-level search options: 15m, 30m, 45m signal modes, plus 2h, 3h, and 6h windows. Minute choices are treated as freshness signals where exact minute filters are not supported by the source.
+- Minute-level search options: 5m, 10m, 15m, 30m, 45m signal modes, plus 2h, 3h, and 6h windows. Minute choices are treated as freshness signals where exact minute filters are not supported by the source.
+- Long-query fix: default searches now use balanced role-pack wording, the aggregate Direct ATS source is shortened to high-use ATS domains, and broad Boolean mode is explicit instead of automatic.
+- Source refinement: low-signal ATS engines and legacy broad boards remain optional through `Extra ATS` and `Legacy Boards`, while defaults focus on high-use job boards, direct ATS, tech/student boards, company careers, and higher-ed/research employers.
 
 ## Run Locally
 

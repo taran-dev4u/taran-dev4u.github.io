@@ -120,6 +120,16 @@
             </select>
           </label>
 
+          <label class="field" for="queryStyleSelect">
+            <span>Query style</span>
+            <select id="queryStyleSelect" name="queryStyle">
+              <option value="balanced" selected>Balanced smart</option>
+              <option value="compact">Compact title</option>
+              <option value="broad">Broad Boolean</option>
+              <option value="custom">Custom query</option>
+            </select>
+          </label>
+
           <label class="field" for="experienceSelect">
             <span>Experience</span>
             <select id="experienceSelect" name="experience">
@@ -158,6 +168,11 @@
           <label class="field field-wide" for="includeTerms">
             <span>Must include</span>
             <input id="includeTerms" name="include" type="text" autocomplete="off" placeholder="Python, SQL, healthcare, sponsorship">
+          </label>
+
+          <label class="field field-wide" for="customQuery">
+            <span>Custom query</span>
+            <input id="customQuery" name="customQuery" type="text" autocomplete="off" placeholder='Example: "backend engineer" Python AWS "new grad"'>
           </label>
 
           <label class="field field-wide" for="excludeTerms">
@@ -229,6 +244,7 @@
           <div class="panel-block" id="pinnedBlock" hidden>
             <h2>Pinned Operators</h2>
             <div id="pinnedOperators" class="tag-list"></div>
+            <button class="secondary-button full-width" type="button" id="copyPinSyncButton">Copy Pin Sync Link</button>
           </div>
 
           <div class="panel-block" id="profileBlock">
@@ -293,6 +309,8 @@
             <span>Company freshness</span>
             <select id="companyTimeFilter">
               <option value="all">All</option>
+              <option value="5minutes">Minute signals / 5m</option>
+              <option value="10minutes">Minute signals / 10m</option>
               <option value="15minutes">Minute signals / 15m</option>
               <option value="30minutes">Minute signals / 30m</option>
               <option value="45minutes">Minute signals / 45m</option>
@@ -403,12 +421,17 @@
             <button class="secondary-button" type="button" id="searchCompanyButton">Search This Company</button>
             <button class="secondary-button" type="button" id="companyLinkedInJobsButton">LinkedIn Jobs</button>
             <button class="secondary-button" type="button" id="companyLinkedInPostsButton">LinkedIn Posts</button>
+            <button class="secondary-button" type="button" id="companyLinkedInRecruitersButton">LinkedIn Recruiters</button>
+            <button class="secondary-button" type="button" id="companyLinkedInPageButton">LinkedIn Company</button>
             <button class="secondary-button" type="button" id="companyIndeedButton">Indeed/Google</button>
+            <button class="secondary-button" type="button" id="companyGoogleButton">Google Company</button>
             <button class="secondary-button" type="button" id="copyCompanyLinksButton">Copy Selected Links</button>
             <button class="secondary-button" type="button" id="openTopSponsorButton">Open Top Sponsors</button>
+            <button class="secondary-button" type="button" id="resetCompanySearchButton">Reset Company Search</button>
             <button class="secondary-button" type="button" id="favoriteCompanyButton">Favorite</button>
           </div>
         </div>
+        <div id="companySuggestions" class="company-suggestions"></div>
         <div class="company-card" id="companyCard"></div>
       </section>
 

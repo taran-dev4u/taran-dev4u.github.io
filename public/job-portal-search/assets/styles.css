@@ -499,6 +499,43 @@ pre {
   flex: 1 1 150px;
 }
 
+.company-suggestions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.company-suggestion-card {
+  min-height: 160px;
+}
+
+.company-mini-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.company-mini-actions a,
+.company-mini-actions button {
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 8px 10px;
+  font-size: .82rem;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.company-mini-actions a:hover,
+.company-mini-actions button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .vendor-controls {
   display: grid;
   grid-template-columns: 1.25fr .9fr 1fr .9fr .9fr .9fr;
@@ -1006,6 +1043,7 @@ pre {
   }
 
   .sponsor-grid,
+  .company-suggestions,
   .vendor-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1029,6 +1067,7 @@ pre {
   .resource-grid,
   .company-link-list,
   .sponsor-grid,
+  .company-suggestions,
   .vendor-grid {
     grid-template-columns: 1fr;
   }
