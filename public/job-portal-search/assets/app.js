@@ -14,8 +14,10 @@ const CATEGORY_ROWS = [
   ["extraAts", "Extra ATS", false],
   ["signals", "LinkedIn Signals", true],
   ["general", "General Boards", true],
-  ["legacy", "Legacy Boards", false],
+  ["moreBoards", "More Job Boards", true],
   ["tech", "Tech and Startups", true],
+  ["remoteBoards", "Remote / Flexible Boards", false],
+  ["publicBoards", "Public / Nonprofit Boards", false],
   ["company", "Company Careers", true],
   ["highered", "Higher Ed / Research Employers", true],
   ["research", "Research Tools", false]
@@ -46,15 +48,22 @@ const SEARCH_PROFILES = [
     label: "Latest 1h",
     description: "Urgent apply flow for postings from the last hour on sources with reliable date filters.",
     defaults: { engine: "google", time: "1hour", sort: "latest", authorization: "none", experience: "entry", rolePack: "all-role-families", precision: "latest1", matchMode: "smart", queryStyle: "balanced" },
-    categories: ["top", "direct", "signals", "general", "tech", "company"]
+    categories: ["top", "direct", "signals", "general", "moreBoards", "tech", "company"]
   },
   {
     id: "dailyQuickApply",
     label: "Daily Quick Apply",
-    description: "Focused daily flow: only the nine highest-yield apply sources, newest-first within the past 24 hours.",
+    description: "Focused daily flow: the highest-yield apply sources, newest-first within the past 24 hours.",
     defaults: { engine: "google", time: "24hours", sort: "latest", authorization: "none", precision: "latest24", matchMode: "smart", queryStyle: "balanced" },
     categories: ["top", "direct", "signals", "general", "tech"],
-    portals: ["linkedinJobs", "indeed", "directATS", "linkedinPosts", "google", "simplify", "hiringCafe", "builtin", "dice"]
+    portals: ["linkedinJobs", "indeed", "directATS", "linkedinPosts", "google", "simplify", "hiringCafe", "builtin", "dice", "glassdoor", "ziprecruiter", "getwork"]
+  },
+  {
+    id: "bestJobBoards",
+    label: "Best Job Boards",
+    description: "Most-used US job boards and job-finding sources, ordered for broad coverage without forcing remote-only or public-sector boards.",
+    defaults: { engine: "google", time: "24hours", sort: "latest", authorization: "none", experience: "entry", rolePack: "all-role-families", precision: "coverage", matchMode: "smart", queryStyle: "balanced" },
+    categories: ["top", "signals", "general", "moreBoards", "tech", "direct", "company"]
   },
   {
     id: "freshDirect",
@@ -82,7 +91,7 @@ const SEARCH_PROFILES = [
     label: "OPT Friendly",
     description: "Adds OPT, STEM OPT, E-Verify, sponsorship, and US work authorization terms.",
     defaults: { time: "week", sort: "recommended", authorization: "optBroad", precision: "optSponsor" },
-    categories: ["top", "direct", "signals", "general", "tech", "company"]
+    categories: ["top", "direct", "signals", "general", "moreBoards", "tech", "company"]
   },
   {
     id: "sponsorResearch",
@@ -128,9 +137,32 @@ const PORTAL_ROWS = [
   { id: "welcome", name: "Welcome to the Jungle", category: "tech", native: "welcome", sites: ["welcometothejungle.com/en/jobs"], priority: 85, tags: ["startups"] },
   { id: "ripplematch", name: "RippleMatch", category: "general", sites: ["ripplematch.com/careers"], priority: 84, tags: ["early career"] },
   { id: "wayup", name: "WayUp", category: "general", sites: ["wayup.com/s/jobs"], priority: 83, tags: ["students"] },
-  { id: "monster", name: "Monster", category: "legacy", native: "monster", sites: ["monster.com/jobs", "monster.com/job-openings"], priority: 82, tags: ["legacy board"] },
-  { id: "careerbuilder", name: "CareerBuilder", category: "legacy", native: "careerbuilder", sites: ["careerbuilder.com/jobs", "careerbuilder.com/job"], priority: 81, tags: ["legacy board"] },
-  { id: "higherEdJobs", name: "HigherEdJobs", category: "highered", sites: ["higheredjobs.com"], priority: 80, tags: ["universities", "research employers"], note: "Kept for university and research-employer roles; use employer pages to verify E-Verify/STEM OPT readiness." },
+  { id: "monster", name: "Monster", category: "moreBoards", native: "monster", sites: ["monster.com/jobs", "monster.com/job-openings"], priority: 82, tags: ["major board", "broad"] },
+  { id: "careerbuilder", name: "CareerBuilder", category: "moreBoards", native: "careerbuilder", sites: ["careerbuilder.com/jobs", "careerbuilder.com/job"], priority: 81, tags: ["major board", "broad"] },
+  { id: "flexjobs", name: "FlexJobs", category: "moreBoards", native: "flexjobs", sites: ["flexjobs.com/search"], priority: 80.8, tags: ["flexible", "remote", "major board"], note: "Useful for remote/flexible jobs; verify OPT and employer details before applying." },
+  { id: "getwork", name: "Getwork", category: "moreBoards", native: "getwork", sites: ["getwork.com"], priority: 80.6, tags: ["aggregator", "company feeds"] },
+  { id: "simplyhired", name: "SimplyHired", category: "moreBoards", native: "simplyhired", sites: ["simplyhired.com/search"], priority: 80.4, tags: ["aggregator", "broad"] },
+  { id: "talentCom", name: "Talent.com", category: "moreBoards", native: "talentCom", sites: ["talent.com/jobs"], priority: 80.2, tags: ["aggregator", "broad"] },
+  { id: "theMuse", name: "The Muse", category: "moreBoards", native: "theMuse", sites: ["themuse.com/search"], priority: 80, tags: ["company profiles", "broad"] },
+  { id: "adzuna", name: "Adzuna", category: "moreBoards", native: "adzuna", sites: ["adzuna.com/search"], priority: 79.8, tags: ["aggregator", "broad"] },
+  { id: "jora", name: "Jora", category: "moreBoards", native: "jora", sites: ["us.jora.com/jobs"], priority: 79.6, tags: ["aggregator", "broad"] },
+  { id: "jooble", name: "Jooble", category: "moreBoards", native: "jooble", sites: ["jooble.org"], priority: 79.4, tags: ["aggregator", "broad"] },
+  { id: "nexxt", name: "Nexxt", category: "moreBoards", native: "nexxt", sites: ["nexxt.com/jobs"], priority: 79.2, tags: ["aggregator", "broad"] },
+  { id: "snagajob", name: "Snagajob", category: "moreBoards", native: "snagajob", sites: ["snagajob.com/search"], priority: 79, tags: ["hourly", "broad"] },
+  { id: "ladders", name: "Ladders", category: "moreBoards", native: "ladders", sites: ["theladders.com/jobs"], priority: 78.8, tags: ["senior leaning", "broad"], note: "More senior-leaning, but kept available for sponsor/company discovery." },
+  { id: "jobcase", name: "Jobcase", category: "moreBoards", sites: ["jobcase.com/jobs"], priority: 78.6, tags: ["community", "broad"] },
+  { id: "collegeRecruiter", name: "College Recruiter", category: "general", sites: ["collegerecruiter.com"], priority: 78.4, tags: ["students", "entry level"] },
+  { id: "hired", name: "Hired", category: "tech", sites: ["hired.com"], priority: 78.2, tags: ["tech marketplace"] },
+  { id: "startupJobs", name: "Startup Jobs", category: "tech", native: "startupJobs", sites: ["startup.jobs"], priority: 78, tags: ["startups"] },
+  { id: "remoteRocketship", name: "Remote Rocketship", category: "remoteBoards", sites: ["remoterocketship.com"], priority: 77.8, tags: ["remote", "optional"] },
+  { id: "weworkremotely", name: "We Work Remotely", category: "remoteBoards", native: "weworkremotely", sites: ["weworkremotely.com/remote-jobs"], priority: 77.6, tags: ["remote", "optional"] },
+  { id: "remotive", name: "Remotive", category: "remoteBoards", native: "remotive", sites: ["remotive.com/remote-jobs"], priority: 77.4, tags: ["remote", "optional"] },
+  { id: "remoteok", name: "RemoteOK", category: "remoteBoards", sites: ["remoteok.com"], priority: 77.2, tags: ["remote", "optional"] },
+  { id: "careerOneStop", name: "CareerOneStop Job Finder", category: "publicBoards", sites: ["careeronestop.org"], priority: 77, tags: ["official", "job finder"] },
+  { id: "usajobs", name: "USAJOBS", category: "publicBoards", native: "usajobs", sites: ["usajobs.gov/Search/Results"], priority: 76.8, tags: ["federal", "public"], note: "Many federal jobs require citizenship; keep optional for roles that explicitly allow your status." },
+  { id: "governmentJobs", name: "GovernmentJobs", category: "publicBoards", native: "governmentJobs", sites: ["governmentjobs.com/jobs"], priority: 76.6, tags: ["state/local", "public"] },
+  { id: "idealist", name: "Idealist", category: "publicBoards", sites: ["idealist.org/en/jobs"], priority: 76.4, tags: ["nonprofit", "mission"] },
+  { id: "higherEdJobs", name: "HigherEdJobs", category: "highered", sites: ["higheredjobs.com"], priority: 76.2, tags: ["universities", "research employers"], note: "Kept for university and research-employer roles; use employer pages to verify E-Verify/STEM OPT readiness." },
   { id: "careersSubdomains", name: "Careers Subdomains", category: "company", rawSiteQuery: "(inurl:careers OR inurl:career)", priority: 71, tags: ["company pages"] },
   { id: "jobsSubdomains", name: "Jobs Subdomains", category: "company", rawSiteQuery: "(inurl:jobs OR inurl:job)", priority: 70, tags: ["company pages"] },
   { id: "peopleSubdomains", name: "People Subdomains", category: "company", rawSiteQuery: "(inurl:people)", priority: 69.8, tags: ["company pages"] },
@@ -188,6 +220,22 @@ const SOURCE_CAPABILITIES = {
   welcome: { kind: "native-filtered", label: "Native tech search", supports: ["keyword"] },
   monster: { kind: "native-filtered", label: "Native broad search", supports: ["keyword", "location"] },
   careerbuilder: { kind: "native-filtered", label: "Native broad search", supports: ["keyword", "location"] },
+  flexjobs: { kind: "native-filtered", label: "Native board search", supports: ["keyword", "location"] },
+  getwork: { kind: "native-filtered", label: "Native board search", supports: ["keyword", "location"] },
+  simplyhired: { kind: "native-filtered", label: "Native board search", supports: ["keyword", "location"] },
+  talentCom: { kind: "native-filtered", label: "Native board search", supports: ["keyword", "location"] },
+  theMuse: { kind: "native-filtered", label: "Native board search", supports: ["keyword", "location"] },
+  adzuna: { kind: "native-filtered", label: "Native board search", supports: ["keyword", "location"] },
+  jora: { kind: "native-filtered", label: "Native board search", supports: ["keyword", "location"] },
+  jooble: { kind: "native-filtered", label: "Native board search", supports: ["keyword", "location"] },
+  nexxt: { kind: "native-filtered", label: "Native board search", supports: ["keyword", "location"] },
+  snagajob: { kind: "native-filtered", label: "Native board search", supports: ["keyword", "location"] },
+  ladders: { kind: "native-filtered", label: "Native board search", supports: ["keyword", "location"] },
+  startupJobs: { kind: "native-filtered", label: "Native startup search", supports: ["keyword", "location"] },
+  weworkremotely: { kind: "native-filtered", label: "Native remote search", supports: ["keyword"] },
+  remotive: { kind: "native-filtered", label: "Native remote search", supports: ["keyword"] },
+  usajobs: { kind: "native-filtered", label: "Native public search", supports: ["keyword", "location"] },
+  governmentJobs: { kind: "native-filtered", label: "Native public search", supports: ["keyword", "location"] },
   static: { kind: "companion-search", label: "Research link", supports: ["manual research"] },
   native: { kind: "broad-search", label: "Native broad search", supports: ["keyword", "location where supported"] },
   operator: { kind: "broad-search", label: "Broad search operator", supports: ["site operators", "date where engine supports it"] }
@@ -9580,8 +9628,10 @@ function sortPortals(portals, sortMode) {
     extraAts: 70,
     signals: 120,
     general: 110,
-    legacy: 50,
+    moreBoards: 105,
     tech: 100,
+    remoteBoards: 55,
+    publicBoards: 45,
     company: 90,
     highered: 80,
     research: 40
@@ -9591,7 +9641,7 @@ function sortPortals(portals, sortMode) {
     const base = portal.priority * 10 + (categoryBoost[portal.category] || 0);
     const pinnedBoost = state.pinnedPortals.has(portal.id) ? 1200 : 0;
     if (sortMode === "latest") {
-      const latestBoost = ["linkedinJobs", "indeed", "linkedinPosts", "google", "directATS", "glassdoor", "ziprecruiter", "dice"].includes(portal.id) ? 600 : 0;
+      const latestBoost = ["linkedinJobs", "indeed", "linkedinPosts", "google", "directATS", "glassdoor", "ziprecruiter", "dice", "getwork", "simplyhired", "talentCom"].includes(portal.id) ? 600 : 0;
       return base + latestBoost + pinnedBoost;
     }
     if (sortMode === "direct") {
@@ -9599,7 +9649,7 @@ function sortPortals(portals, sortMode) {
       return base + directBoost + pinnedBoost;
     }
     if (sortMode === "coverage") {
-      const coverageBoost = ["top", "general", "tech", "company"].includes(portal.category) ? 450 : 0;
+      const coverageBoost = ["top", "general", "moreBoards", "tech", "company"].includes(portal.category) ? 450 : 0;
       return base + coverageBoost + pinnedBoost;
     }
     return base + pinnedBoost;
@@ -9999,6 +10049,97 @@ function buildSearchUrl(portal, query, title, context) {
       return `https://www.monster.com/jobs/search?q=${encodeURIComponent(buildBoardKeywordQuery(title, context))}&where=${encodeURIComponent(getNativeLocation(context.location))}`;
     case "careerbuilder":
       return `https://www.careerbuilder.com/jobs?keywords=${encodeURIComponent(buildBoardKeywordQuery(title, context))}&location=${encodeURIComponent(getNativeLocation(context.location))}`;
+    case "flexjobs": {
+      const params = new URLSearchParams();
+      params.set("search", buildBoardKeywordQuery(title, context, { includeAuthorization: true }));
+      params.set("location", getNativeLocation(context.location));
+      return `https://www.flexjobs.com/search?${params.toString()}`;
+    }
+    case "getwork": {
+      const params = new URLSearchParams();
+      params.set("query", buildBoardKeywordQuery(title, context, { includeAuthorization: true }));
+      params.set("location", getNativeLocation(context.location));
+      return `https://getwork.com/search/results?${params.toString()}`;
+    }
+    case "simplyhired": {
+      const params = new URLSearchParams();
+      params.set("q", buildBoardKeywordQuery(title, context, { includeAuthorization: true }));
+      params.set("l", getNativeLocation(context.location));
+      return `https://www.simplyhired.com/search?${params.toString()}`;
+    }
+    case "talentCom": {
+      const params = new URLSearchParams();
+      params.set("k", buildBoardKeywordQuery(title, context, { includeAuthorization: true }));
+      params.set("l", getNativeLocation(context.location));
+      return `https://www.talent.com/jobs?${params.toString()}`;
+    }
+    case "theMuse": {
+      const params = new URLSearchParams();
+      params.set("keyword", buildBoardKeywordQuery(title, context, { includeAuthorization: true }));
+      params.set("location", getNativeLocation(context.location));
+      return `https://www.themuse.com/search?${params.toString()}`;
+    }
+    case "adzuna": {
+      const params = new URLSearchParams();
+      params.set("what", buildBoardKeywordQuery(title, context, { includeAuthorization: true }));
+      params.set("where", getNativeLocation(context.location));
+      return `https://www.adzuna.com/search?${params.toString()}`;
+    }
+    case "jora": {
+      const params = new URLSearchParams();
+      params.set("q", buildBoardKeywordQuery(title, context, { includeAuthorization: true }));
+      params.set("l", getNativeLocation(context.location));
+      return `https://us.jora.com/jobs?${params.toString()}`;
+    }
+    case "jooble": {
+      const params = new URLSearchParams();
+      params.set("ukw", buildBoardKeywordQuery(title, context, { includeAuthorization: true }));
+      params.set("rgns", getNativeLocation(context.location));
+      return `https://jooble.org/SearchResult?${params.toString()}`;
+    }
+    case "nexxt": {
+      const params = new URLSearchParams();
+      params.set("keyword", buildBoardKeywordQuery(title, context, { includeAuthorization: true }));
+      params.set("location", getNativeLocation(context.location));
+      return `https://www.nexxt.com/jobs/search?${params.toString()}`;
+    }
+    case "snagajob": {
+      const params = new URLSearchParams();
+      params.set("q", buildBoardKeywordQuery(title, context, { includeAuthorization: true }));
+      params.set("w", getNativeLocation(context.location));
+      return `https://www.snagajob.com/search?${params.toString()}`;
+    }
+    case "ladders": {
+      const params = new URLSearchParams();
+      params.set("keywords", buildBoardKeywordQuery(title, context, { includeAuthorization: true }));
+      params.set("location", getNativeLocation(context.location));
+      return `https://www.theladders.com/jobs/search-jobs?${params.toString()}`;
+    }
+    case "startupJobs": {
+      const params = new URLSearchParams();
+      params.set("q", buildBoardTitleQuery(title, context));
+      params.set("loc", getNativeLocation(context.location));
+      return `https://startup.jobs/?${params.toString()}`;
+    }
+    case "weworkremotely":
+      return `https://weworkremotely.com/remote-jobs/search?term=${encodeURIComponent(buildBoardTitleQuery(title, context))}`;
+    case "remotive":
+      return `https://remotive.com/remote-jobs/search?search=${encodeURIComponent(buildBoardTitleQuery(title, context))}`;
+    case "usajobs": {
+      const params = new URLSearchParams();
+      params.set("k", buildBoardKeywordQuery(title, context, { includeAuthorization: true }));
+      params.set("l", getNativeLocation(context.location));
+      if (context.sort === "latest") {
+        params.set("sort", "date");
+      }
+      return `https://www.usajobs.gov/Search/Results?${params.toString()}`;
+    }
+    case "governmentJobs": {
+      const params = new URLSearchParams();
+      params.set("keyword", buildBoardKeywordQuery(title, context, { includeAuthorization: true }));
+      params.set("location", getNativeLocation(context.location));
+      return `https://www.governmentjobs.com/jobs?${params.toString()}`;
+    }
     case "static":
       return portal.url;
     default:
