@@ -8568,6 +8568,7 @@ const state = {
   checked: new Set(),
   favoriteCompanies: new Set(),
   pinnedPortals: new Set(),
+  customPortalLinks: {},
   dailyChecklist: {},
   visibleCompanies: COMPANIES,
   visibleVendors: []
@@ -9179,6 +9180,9 @@ function hydrateFromUrl() {
   if (params.has("customSourceUrl")) {
     els.customSourceUrl.value = params.get("customSourceUrl") || "";
   }
+  if (params.has("sourceLinks")) {
+    state.customPortalLinks = decodeJsonParam(params.get("sourceLinks")) || {};
+  }
   if (params.has("include")) {
     els.includeTerms.value = params.get("include") || "";
   }
@@ -9284,6 +9288,9 @@ function loadPreferences() {
   if (Array.isArray(data.pinnedPortals)) {
     state.pinnedPortals = new Set(data.pinnedPortals.filter(id => PORTALS.some(portal => portal.id === id)));
   }
+  if (data.customPortalLinks && typeof data.customPortalLinks === "object" && !Array.isArray(data.customPortalLinks)) {
+    state.customPortalLinks = sanitizePortalLinks(data.customPortalLinks);
+  }
   if (data.dailyChecklist && typeof data.dailyChecklist === "object") {
     state.dailyChecklist = data.dailyChecklist.date === getTodayStamp() ? data.dailyChecklist : { date: getTodayStamp(), items: {} };
   }
@@ -9352,6 +9359,7 @@ function savePreferences() {
     selectedCategories: Array.from(getSelectedCategories()),
     favoriteCompanies: Array.from(state.favoriteCompanies),
     pinnedPortals: Array.from(state.pinnedPortals),
+    customPortalLinks: sanitizePortalLinks(state.customPortalLinks),
     dailyChecklist: getDailyChecklist(),
     selectedCompany: els.companySelect.value,
     openBatchSize: els.openBatchSize.value,
@@ -9537,7 +9545,9 @@ function generateResults(updateUrl = true) {
   titles.forEach(title => {
     portals.forEach(portal => {
       const query = buildPortalQuery(title, portal, context);
-      const url = buildSearchUrl(portal, query, title, context);
+      const defaultUrl = buildSearchUrl(portal, query, title, context);
+      const customPortalUrl = buildPortalCustomLinkUrl(portal, title, context, query);
+      const url = customPortalUrl || defaultUrl;
       const searchKind = getSearchKind(portal);
       const freshnessLabel = getPortalFreshnessLabel(portal, context);
       nextResults.push({
@@ -9546,9 +9556,11 @@ function generateResults(updateUrl = true) {
         portal,
         query,
         url,
+        defaultUrl,
+        customPortalUrl,
         searchKind,
         freshnessLabel,
-        badges: getSourceBadges(portal, context, searchKind),
+        badges: getSourceBadges(portal, context, searchKind, Boolean(customPortalUrl)),
         opportunityScore: getOpportunityFitScore(portal, context, searchKind, freshnessLabel)
       });
     });
@@ -9653,10 +9665,123 @@ function buildCustomTemplateUrl(template, values) {
     query: values.query || values.title || "",
     location: values.location || "",
     time: values.time || "",
-    company: values.company || ""
+    company: values.company || "",
+    source: values.source || "",
+    portal: values.source || ""
   };
-  const url = cleaned.replace(/\{(role|title|query|location|time|company)\}/gi, (match, key) => encodeURIComponent(replacements[key.toLowerCase()] || ""));
+  const url = cleaned.replace(/\{(role|title|query|location|time|company|source|portal)\}/gi, (match, key) => encodeURIComponent(replacements[key.toLowerCase()] || ""));
   return /^https?:\/\//i.test(url) ? url : "";
+}
+
+function buildPortalCustomLinkUrl(portal, title, context, defaultQuery) {
+  const custom = getPortalCustomLink(portal.id);
+  if (!custom || !custom.url) {
+    return "";
+  }
+  const query = portal.native && portal.native !== "google" && portal.native !== "static"
+    ? buildNativeKeywordQuery(title, context)
+    : defaultQuery;
+  return buildCustomTemplateUrl(custom.url, {
+    title,
+    query,
+    location: getNativeLocation(context.location),
+    time: getTimeLabel(context.time),
+    company: "",
+    source: portal.name
+  });
+}
+
+function getPortalCustomLink(portalId) {
+  return sanitizePortalLinks(state.customPortalLinks)[portalId] || null;
+}
+
+function editPortalCustomLink(portalId) {
+  const portal = PORTALS.find(item => item.id === portalId);
+  if (!portal) {
+    return;
+  }
+  const current = getPortalCustomLink(portalId)?.url || "";
+  const next = window.prompt(
+    `Custom URL template for ${portal.name}\nTokens: {role}, {query}, {location}, {time}, {source}\nLeave blank to reset this board.`,
+    current
+  );
+  if (next === null) {
+    return;
+  }
+  const cleaned = next.trim();
+  if (!cleaned) {
+    resetPortalCustomLink(portalId);
+    return;
+  }
+  if (!/^https?:\/\//i.test(cleaned)) {
+    showToast("Custom board link must start with http:// or https://");
+    return;
+  }
+  state.customPortalLinks = sanitizePortalLinks({
+    ...state.customPortalLinks,
+    [portalId]: { url: cleaned }
+  });
+  persistPortalLinkChange(`${portal.name} custom link saved`);
+}
+
+function resetPortalCustomLink(portalId) {
+  const portal = PORTALS.find(item => item.id === portalId);
+  if (!portal) {
+    return;
+  }
+  const next = { ...state.customPortalLinks };
+  delete next[portalId];
+  state.customPortalLinks = sanitizePortalLinks(next);
+  persistPortalLinkChange(`${portal.name} custom link reset`);
+}
+
+function persistPortalLinkChange(message) {
+  savePreferences();
+  if (hasJobTitle()) {
+    generateResults();
+  } else {
+    updateCounts();
+    updatePreviewForEmptyState();
+    updateAddressBar(getSearchTitles(), getContext());
+  }
+  showToast(message);
+}
+
+function sanitizePortalLinks(raw) {
+  const clean = {};
+  Object.entries(raw || {}).forEach(([portalId, value]) => {
+    if (!PORTALS.some(portal => portal.id === portalId)) {
+      return;
+    }
+    const url = typeof value === "string" ? value.trim() : String(value?.url || "").trim();
+    if (/^https?:\/\//i.test(url)) {
+      clean[portalId] = { url };
+    }
+  });
+  return clean;
+}
+
+function encodeJsonParam(value) {
+  const clean = sanitizePortalLinks(value);
+  return Object.keys(clean).length ? JSON.stringify(clean) : "";
+}
+
+function decodeJsonParam(value) {
+  try {
+    const parsed = JSON.parse(value || "{}");
+    return sanitizePortalLinks(parsed);
+  } catch (error) {
+    return {};
+  }
+}
+
+function updatePreviewForResult(item) {
+  if (item.customPortalUrl) {
+    const custom = getPortalCustomLink(item.portal.id);
+    els.queryPreview.textContent = `${item.portal.name} custom URL\n${custom?.url || item.url}`;
+    return;
+  }
+  updatePreview(item.title, item.portal, getContext());
 }
 
 function renderPortalRow(item) {
@@ -9691,8 +9816,8 @@ function renderPortalRow(item) {
   link.rel = "noopener";
   link.className = "portal-link";
   link.textContent = item.portal.name;
-  link.addEventListener("focus", () => updatePreview(item.title, item.portal, getContext()));
-  link.addEventListener("mouseenter", () => updatePreview(item.title, item.portal, getContext()));
+  link.addEventListener("focus", () => updatePreviewForResult(item));
+  link.addEventListener("mouseenter", () => updatePreviewForResult(item));
   link.addEventListener("click", () => {
     if (!state.checked.has(item.key)) {
       state.checked.add(item.key);
@@ -9743,7 +9868,29 @@ function renderPortalRow(item) {
   copyButton.textContent = "Copy";
   copyButton.addEventListener("click", () => copyLinks([item.url], `Copied ${item.portal.name}`));
 
-  actions.append(pinButton, copyButton);
+  const updateButton = document.createElement("button");
+  updateButton.type = "button";
+  updateButton.className = "copy-button";
+  updateButton.textContent = item.portal.noPin ? "Update" : item.customPortalUrl ? "Edit Link" : "Update Link";
+  updateButton.addEventListener("click", () => {
+    if (item.portal.noPin) {
+      els.customSourceUrl.focus();
+      els.customSourceUrl.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+      editPortalCustomLink(item.portal.id);
+    }
+  });
+
+  actions.append(pinButton, updateButton);
+  if (item.customPortalUrl) {
+    const resetButton = document.createElement("button");
+    resetButton.type = "button";
+    resetButton.className = "copy-button subtle-button";
+    resetButton.textContent = "Reset";
+    resetButton.addEventListener("click", () => resetPortalCustomLink(item.portal.id));
+    actions.appendChild(resetButton);
+  }
+  actions.appendChild(copyButton);
   row.append(checkbox, body, actions);
   return row;
 }
@@ -9794,11 +9941,14 @@ function getPortalFreshnessLabel(portal, context) {
   return "";
 }
 
-function getSourceBadges(portal, context, searchKind) {
+function getSourceBadges(portal, context, searchKind, hasCustomPortalLink = false) {
   const badges = [];
   const capability = getSourceCapability(portal);
   const tagText = (portal.tags || []).join(" ").toLowerCase();
 
+  if (hasCustomPortalLink) {
+    badges.push("custom board link");
+  }
   if (portal.native && capability && capability.kind === "native-filtered") {
     badges.push("native clean");
   }
@@ -11086,6 +11236,10 @@ function updateAddressBar(titles, context) {
   if (els.customSourceUrl.value.trim()) {
     params.set("customSourceUrl", els.customSourceUrl.value.trim());
   }
+  const encodedSourceLinks = encodeJsonParam(state.customPortalLinks);
+  if (encodedSourceLinks) {
+    params.set("sourceLinks", encodedSourceLinks);
+  }
   if (context.experience !== "any") {
     params.set("experience", context.experience);
   }
@@ -11284,18 +11438,13 @@ function renderFavoriteCompanies() {
     }
     const actions = document.createElement("div");
     actions.className = "company-mini-actions";
+    actions.append(createCompanySuggestionButton("Use", company, () => selectCompanySuggestion(company)));
+    getVisibleCompanyActions(company, title, context).forEach(action => {
+      actions.appendChild(createCompanySuggestionLink(action.label, action.url));
+    });
     actions.append(
-      createCompanySuggestionButton("Use", company, () => selectCompanySuggestion(company)),
-      createCompanySuggestionLink("Careers", company.careersUrl || buildCompanySearchUrl(company, title, context)),
-      createCompanySuggestionLink("LinkedIn Jobs", getCompanyActionUrls(company, title, context, "linkedinJobs")[0]),
       createCompanySuggestionButton("Open Pack", company, () => openCompanyLinkPack(company)),
-      createCompanySuggestionButton("Remove", company, () => {
-        state.favoriteCompanies.delete(company.id);
-        savePreferences();
-        renderCompanyOptions(els.companyFilter.value);
-        renderFavoriteCompanies();
-        syncCompanyCard();
-      })
+      createCompanySuggestionButton("Remove", company, () => toggleFavoriteCompanyById(company.id, false))
     );
     card.append(name, meta, actions);
     fragment.appendChild(card);
@@ -11351,6 +11500,19 @@ function createCompanySuggestionLink(label, url) {
   link.rel = "noopener";
   link.textContent = label;
   return link;
+}
+
+function getVisibleCompanyActions(company, title, context) {
+  return getCompanyActionItems(company, title, context)
+    .filter(action => [
+      "LinkedIn Jobs",
+      "LinkedIn Posts",
+      "LinkedIn Recruiters",
+      "LinkedIn Company",
+      "Indeed/Google",
+      "Google Company",
+      "Custom Link"
+    ].includes(action.label) || action.label === (els.companyCustomLinkName.value.trim() || "Custom Link"));
 }
 
 function selectCompanySuggestion(company) {
@@ -11537,7 +11699,7 @@ function renderAllCompanyCard() {
 
     links.appendChild(careers);
     if (hasRole) {
-      getCompactCompanyActions(row.company, titleText, context).forEach(action => {
+      getVisibleCompanyActions(row.company, titleText, context).forEach(action => {
         const link = document.createElement("a");
         link.href = action.url;
         link.target = "_blank";
@@ -11545,6 +11707,11 @@ function renderAllCompanyCard() {
         link.textContent = action.label;
         links.appendChild(link);
       });
+      const favoriteButton = document.createElement("button");
+      favoriteButton.type = "button";
+      favoriteButton.textContent = state.favoriteCompanies.has(row.company.id) ? "Unfavorite" : "Favorite";
+      favoriteButton.addEventListener("click", () => toggleFavoriteCompanyById(row.company.id));
+      links.appendChild(favoriteButton);
     } else {
       const missing = document.createElement("span");
       missing.className = "company-link-muted";
@@ -11567,12 +11734,6 @@ function createCompanyActionGrid(company, title, context) {
   actions.appendChild(createCompanyActionButton("Open All", () => openCompanyLinkPack(company)));
   actions.appendChild(createCompanyActionButton("Copy All", () => copyCompanyLinkPack(company)));
   return actions;
-}
-
-function getCompactCompanyActions(company, title, context) {
-  return getCompanyActionItems(company, title, context)
-    .filter(action => ["LinkedIn Jobs", "Indeed/Google", "Google Company", "Custom Link"].includes(action.label))
-    .slice(0, 4);
 }
 
 function getCompanyActionItems(company, title, context) {
@@ -12103,16 +12264,32 @@ function toggleFavoriteCompany() {
   if (!company) {
     return;
   }
-  if (state.favoriteCompanies.has(company.id)) {
-    state.favoriteCompanies.delete(company.id);
-  } else {
-    state.favoriteCompanies.add(company.id);
+  toggleFavoriteCompanyById(company.id);
+}
+
+function toggleFavoriteCompanyById(companyId, forceFavorite) {
+  const company = COMPANIES.find(item => item.id === companyId);
+  if (!company) {
+    return;
   }
+  const shouldFavorite = typeof forceFavorite === "boolean" ? forceFavorite : !state.favoriteCompanies.has(company.id);
+  if (shouldFavorite) {
+    state.favoriteCompanies.add(company.id);
+  } else {
+    state.favoriteCompanies.delete(company.id);
+  }
+  persistFavoriteCompanies(`${company.name} ${shouldFavorite ? "added to favorites" : "removed from favorites"}`);
+}
+
+function persistFavoriteCompanies(message) {
   savePreferences();
   renderCompanyOptions(els.companyFilter.value);
-  els.companySelect.value = company.id;
   renderFavoriteCompanies();
   syncCompanyCard();
+  updateAddressBar(getSearchTitles(), getContext());
+  if (message) {
+    showToast(message);
+  }
 }
 
 function getCompanySearchTitle() {
@@ -12475,6 +12652,7 @@ function resetSearch() {
   els.vendorCategory.value = "all";
   els.vendorKind.value = "vendor";
   els.vendorHasUrl.value = "all";
+  state.customPortalLinks = {};
   setCategorySelection(new Set(DEFAULT_CATEGORY_IDS));
   renderCompanyOptions("");
   renderVendorOutreach();

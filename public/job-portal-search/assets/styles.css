@@ -823,6 +823,25 @@ pre {
   font-weight: 800;
 }
 
+.company-link-actions a,
+.company-link-actions button {
+  min-height: 32px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  color: var(--ink);
+  padding: 7px 9px;
+  font-size: .78rem;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.company-link-actions a:hover,
+.company-link-actions button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .company-card-actions {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1098,6 +1117,10 @@ pre {
 .copy-button:hover {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+.subtle-button {
+  color: var(--muted);
 }
 
 .resource-grid {

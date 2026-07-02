@@ -10,6 +10,7 @@ Taran's Job Command Center is a US-focused static job-search launcher. It builds
 - Specific role packs for software engineer, full-stack, backend, frontend, AI engineer, ML engineer, data scientist, data engineer, analytics engineer, BI analyst, cloud/devops, and new-grad software searches.
 - Query customization with balanced smart, compact title, broad Boolean, and custom raw-query modes.
 - Portable custom source links with `{role}`, `{query}`, `{location}`, `{time}`, and `{company}` tokens.
+- Independent per-board custom URL templates from each search result card. Each board keeps its own override and supports `{role}`, `{query}`, `{location}`, `{time}`, `{source}`, and `{portal}` tokens.
 - Best Job Boards profile for broad US coverage across the most-used job boards and job-finding sources.
 - Fast Apply Routine profile ordered for the fastest daily apply pass: LinkedIn Jobs, Indeed, Direct ATS, LinkedIn Posts, Google, Simplify, HiringCafe, Built In, Dice, Getwork, Glassdoor, and ZipRecruiter.
 - Search presets for Backend, Full Stack, AI/ML, Data Analyst, Data Engineer, and New Grad Software. Presets update role, role pack, freshness, profile, sort, and source groups together.
@@ -36,7 +37,7 @@ Taran's Job Command Center is a US-focused static job-search launcher. It builds
 - Copy Application Packet action with current role/location/profile, top links, favorite company links, OPT wording, follow-up reminders, and scam/auth safety reminders.
 - Pin sync links for carrying pinned portals and settings to another browser or computer without a backend.
 - Company search cards with related company results, reset, careers, LinkedIn recruiter/company, LinkedIn jobs/posts, Indeed/Google, Google Company, custom company links, and link-pack open/copy actions.
-- Favorite company shortcuts above the company search controls, including top-favorites launch/copy actions.
+- Favorite company shortcuts above the company search controls, including instant favorite/unfavorite saving, top-favorites launch/copy actions, and visible LinkedIn Jobs, LinkedIn Posts, LinkedIn Recruiters, LinkedIn Company, Indeed/Google, and Google Company links.
 
 ## Recent Updates
 
@@ -52,6 +53,7 @@ Taran's Job Command Center is a US-focused static job-search launcher. It builds
 - Source refinement: low-signal ATS engines remain optional through `Extra ATS`; remote-only and public/nonprofit boards are available in separate optional groups so they do not crowd the daily OPT-focused flow.
 - Native board search cleanup: LinkedIn, Indeed, and other job-board search boxes now receive compact role text by default, while Google/operator-only sources keep `site:` and advanced Boolean syntax.
 - Company actions are now available directly inside each company box, with favorite-company cards and portable custom-link sync.
+- Per-board Update Link controls let a specific source card use a custom URL template without changing any other job board.
 - Fast Apply upgrade: added the daily routine profile, daily checklist, search presets, high-value batching, opportunity scores, source badges, application packet copying, and top-favorite company pack actions.
 
 ## Run Locally
