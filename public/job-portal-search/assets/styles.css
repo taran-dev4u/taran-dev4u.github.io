@@ -226,6 +226,60 @@ pre {
   padding-bottom: 36px;
 }
 
+.daily-command-panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 14px;
+}
+
+.daily-checklist {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.daily-check-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  padding: 8px;
+  color: var(--ink);
+  font-size: .86rem;
+  font-weight: 900;
+}
+
+.daily-check-item input {
+  width: 18px;
+  min-height: 18px;
+  accent-color: var(--green);
+}
+
+.daily-check-item span {
+  overflow-wrap: anywhere;
+}
+
+.daily-check-item button {
+  min-height: 32px;
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 0 9px;
+  font-size: .78rem;
+  font-weight: 900;
+}
+
+.daily-check-item button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .search-tool,
 .careers-tool,
 .side-panel,
@@ -356,6 +410,14 @@ pre {
 .field-wide {
   grid-column: span 2;
   min-width: 0;
+}
+
+.preset-tools {
+  align-content: end;
+}
+
+.preset-tools button {
+  width: 100%;
 }
 
 .checkbox-field {
@@ -489,6 +551,14 @@ pre {
   grid-column: span 2;
 }
 
+.custom-link-tools {
+  align-content: end;
+}
+
+.custom-link-tools button {
+  width: 100%;
+}
+
 .company-actions {
   grid-column: 1 / -1;
   flex-wrap: wrap;
@@ -534,6 +604,47 @@ pre {
 .company-mini-actions button:hover {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+.favorite-companies-panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 14px;
+}
+
+.compact-heading {
+  margin-bottom: 10px;
+}
+
+.favorite-companies-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.favorite-company-toolbar {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.favorite-company-toolbar button {
+  flex: 1 1 220px;
+}
+
+.favorite-company-card {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  padding: 10px;
+}
+
+.favorite-company-card strong {
+  overflow-wrap: anywhere;
 }
 
 .vendor-controls {
@@ -710,6 +821,32 @@ pre {
   gap: 10px;
   font-size: .88rem;
   font-weight: 800;
+}
+
+.company-card-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.company-card-actions a,
+.company-card-actions button {
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 8px 10px;
+  font-size: .82rem;
+  font-weight: 900;
+  text-align: center;
+  text-decoration: none;
+}
+
+.company-card-actions a:hover,
+.company-card-actions button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .company-link-muted {
@@ -926,6 +1063,28 @@ pre {
   overflow-wrap: anywhere;
 }
 
+.score-pill {
+  border-color: color-mix(in srgb, var(--green) 70%, var(--line));
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.source-badge {
+  border-color: color-mix(in srgb, var(--accent) 70%, var(--line));
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.safety-check ul {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: .86rem;
+  line-height: 1.35;
+}
+
 .copy-button {
   min-width: 58px;
   min-height: 36px;
@@ -1042,8 +1201,14 @@ pre {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  .daily-checklist {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .sponsor-grid,
   .company-suggestions,
+  .favorite-companies-grid,
+  .company-card-actions,
   .vendor-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1064,10 +1229,13 @@ pre {
   }
 
   .portal-grid,
+  .daily-checklist,
   .resource-grid,
   .company-link-list,
   .sponsor-grid,
   .company-suggestions,
+  .favorite-companies-grid,
+  .company-card-actions,
   .vendor-grid {
     grid-template-columns: 1fr;
   }
@@ -1097,7 +1265,8 @@ pre {
 
   .search-form,
   .careers-grid,
-  .vendor-controls {
+  .vendor-controls,
+  .daily-checklist {
     grid-template-columns: 1fr;
   }
 

@@ -31,6 +31,7 @@
         <a href="#searchHeading">Daily Search</a>
         <button type="button" id="minuteRadarButton">Minute Radar</button>
         <button type="button" id="latestOneHourButton">Latest 1h</button>
+        <button type="button" id="fastApplyButton">Fast Apply</button>
         <button type="button" id="quickApplyButton">Quick Apply</button>
         <button type="button" id="freshDirectButton">Fresh ATS</button>
         <a href="#careersHeading">Companies</a>
@@ -38,6 +39,17 @@
         <a href="#vendorHeading">Vendors</a>
         <a href="#resourcesHeading">Resources</a>
       </nav>
+
+      <section class="daily-command-panel" aria-labelledby="dailyChecklistHeading">
+        <div class="section-heading compact-heading">
+          <div>
+            <p class="eyebrow">Fast apply routine</p>
+            <h2 id="dailyChecklistHeading">Daily search checklist</h2>
+          </div>
+          <span class="status-pill" id="dailyChecklistStatus">0 of 5 done</span>
+        </div>
+        <div id="dailyChecklist" class="daily-checklist" aria-label="Daily search checklist"></div>
+      </section>
 
       <section class="search-tool" id="dailySearch" aria-labelledby="searchHeading">
         <div class="section-heading">
@@ -65,6 +77,16 @@
             <span>Smart profile</span>
             <select id="profileSelect" name="profile"></select>
           </label>
+
+          <label class="field" for="searchPresetSelect">
+            <span>Search preset</span>
+            <select id="searchPresetSelect" name="preset"></select>
+          </label>
+
+          <div class="field preset-tools">
+            <span>Preset action</span>
+            <button class="secondary-button" type="button" id="applyPresetButton">Apply Preset</button>
+          </div>
 
           <label class="field" for="locationSelect">
             <span>US market</span>
@@ -175,6 +197,21 @@
             <input id="customQuery" name="customQuery" type="text" autocomplete="off" placeholder='Example: "backend engineer" Python AWS "new grad"'>
           </label>
 
+          <label class="field" for="customSourceName">
+            <span>Custom source</span>
+            <input id="customSourceName" name="customSourceName" type="text" autocomplete="off" placeholder="My custom link">
+          </label>
+
+          <label class="field field-wide" for="customSourceUrl">
+            <span>Custom source URL</span>
+            <input id="customSourceUrl" name="customSourceUrl" type="text" autocomplete="off" placeholder="https://example.com/jobs?q={role}&location={location}">
+          </label>
+
+          <div class="field custom-link-tools">
+            <span>Portable link</span>
+            <button class="secondary-button" type="button" id="copyCustomSyncButton">Copy Sync Link</button>
+          </div>
+
           <label class="field field-wide" for="excludeTerms">
             <span>Exclude</span>
             <input id="excludeTerms" name="exclude" type="text" autocomplete="off" placeholder="unpaid, clearance, commission only">
@@ -239,6 +276,19 @@
             <button class="secondary-button full-width" type="button" id="shareButton" disabled>Copy Share Link</button>
             <button class="secondary-button full-width" type="button" id="exportSettingsButton">Export Settings</button>
             <button class="secondary-button full-width" type="button" id="importSettingsButton">Import Settings</button>
+            <button class="secondary-button full-width" type="button" id="openHighValueBatchButton" disabled>Open High-Value Batch</button>
+            <button class="secondary-button full-width" type="button" id="copyApplicationPacketButton" disabled>Copy Application Packet</button>
+          </div>
+
+          <div class="panel-block safety-check">
+            <h2>Safety Check</h2>
+            <ul id="safetyChecklist">
+              <li>No upfront recruiter/vendor fee</li>
+              <li>No fake-check or equipment-payment request</li>
+              <li>No citizenship/clearance-only requirement unless eligible</li>
+              <li>Role is related to my OPT/STEM OPT field</li>
+              <li>Employer/payroll setup can support I-983/E-Verify when needed</li>
+            </ul>
           </div>
 
           <div class="panel-block" id="pinnedBlock" hidden>
@@ -278,6 +328,17 @@
           </div>
           <div id="results" class="results-list"></div>
         </section>
+      </section>
+
+      <section class="favorite-companies-panel" aria-labelledby="favoriteCompaniesHeading" id="favoriteCompaniesPanel" hidden>
+        <div class="section-heading compact-heading">
+          <div>
+            <p class="eyebrow">Pinned companies</p>
+            <h2 id="favoriteCompaniesHeading">Favorite company shortcuts</h2>
+          </div>
+          <span class="status-pill" id="favoriteCompanyCount">0 favorites</span>
+        </div>
+        <div id="favoriteCompaniesGrid" class="favorite-companies-grid"></div>
       </section>
 
       <section class="careers-tool" aria-labelledby="careersHeading">
@@ -383,6 +444,14 @@
             <span>Exclude</span>
             <input id="companyExcludeTerms" type="text" autocomplete="off" placeholder="unpaid, clearance, senior">
           </label>
+          <label class="field" for="companyCustomLinkName">
+            <span>Custom company link</span>
+            <input id="companyCustomLinkName" type="text" autocomplete="off" placeholder="My company link">
+          </label>
+          <label class="field company-wide" for="companyCustomLinkUrl">
+            <span>Custom company URL</span>
+            <input id="companyCustomLinkUrl" type="text" autocomplete="off" placeholder="https://example.com/search?company={company}&q={role}">
+          </label>
           <label class="field" for="companySortSelect">
             <span>Company order</span>
             <select id="companySortSelect">
@@ -426,6 +495,8 @@
             <button class="secondary-button" type="button" id="companyIndeedButton">Indeed/Google</button>
             <button class="secondary-button" type="button" id="companyGoogleButton">Google Company</button>
             <button class="secondary-button" type="button" id="copyCompanyLinksButton">Copy Selected Links</button>
+            <button class="secondary-button" type="button" id="openCompanyPackButton">Open Link Pack</button>
+            <button class="secondary-button" type="button" id="copyCompanySyncButton">Copy Company Sync</button>
             <button class="secondary-button" type="button" id="openTopSponsorButton">Open Top Sponsors</button>
             <button class="secondary-button" type="button" id="resetCompanySearchButton">Reset Company Search</button>
             <button class="secondary-button" type="button" id="favoriteCompanyButton">Favorite</button>

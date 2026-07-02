@@ -9,7 +9,11 @@ Taran's Job Command Center is a US-focused static job-search launcher. It builds
 - Role packs for broad target coverage, software, AI/ML, data analytics, and cloud/DevOps searches.
 - Specific role packs for software engineer, full-stack, backend, frontend, AI engineer, ML engineer, data scientist, data engineer, analytics engineer, BI analyst, cloud/devops, and new-grad software searches.
 - Query customization with balanced smart, compact title, broad Boolean, and custom raw-query modes.
+- Portable custom source links with `{role}`, `{query}`, `{location}`, `{time}`, and `{company}` tokens.
 - Best Job Boards profile for broad US coverage across the most-used job boards and job-finding sources.
+- Fast Apply Routine profile ordered for the fastest daily apply pass: LinkedIn Jobs, Indeed, Direct ATS, LinkedIn Posts, Google, Simplify, HiringCafe, Built In, Dice, Getwork, Glassdoor, and ZipRecruiter.
+- Search presets for Backend, Full Stack, AI/ML, Data Analyst, Data Engineer, and New Grad Software. Presets update role, role pack, freshness, profile, sort, and source groups together.
+- Daily Search Checklist for Latest 1h, Fast Apply Routine, Favorite Companies, Vendor Outreach, and OPT Resources. Checklist progress resets by date while normal settings stay saved.
 - Multi-title search with comma-separated roles.
 - Freshness filters from minute-signal searches through older-than ranges.
 - Google, DuckDuckGo, Bing, Yahoo, Kagi, Qwant, Brave, and Startpage.
@@ -26,8 +30,13 @@ Taran's Job Command Center is a US-focused static job-search launcher. It builds
 - Vendor Outreach section with role/location/vendor filters, vendor fit score, LinkedIn recruiter search, LinkedIn Jobs, Indeed, Google contact search, and copy-ready outreach templates.
 - Vendor safety reminders based on official job-scam guidance: avoid upfront placement fees, fake-check/equipment scams, and unverified recruiter identities.
 - Pinned search operators, copy-all, copy-checked, checked-progress, shareable URLs, related-title suggestions, and company search bundles.
+- Opportunity fit scores on search links, based on source priority, freshness support, direct-apply value, entry-level usefulness, and OPT/sponsor research relevance.
+- Source badges that show whether a link is native clean, Google advanced, direct apply, minute signal, OPT research, custom, or optional/noisy.
+- Open High-Value Batch action for launching the strongest quick-apply links first without removing the broader result set.
+- Copy Application Packet action with current role/location/profile, top links, favorite company links, OPT wording, follow-up reminders, and scam/auth safety reminders.
 - Pin sync links for carrying pinned portals and settings to another browser or computer without a backend.
-- Company search cards with related company results, reset, careers, LinkedIn recruiter/company, LinkedIn jobs/posts, Indeed, and Google shortcuts.
+- Company search cards with related company results, reset, careers, LinkedIn recruiter/company, LinkedIn jobs/posts, Indeed/Google, Google Company, custom company links, and link-pack open/copy actions.
+- Favorite company shortcuts above the company search controls, including top-favorites launch/copy actions.
 
 ## Recent Updates
 
@@ -41,6 +50,9 @@ Taran's Job Command Center is a US-focused static job-search launcher. It builds
 - Long-query fix: default searches now use balanced role-pack wording, the aggregate Direct ATS source is shortened to high-use ATS domains, and broad Boolean mode is explicit instead of automatic.
 - Source expansion: restored and added high-use boards such as Monster, CareerBuilder, FlexJobs, Getwork, SimplyHired, Talent.com, The Muse, Adzuna, Jora, Jooble, Nexxt, Snagajob, Ladders, College Recruiter, Hired, and Startup Jobs.
 - Source refinement: low-signal ATS engines remain optional through `Extra ATS`; remote-only and public/nonprofit boards are available in separate optional groups so they do not crowd the daily OPT-focused flow.
+- Native board search cleanup: LinkedIn, Indeed, and other job-board search boxes now receive compact role text by default, while Google/operator-only sources keep `site:` and advanced Boolean syntax.
+- Company actions are now available directly inside each company box, with favorite-company cards and portable custom-link sync.
+- Fast Apply upgrade: added the daily routine profile, daily checklist, search presets, high-value batching, opportunity scores, source badges, application packet copying, and top-favorite company pack actions.
 
 ## Run Locally
 
