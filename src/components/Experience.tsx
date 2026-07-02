@@ -5,11 +5,13 @@ import type { IconType } from 'react-icons';
 import { publicAsset } from '@/lib/assets';
 import {
   SiDocker,
-  SiFastapi,
   SiFlask,
   SiGithubactions,
+  SiGit,
+  SiJavascript,
   SiJenkins,
   SiMongodb,
+  SiMysql,
   SiNumpy,
   SiPandas,
   SiPostgresql,
@@ -19,7 +21,7 @@ import {
   SiStreamlit,
   SiTypescript,
 } from 'react-icons/si';
-import { FaJava } from 'react-icons/fa';
+import { FaAws, FaJava } from 'react-icons/fa';
 
 type Tech = {
   name: string;
@@ -30,7 +32,8 @@ type Tech = {
 type ExperienceItem = {
   title: string;
   company: string;
-  logo: string;
+  logo?: string;
+  mark?: string;
   tag: string;
   location: string;
   period: string;
@@ -41,25 +44,24 @@ type ExperienceItem = {
 };
 
 const experiences: ExperienceItem[] = [
-  // iVinGo is intentionally hidden from the live portfolio. Uncomment this block if you want to restore it later.
-  /*
   {
-    title: 'Software Engineer - Web & Data Platforms',
-    company: 'iVinGo Solutions Pvt. Ltd.',
-    logo: 'companies/ivingo.png.jpg',
-    tag: 'Full-time',
-    location: 'Hyderabad, India / Remote',
-    period: 'Jun 2023 - Jul 2024',
+    title: 'Software Engineer',
+    company: 'Rebecca Everlene Trust Company',
+    mark: 'RET',
+    tag: 'Current',
+    location: 'United States / Remote',
+    period: 'Mar 2026 - Present',
     description:
-      'Owned practical engineering work across backend services, database-backed product features, deployment workflows, and reporting pipelines for production-facing use cases.',
+      'Building full-stack applications, internal tools, backend services, and data-aware workflows for program and operations needs.',
     keyWork: [
-      'Developed API-backed workflows and database-driven features for product teams.',
-      'Worked on data ingestion, cleaning, transformation, validation, and reporting improvements.',
+      'Develop full-stack features, internal tools, REST APIs, and database-backed workflows.',
+      'Translate stakeholder needs into documented, tested, maintainable product improvements.',
     ],
     details: [
-      'Built and maintained services using Python/Java, REST APIs, PostgreSQL, and MongoDB.',
-      'Supported schema updates, SQL query development, and reporting-oriented performance improvements.',
-      'Containerized workflows with Docker and supported repeatable releases through GitHub Actions/Jenkins.',
+      'Build backend services with Python and Java while working with PostgreSQL and MongoDB data models.',
+      'Support data analytics, reporting, cleaning, validation, structuring, and visualization workflows.',
+      'Use Docker and CI/CD practices to keep development and delivery repeatable.',
+      'Collaborate in a remote, async environment with careful attention to confidentiality and data handling.',
     ],
     technologies: [
       { name: 'Python', icon: SiPython, color: '#3776AB' },
@@ -67,11 +69,68 @@ const experiences: ExperienceItem[] = [
       { name: 'PostgreSQL', icon: SiPostgresql, color: '#4169E1' },
       { name: 'MongoDB', icon: SiMongodb, color: '#47A248' },
       { name: 'Docker', icon: SiDocker, color: '#2496ED' },
+      { name: 'Git', icon: SiGit, color: '#F05032' },
+    ],
+  },
+  {
+    title: 'Research Assistant',
+    company: 'University at Buffalo',
+    logo: 'education/University_at_Buffalo_logo.svg.png',
+    tag: 'Research',
+    location: 'Buffalo, New York',
+    period: 'Jan 2025 - Jan 2026',
+    description:
+      'Built reproducible computational workflows, data analysis tooling, and ML/statistical experiments for academic research and graduate-level collaboration.',
+    keyWork: [
+      'Developed Python-based research workflows with clear methods, assumptions, and reproducibility notes.',
+      'Created analysis tooling and visual explanations for technical and non-technical research audiences.',
+    ],
+    details: [
+      'Supported ML and statistical modeling experiments with careful data preparation and result interpretation.',
+      'Maintained version-controlled code and documentation so workflows could be reviewed, repeated, and extended.',
+      'Connected graduate coursework with practical research software, analysis, visualization, and communication habits.',
+    ],
+    technologies: [
+      { name: 'Python', icon: SiPython, color: '#3776AB' },
+      { name: 'Pandas', icon: SiPandas, color: '#150458' },
+      { name: 'NumPy', icon: SiNumpy, color: '#013243' },
+      { name: 'PostgreSQL', icon: SiPostgresql, color: '#4169E1' },
+      { name: 'AWS', icon: FaAws, color: '#FF9900' },
+      { name: 'Git', icon: SiGit, color: '#F05032' },
+    ],
+  },
+  {
+    title: 'Software Engineer - Web & Data Platforms',
+    company: 'iVinGo Solutions Pvt. Ltd.',
+    logo: 'companies/ivingo.png.jpg',
+    tag: 'Full-time',
+    location: 'Hyderabad, India / Remote',
+    period: 'Jun 2022 - Jul 2024',
+    description:
+      'Delivered software, web platform, backend, database, data workflow, reporting, QA, and client-facing implementation work across production use cases.',
+    keyWork: [
+      'Built web applications, REST API patterns, database-backed features, and reporting workflows for client projects.',
+      'Worked across data ingestion, cleaning, validation, SQL reporting, QA, debugging, and delivery documentation.',
+    ],
+    details: [
+      'Supported education, pharma, real estate, travel, e-commerce, and marketing platform work across India, the United States, and the Netherlands.',
+      'Built and maintained services using Python, Java, JavaScript, REST APIs, SQL databases, and CMS-style web workflows.',
+      'Supported MySQL, Oracle, PostgreSQL, MongoDB, schema updates, query development, indexing, and reporting-oriented performance improvements.',
+      'Containerized workflows with Docker and supported repeatable releases through GitHub Actions/Jenkins.',
+      'Practiced functional, browser, and regression testing while documenting fixes and delivery decisions.',
+    ],
+    technologies: [
+      { name: 'Python', icon: SiPython, color: '#3776AB' },
+      { name: 'Java', icon: FaJava, color: '#E76F00' },
+      { name: 'JavaScript', icon: SiJavascript, color: '#F7DF1E' },
+      { name: 'PostgreSQL', icon: SiPostgresql, color: '#4169E1' },
+      { name: 'MySQL', icon: SiMysql, color: '#4479A1' },
+      { name: 'MongoDB', icon: SiMongodb, color: '#47A248' },
+      { name: 'Docker', icon: SiDocker, color: '#2496ED' },
       { name: 'GitHub Actions', icon: SiGithubactions, color: '#2088FF' },
       { name: 'Jenkins', icon: SiJenkins, color: '#D24939' },
     ],
   },
-  */
   {
     title: 'Research Intern - Data Science',
     company: 'NRSC, Indian Space Research Organisation (ISRO)',
@@ -83,13 +142,14 @@ const experiences: ExperienceItem[] = [
       'Delivered research-grade data science work across satellite data processing, geospatial modeling, regression analysis, explainability, and reproducible climate reporting.',
     keyWork: [
       'Processed and validated large satellite datasets for climate and land-use analysis.',
-      'Built modeling and reporting workflows that connected data science with remote-sensing research.',
+      'Built modeling and reporting workflows that connected data science with remote-sensing research and publication support.',
     ],
     details: [
-      'Processed 2M+ data points from AIRS, GOSAT, and OCO-2 satellite datasets.',
-      'Built feature engineering, regression modeling, validation, and statistical reporting workflows.',
+      'Processed 2M+ satellite records across atmospheric CO2, climate-zone, and land-use/land-cover analysis workflows.',
+      'Built feature engineering, regression modeling, validation, temporal aggregation, spatial analysis, and statistical reporting workflows.',
       'Applied SHAP Kernel Explainer to identify drivers behind model outputs.',
       'Created Flask/Streamlit dashboards and PostgreSQL-backed reporting workflows for reproducible analysis.',
+      'Contributed to research that later became a 2025 International Journal of Remote Sensing publication.',
     ],
     technologies: [
       { name: 'Python', icon: SiPython, color: '#3776AB' },
@@ -106,7 +166,7 @@ const experiences: ExperienceItem[] = [
     logo: 'companies/LTIMindtree%20-Logo.png',
     tag: 'Internship',
     location: 'Remote / India',
-    period: 'Mar 2023 - Jun 2023',
+    period: 'IGNITE 2023',
     description:
       'Completed intensive enterprise engineering training across Java, databases, web technologies, version control, TypeScript, Angular, and delivery practices.',
     keyWork: [
@@ -162,7 +222,7 @@ export const Experience = () => {
             Professional <span className="gradient-text">Track Record</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Data science research and structured enterprise training across software, data, and ML workflows.
+            Professional software, research, backend, data, and enterprise training experience across production tools, reproducible analysis, and applied AI/ML workflows.
           </p>
         </motion.div>
 
@@ -181,7 +241,11 @@ export const Experience = () => {
                 <span className="experience-timeline__dot" aria-hidden="true" />
                 <div className="grid gap-5 lg:grid-cols-[auto_1fr_auto] lg:items-start">
                   <div className="experience-logo-frame flex h-32 w-32 items-center justify-center overflow-hidden rounded-2xl border border-border/50 bg-background/70 p-3">
-                    <img src={publicAsset(experience.logo)} alt={`${experience.company} logo`} className="h-full w-full object-contain" />
+                    {experience.logo ? (
+                      <img src={publicAsset(experience.logo)} alt={`${experience.company} logo`} className="h-full w-full object-contain" />
+                    ) : (
+                      <span className="font-display text-3xl font-bold text-primary">{experience.mark || experience.company.slice(0, 2)}</span>
+                    )}
                   </div>
 
                   <div>

@@ -4,6 +4,7 @@ import { About } from '@/components/About';
 import { Skills } from '@/components/Skills';
 import { Projects } from '@/components/Projects';
 import { Experience } from '@/components/Experience';
+import { ResumePreview } from '@/components/ResumePreview';
 import { Education } from '@/components/Education';
 import { Contact } from '@/components/Contact';
 import { Footer } from '@/components/Footer';
@@ -11,7 +12,6 @@ import { InteractiveBackground } from '@/components/InteractiveBackground';
 import { Preloader } from '@/components/Preloader';
 import { Growth } from '@/components/Growth';
 import { Credibility } from '@/components/Credibility';
-import { Writing } from '@/components/Writing';
 import { AskTaranAI } from '@/components/AskTaranAI';
 import { useEffect, useState } from 'react';
 import { initAnalytics, trackAnonymousVisitorContext, trackEvent } from '@/lib/analytics';
@@ -20,7 +20,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    document.title = 'Taran Mamidala | Machine Learning & Software Engineer';
+    document.title = 'Taran Mamidala | Software, Data & AI Engineer';
     initAnalytics();
     trackEvent({ action: 'page_view', label: 'portfolio_home' });
     trackAnonymousVisitorContext();
@@ -28,7 +28,7 @@ const Index = () => {
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute('content',
-        'Portfolio of Taran Mamidala - Machine Learning Engineer and Software Engineer based in Buffalo, New York. Focused on ML pipelines, data engineering, backend APIs, cloud deployment, and geospatial research.'
+        'Portfolio of Taran Mamidala - Software, Data, ML, and AI Engineer based in Buffalo, New York. Focused on backend APIs, data platforms, research-grade ML workflows, cloud-ready systems, and AI products.'
       );
     }
 
@@ -61,9 +61,9 @@ const Index = () => {
           <Skills />
           <Projects />
           <Experience />
+          <ResumePreview />
           <Education />
           <Credibility />
-          <Writing />
           <Growth />
           <Contact />
         </main>

@@ -10,12 +10,12 @@ const topics = [
   },
   {
     title: 'AI Agents and Tool Use',
-    description: 'Planning, tool calling, memory, validation loops, MCP-style workflows, and human review boundaries.',
+    description: 'Planning, tool calling, memory, validation loops, research workflows, and human review boundaries.',
     icon: Bot,
   },
   {
-    title: 'LLMOps, Evaluation, and AI Security',
-    description: 'Prompt/version control, evaluation harnesses, observability, regression tests, cost, latency, privacy, and prompt-injection awareness.',
+    title: 'LLMOps, Reproducibility, and AI Security',
+    description: 'Evaluation harnesses, regression tests, observability, reproducible pipelines, cost, latency, privacy, and prompt-injection awareness.',
     icon: Workflow,
   },
 ];
@@ -37,10 +37,10 @@ export const Growth = () => {
             <span className="text-sm text-primary font-medium">Growth</span>
           </div>
           <h2 className="font-display text-4xl sm:text-5xl font-bold mb-6">
-            Currently <span className="gradient-text">Exploring</span>
+            The <span className="gradient-text">Absolute Learning Loop</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Deep diving into practical AI engineering topics that matter for building reliable products.
+            I keep learning by turning questions into prototypes, prototypes into systems, and systems into evidence I can explain.
           </p>
         </motion.div>
 
@@ -78,8 +78,8 @@ export const Growth = () => {
             <div>
               <h3 className="font-display text-2xl font-bold mb-2">Continuous Learning</h3>
               <p className="max-w-3xl text-muted-foreground leading-relaxed">
-                I'm constantly exploring new technologies and platforms to stay current with industry trends
-                and expand my technical capabilities across different domains.
+                I stay curious, but I try to make curiosity useful: cleaner data, clearer APIs, more reliable models,
+                better documentation, and stronger judgment about when a tool actually solves the problem.
               </p>
             </div>
             <div className="brand-mark">

@@ -148,7 +148,7 @@ export const Education = () => {
                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <Calendar size={16} />
-                  <span>Aug 2024 - Dec 2025</span>
+                  <span>Aug 2024 - Jan 2026</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <MapPin size={16} />
@@ -160,7 +160,7 @@ export const Education = () => {
 
             <p className="text-muted-foreground mb-6 leading-relaxed">
               Coursework covers algorithms, systems, security, databases, ML, deep learning, computer vision,
-              data-intensive computing, statistical mining, and web analytics.
+              data-intensive computing, statistical mining, and web analytics. Current resume evidence lists a 3.8/4.0 GPA.
             </p>
 
             <div className="space-y-5">

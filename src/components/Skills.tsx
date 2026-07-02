@@ -21,6 +21,7 @@ import {
   SiGit,
   SiGithub,
   SiGithubactions,
+  SiGnubash,
   SiGooglecloud,
   SiGraphql,
   SiHtml5,
@@ -47,8 +48,10 @@ import {
   SiPlotly,
   SiPostgresql,
   SiPrometheus,
+  SiPytest,
   SiPytorch,
   SiPython,
+  SiR,
   SiReact,
   SiRedis,
   SiScikitlearn,
@@ -64,7 +67,7 @@ import {
   SiTypescript,
   SiVite,
 } from 'react-icons/si';
-import { FaAws, FaJava } from 'react-icons/fa';
+import { FaAws, FaDatabase, FaJava } from 'react-icons/fa';
 
 type Skill = {
   name: string;
@@ -75,10 +78,12 @@ type Skill = {
 const skillsByArea: Array<{ title: string; description: string; skills: Skill[] }> = [
   {
     title: 'Programming & Backend',
-    description: 'Languages, APIs, service design, and backend fundamentals.',
+    description: 'Languages, APIs, service design, scripting, and backend fundamentals.',
     skills: [
       { name: 'Python', icon: SiPython, color: '#3776AB' },
       { name: 'Java', icon: FaJava, color: '#E76F00' },
+      { name: 'SQL', icon: SiPostgresql, color: '#4169E1' },
+      { name: 'Bash', icon: SiGnubash, color: '#4EAA25' },
       { name: 'C', icon: SiC, color: '#A8B9CC' },
       { name: 'C++', icon: SiCplusplus, color: '#00599C' },
       { name: 'Spring Boot', icon: SiSpringboot, color: '#6DB33F' },
@@ -103,12 +108,17 @@ const skillsByArea: Array<{ title: string; description: string; skills: Skill[] 
   },
   {
     title: 'Data Engineering',
-    description: 'Pipelines, warehouses, streaming, and analytics-ready storage.',
+    description: 'Pipelines, warehouses, streaming, data quality, and analytics-ready storage.',
     skills: [
       { name: 'PostgreSQL', icon: SiPostgresql, color: '#4169E1' },
       { name: 'MySQL', icon: SiMysql, color: '#4479A1' },
+      { name: 'Oracle', icon: FaDatabase, color: '#F80000' },
       { name: 'MongoDB', icon: SiMongodb, color: '#47A248' },
       { name: 'SQLite', icon: SiSqlite, color: '#003B57' },
+      { name: 'ETL/ELT', icon: SiApacheairflow, color: '#017CEE' },
+      { name: 'Data Validation', icon: SiJupyter, color: '#F37626' },
+      { name: 'Schema Design', icon: SiPostgresql, color: '#4169E1' },
+      { name: 'Query Optimization', icon: SiMysql, color: '#4479A1' },
       { name: 'Kafka', icon: SiApachekafka, color: '#231F20' },
       { name: 'Spark', icon: SiApachespark, color: '#E25A1C' },
       { name: 'Airflow', icon: SiApacheairflow, color: '#017CEE' },
@@ -118,8 +128,8 @@ const skillsByArea: Array<{ title: string; description: string; skills: Skill[] 
     ],
   },
   {
-    title: 'Machine Learning',
-    description: 'Modeling, evaluation, vision, statistics, and experiment workflows.',
+    title: 'Scientific, ML & Geospatial',
+    description: 'Modeling, evaluation, statistics, remote-sensing data, and experiment workflows.',
     skills: [
       { name: 'PyTorch', icon: SiPytorch, color: '#EE4C2C' },
       { name: 'TensorFlow', icon: SiTensorflow, color: '#FF6F00' },
@@ -128,6 +138,11 @@ const skillsByArea: Array<{ title: string; description: string; skills: Skill[] 
       { name: 'Pandas', icon: SiPandas, color: '#150458' },
       { name: 'NumPy', icon: SiNumpy, color: '#013243' },
       { name: 'SciPy', icon: SiScipy, color: '#8CAAE6' },
+      { name: 'GeoPandas', icon: SiPandas, color: '#139C5A' },
+      { name: 'xarray', icon: SiNumpy, color: '#17A2B8' },
+      { name: 'NetCDF4', icon: SiNumpy, color: '#4E79A7' },
+      { name: 'SHAP', icon: SiScikitlearn, color: '#F7931E' },
+      { name: 'R', icon: SiR, color: '#276DC3' },
       { name: 'OpenCV', icon: SiOpencv, color: '#5C3EE8' },
       { name: 'MLflow', icon: SiMlflow, color: '#0194E2' },
       { name: 'DVC', icon: SiDvc, color: '#13ADC7' },
@@ -162,6 +177,7 @@ const skillsByArea: Array<{ title: string; description: string; skills: Skill[] 
       { name: 'Jenkins', icon: SiJenkins, color: '#D24939' },
       { name: 'Linux', icon: SiLinux, color: '#FCC624' },
       { name: 'Maven', icon: SiApachemaven, color: '#C71A36' },
+      { name: 'Pytest', icon: SiPytest, color: '#0A9EDC' },
       { name: 'Jest', icon: SiJest, color: '#C21325' },
       { name: 'Mocha', icon: SiMocha, color: '#8D6748' },
       { name: 'Selenium', icon: SiSelenium, color: '#43B02A' },
@@ -191,10 +207,10 @@ export const Skills = () => {
             <span className="text-sm text-primary font-medium">Technical Expertise</span>
           </div>
           <h2 className="font-display text-4xl sm:text-5xl font-bold mb-6">
-            Technologies That <span className="gradient-text">Build Solutions</span>
+            Tools I Use To <span className="gradient-text">Turn Learning Into Systems</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Technologies and tools I work with to build solutions.
+            A practical stack across backend services, data engineering, scientific computing, AI products, cloud delivery, and testing.
           </p>
         </motion.div>
 

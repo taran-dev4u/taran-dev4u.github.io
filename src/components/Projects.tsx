@@ -114,16 +114,17 @@ const projects: Project[] = [
     status: 'Completed',
     context: 'NRSC / ISRO research internship',
     overview:
-      'Geospatial climate-data workflow for atmospheric CO2 analysis across India using satellite observations, climate zones, LULC features, regression modeling, and explainability.',
+      'Research-grade geospatial climate-data workflow for atmospheric CO2 analysis across India using satellite observations, climate zones, LULC features, regression modeling, and explainability.',
     technologies: ['Python', 'xarray', 'NetCDF4', 'GeoPandas', 'SHAP', 'PostgreSQL', 'Streamlit'],
     keyFeatures: [
       'Processed multi-year satellite datasets from AIRS, GOSAT, SCIAMACHY, OCO-2, and OCO-3.',
       'Mapped CO2 trends against Koppen-Geiger climate zones and land-use classes.',
       'Used explainability to understand drivers behind regression outputs.',
       'Built reproducible reporting workflows for analysis and review.',
+      'Contributed to work later published in the International Journal of Remote Sensing, DOI 10.1080/01431161.2025.2562005.',
     ],
     outcome:
-      'Strengthened my ability to connect climate science, data processing, modeling, and clear technical storytelling.',
+      'Connected climate science, large-scale data processing, modeling, explainability, and publication-ready technical storytelling.',
     icon: RadioTower,
     githubUrl: 'https://github.com/taran-dev4u/satellite-co2-climate-analytics',
   },
@@ -828,6 +829,15 @@ const getProjectTags = (project: Project) => {
   return [project.role, project.subject || fallbackSubject].filter(Boolean).slice(0, 2) as string[];
 };
 
+const priorityProjectTitles = [
+  'Atmospheric CO2 and LULC Modeling Pipeline',
+  'Real-Time Streaming Data Pipeline',
+  'Enterprise RAG Knowledge System',
+  'End-to-End MLOps Pipeline',
+  'Pintos User Programs and System Calls',
+  'Stock Market Database for Real-Time Analysis',
+];
+
 const ProjectVisual = ({ project }: { project: Project }) => {
   const [actualLoaded, setActualLoaded] = useState(false);
   const [actualFailed, setActualFailed] = useState(false);
@@ -870,7 +880,17 @@ export const Projects = () => {
   const [showAll, setShowAll] = useState(false);
   const [activeProject, setActiveProject] = useState<Project | null>(null);
 
-  const orderedProjects = projects;
+  const orderedProjects = [...projects].sort((a, b) => {
+    const aPriority = priorityProjectTitles.indexOf(a.title);
+    const bPriority = priorityProjectTitles.indexOf(b.title);
+
+    if (aPriority !== -1 || bPriority !== -1) {
+      return (aPriority === -1 ? priorityProjectTitles.length : aPriority)
+        - (bPriority === -1 ? priorityProjectTitles.length : bPriority);
+    }
+
+    return 0;
+  });
 
   const filteredProjects = selectedRole === 'All Projects'
     ? orderedProjects
@@ -894,7 +914,7 @@ export const Projects = () => {
             Selected <span className="gradient-text">Engineering Work</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Live builds first, followed by completed work from systems, data, machine learning, computer vision, analytics, and security.
+            Selected work across research data pipelines, backend systems, AI products, MLOps, databases, computer vision, analytics, and security.
           </p>
         </motion.div>
 

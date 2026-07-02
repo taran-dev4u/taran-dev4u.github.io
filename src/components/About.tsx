@@ -5,18 +5,18 @@ import { Brain, Code2, Database, Handshake, Network, ShieldCheck } from 'lucide-
 const strengths = [
   {
     icon: Code2,
-    title: 'Software Foundations',
-    description: 'Programming logic, data structures, algorithms, computer networks, testing, and clean implementation habits.',
+    title: 'Software Delivery',
+    description: 'Backend APIs, full-stack tools, database-backed features, testing, documentation, and clean implementation habits.',
   },
   {
     icon: Database,
     title: 'Data & Systems Thinking',
-    description: 'Relational and non-relational databases, distributed systems, service integration, and data engineering principles.',
+    description: 'ETL, validation, SQL, schema design, distributed processing, service integration, and reproducible data workflows.',
   },
   {
     icon: Brain,
-    title: 'ML & AI Delivery',
-    description: 'Machine learning pipelines, deep learning, computer vision, explainability, and practical model evaluation.',
+    title: 'Research-Grade ML',
+    description: 'Machine learning pipelines, remote-sensing analysis, deep learning, computer vision, explainability, and practical evaluation.',
   },
   {
     icon: Network,
@@ -26,20 +26,20 @@ const strengths = [
   {
     icon: Handshake,
     title: 'Collaboration',
-    description: 'Proactivity, organization, communication, leadership, and comfort working across teams and technical domains.',
+    description: 'Remote teamwork, research discussions, stakeholder translation, teaching support, leadership, and cross-domain communication.',
   },
   {
     icon: ShieldCheck,
     title: 'Ownership',
-    description: 'A steady focus on reliability, documentation, reproducibility, and work that can be explained clearly in interviews.',
+    description: 'A steady focus on reliability, data quality, reproducibility, confidentiality, and work that can be explained clearly in interviews.',
   },
 ];
 
 const stats = [
-  { value: '12+', label: 'Projects Deployed' },
+  { value: '25mo', label: 'Software Role' },
   { value: '3+', label: 'Years Experience' },
-  { value: '50+', label: 'Models Trained' },
-  { value: '∞', label: 'Papers Read' },
+  { value: '2M+', label: 'Research Records' },
+  { value: '1', label: 'Peer-Reviewed Paper' },
 ];
 
 export const About = () => {
@@ -59,13 +59,12 @@ export const About = () => {
             <span className="text-sm text-primary font-medium">About Me</span>
           </div>
           <h2 className="font-display text-4xl sm:text-5xl font-bold mb-6">
-            Building Across <span className="gradient-text">Software, Data, and AI</span>
+            Building With <span className="gradient-text">Curiosity, Evidence, and Useful Systems</span>
           </h2>
           <p className="text-lg text-muted-foreground leading-relaxed">
-            I have extensive expertise in software development, with a solid background in programming logic,
-            data structures, algorithms, and computer networks. I learn complex technologies quickly, including
-            distributed systems, service integration, relational and non-relational databases, data engineering,
-            and software architecture.
+            I like learning that turns into working systems. My path moves through professional software engineering,
+            research data pipelines, graduate AI/ML study, and public projects where the goal is not just to try a tool,
+            but to understand the problem well enough to build something useful.
           </p>
         </motion.div>
 
@@ -79,19 +78,18 @@ export const About = () => {
             <h3 className="font-display text-2xl font-bold mb-6 text-primary">How I Work</h3>
             <div className="space-y-5 text-muted-foreground leading-relaxed">
               <p>
-                I like work that has a clear path from problem definition to something people can actually use:
-                clean APIs, reliable data, readable dashboards, measured models, and deployment habits that make
-                the next iteration easier.
+                I call myself an Absolute learner because I care about the full loop: ask better questions, learn the domain,
+                build the first version, validate it, explain it clearly, and keep improving until the work is useful.
               </p>
               <p>
                 My strongest work sits at the intersection of backend systems, data pipelines, machine learning,
-                and product-facing interfaces. I care about clarity, reproducibility, and explaining technical
-                tradeoffs without hiding behind jargon.
+                research workflows, and product-facing interfaces. I care about clarity, reproducibility, and explaining
+                technical tradeoffs without hiding behind jargon.
               </p>
               <p>
-                I have also built leadership habits through teaching support, class representation, club work,
-                hackathons, and research collaboration. That experience helps me communicate early, organize work
-                well, and stay steady when a project becomes messy.
+                That mindset shows up in production web/data work, current software engineering, UB research collaboration,
+                and NRSC/ISRO climate-data research that grew into a peer-reviewed publication. I bring curiosity, but I also
+                bring the discipline to turn curiosity into shipped, documented, interview-ready work.
               </p>
             </div>
 

@@ -59,7 +59,7 @@ export const Contact = () => {
       title: 'Location',
       value: 'Buffalo, New York',
       href: null,
-      description: 'Open to remote and on-site opportunities'
+      description: 'Open to remote, hybrid, on-site, and relocation opportunities'
     },
     {
       icon: Phone,
@@ -71,10 +71,10 @@ export const Contact = () => {
   ];
 
   const reasons = [
-    'Full-time software, data, ML, or AI engineering conversations',
-    'Research and product teams working with data platforms, models, or APIs',
+    'Full-time software, backend, data, ML, or AI engineering conversations',
+    'Research and product teams building data platforms, models, APIs, or AI tools',
     'Interview conversations, referrals, and technical screenings',
-    'Opportunities involving analytics, automation, and intelligent systems',
+    'Opportunities involving analytics, automation, cloud systems, and intelligent products',
   ];
 
   return (
@@ -90,10 +90,10 @@ export const Contact = () => {
             <span className="text-sm text-primary font-medium">Get In Touch</span>
           </div>
           <h2 className="font-display text-4xl sm:text-5xl font-bold mb-6">
-            Let's Build <span className="gradient-text">Something</span>
+            Let's Build The Next <span className="gradient-text">Useful Thing</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Have a project in mind? I'm always open to discussing new opportunities.
+            I am open to opportunities where software, data, and AI work together to solve real problems.
           </p>
         </motion.div>
 
@@ -165,7 +165,7 @@ export const Contact = () => {
               <div>
                 <h3 className="font-display text-2xl font-bold mb-2">Send a Message</h3>
                 <p className="text-muted-foreground">
-                  Have something in mind? I'd love to hear from you.
+                  Have a role, referral, project, or technical conversation in mind? I'd love to hear from you.
                 </p>
               </div>
 

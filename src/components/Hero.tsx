@@ -1,10 +1,8 @@
 import { motion } from 'framer-motion';
 import { TypeWriter } from './TypeWriter';
 import { Button } from './ui/button';
-import { ArrowDown, BrainCircuit, Download, Github, Linkedin, Mail, MapPin, ServerCog, Sparkles } from 'lucide-react';
+import { ArrowDown, BrainCircuit, FileText, Github, Linkedin, Mail, MapPin, ServerCog, Sparkles } from 'lucide-react';
 import profileImage from '@/assets/profile-taran.webp';
-
-const resumeHref = 'https://drive.google.com/file/d/1W9V4bXnt9ak7zhB6SuiUaN6mYrFPqI5u/view?usp=sharing';
 
 export const Hero = () => {
   return (
@@ -21,7 +19,7 @@ export const Hero = () => {
             <div className="inline-block max-w-full px-4 py-2 rounded-full bg-secondary/50 border border-border/50 mb-4">
               <span className="inline-flex flex-wrap items-center justify-center gap-2 text-center text-sm text-muted-foreground">
                 <Sparkles size={15} className="text-primary shrink-0" />
-                Software, data, and AI engineering
+                Absolute learner - software, data, and AI engineering
               </span>
             </div>
 
@@ -30,7 +28,7 @@ export const Hero = () => {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
               </span>
-              Open to work.
+              Open to opportunities.
             </div>
 
             <h1 className="font-display text-3xl sm:text-5xl lg:text-6xl font-bold mb-4 leading-tight text-balance">
@@ -51,13 +49,13 @@ export const Hero = () => {
             </div>
 
             <p className="mx-auto max-w-[18.5rem] text-base sm:max-w-full sm:text-lg text-muted-foreground mb-8 lg:mx-0 lg:max-w-xl">
-              I build software, data platforms, ML systems, and AI products with a practical engineering mindset.
-              My work spans production APIs, geospatial research, deep learning, computer vision, analytics dashboards,
-              and cloud-ready project architecture.
+              I build backend systems, data platforms, ML workflows, and AI products with a practical engineering mindset.
+              My work connects production APIs, research-grade data pipelines, geospatial climate modeling, full-stack tools,
+              and cloud-ready architecture.
             </p>
 
             <div className="mx-auto flex max-w-[18.5rem] flex-wrap justify-center gap-3 mb-6 sm:max-w-[20rem] lg:mx-0 lg:max-w-none lg:justify-start">
-              {['RAG', 'MLOps', 'Vector DBs', 'LLMOps', 'Cloud AI'].map((item) => (
+              {['Backend APIs', 'Data Pipelines', 'RAG', 'MLOps', 'Research AI'].map((item) => (
                 <span key={item} className="tech-chip text-xs sm:text-sm">
                   <Sparkles size={13} />
                   {item}
@@ -68,7 +66,7 @@ export const Hero = () => {
             <div className="mx-auto flex max-w-[18.5rem] flex-wrap justify-center gap-4 mb-8 text-xs sm:max-w-[20rem] sm:text-sm text-muted-foreground lg:mx-0 lg:max-w-none lg:justify-start">
               <div className="flex items-center gap-2">
                 <MapPin size={16} className="text-primary" />
-                <span>Buffalo, NY · open to relocation</span>
+                <span>Buffalo, NY - open to relocation</span>
               </div>
               <div className="flex items-center gap-2">
                 <Mail size={16} className="text-primary" />
@@ -85,9 +83,9 @@ export const Hero = () => {
               </Button>
 
               <Button asChild variant="outline" size="lg" className="btn-secondary">
-                <a href={resumeHref} target="_blank" rel="noopener noreferrer">
-                  Resume
-                  <Download className="ml-2" size={18} />
+                <a href="#resume">
+                  Read Resume
+                  <FileText className="ml-2" size={18} />
                 </a>
               </Button>
             </div>
