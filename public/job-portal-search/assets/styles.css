@@ -454,8 +454,7 @@ pre {
   overflow-wrap: anywhere;
 }
 
-.action-row,
-.company-actions {
+.action-row {
   display: flex;
   gap: 8px;
   align-items: end;
@@ -557,27 +556,6 @@ pre {
 
 .custom-link-tools button {
   width: 100%;
-}
-
-.company-actions {
-  grid-column: 1 / -1;
-  flex-wrap: wrap;
-  min-width: 0;
-}
-
-.company-actions button {
-  flex: 1 1 150px;
-}
-
-.company-suggestions {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.company-suggestion-card {
-  min-height: 160px;
 }
 
 .company-mini-actions {
@@ -844,7 +822,7 @@ pre {
 
 .company-card-actions {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
   gap: 8px;
 }
 
@@ -1215,11 +1193,6 @@ pre {
     grid-column: span 2;
   }
 
-  .company-actions {
-    grid-column: 1 / -1;
-    min-width: 0;
-  }
-
   .resource-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -1229,7 +1202,6 @@ pre {
   }
 
   .sponsor-grid,
-  .company-suggestions,
   .favorite-companies-grid,
   .company-card-actions,
   .vendor-grid {
@@ -1256,7 +1228,6 @@ pre {
   .resource-grid,
   .company-link-list,
   .sponsor-grid,
-  .company-suggestions,
   .favorite-companies-grid,
   .company-card-actions,
   .vendor-grid {
@@ -1298,13 +1269,11 @@ pre {
   .company-wide,
   .vendor-wide,
   .action-row,
-  .company-actions,
   .vendor-actions {
     grid-column: auto;
   }
 
   .action-row,
-  .company-actions,
   .vendor-actions {
     display: grid;
     grid-template-columns: 1fr;

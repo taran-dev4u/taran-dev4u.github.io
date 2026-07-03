@@ -2,6 +2,17 @@
 
 Taran's Job Command Center is a US-focused static job-search launcher. It builds fresh search links across ATS systems, general job boards, startup boards, public-sector portals, H1B sponsor companies, company career pages, and staffing/vendor outreach paths, with OPT-aware search profiles for an international student who is work-authorized in the United States.
 
+## Folder Layout
+
+The job-search app is organized under `public/job-portal-search`.
+
+- `../index.html` is the live app page served at `/job-portal-search/`.
+- `../assets/app.js` contains the search logic, URL builders, company data, vendor actions, favorites, sync links, and saved settings.
+- `../assets/styles.css` contains the dark command-center UI.
+- `../assets/portal-scout-mark.svg` is the local app mark.
+- `README.md` is this project guide.
+- `PROJECT_CONTEXT.md` is local-only planning/context and is ignored by Git.
+
 ## Features
 
 - Dark theme by default, with an explicit saved light-mode option.
@@ -37,6 +48,7 @@ Taran's Job Command Center is a US-focused static job-search launcher. It builds
 - Copy Application Packet action with current role/location/profile, top links, favorite company links, OPT wording, follow-up reminders, and scam/auth safety reminders.
 - Pin sync links for carrying pinned portals and settings to another browser or computer without a backend.
 - Company search cards with related company results, reset, careers, LinkedIn recruiter/company, LinkedIn jobs/posts, Indeed/Google, Google Company, custom company links, and link-pack open/copy actions.
+- Per-company Careers links default to the company careers page and can be updated/reset from the company card; saved custom Careers links are included in local settings and sync URLs.
 - Favorite company shortcuts above the company search controls, including instant favorite/unfavorite saving, top-favorites launch/copy actions, and visible LinkedIn Jobs, LinkedIn Posts, LinkedIn Recruiters, LinkedIn Company, Indeed/Google, and Google Company links.
 
 ## Recent Updates
@@ -58,8 +70,8 @@ Taran's Job Command Center is a US-focused static job-search launcher. It builds
 
 ## Run Locally
 
-Open `index.html` in a browser. No build step is required.
+Open `public/job-portal-search/index.html` in a browser. No build step is required for the standalone job-search page.
 
 ## Deploy To GitHub Pages
 
-For a standalone repository, commit this folder as the repository root and enable GitHub Pages from the `main` branch, or use the included workflow in `.github/workflows/pages.yml`.
+In this portfolio repository, the job-search page is published from `public/job-portal-search` during the normal Vite/GitHub Pages build. Keep `index.html` and `assets/` in that folder so the live `/job-portal-search/` URL keeps working.
