@@ -8594,6 +8594,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderFavoriteCompanies();
   loadTheme();
   bindEvents();
+  setupWorkspaceHeightSync();
 
   loadPreferences();
   const hydratedFromUrl = hydrateFromUrl();
@@ -8650,6 +8651,8 @@ function cacheElements() {
     cautionExcludes: document.getElementById("cautionExcludes"),
     strictTitle: document.getElementById("strictTitle"),
     categoryFilters: document.getElementById("categoryFilters"),
+    sidePanel: document.querySelector(".side-panel"),
+    resultsPanel: document.querySelector(".results-panel"),
     companyRole: document.getElementById("companyRole"),
     companyRolePack: document.getElementById("companyRolePack"),
     companyFilter: document.getElementById("companyFilter"),
@@ -8860,6 +8863,29 @@ function bindEvents() {
     }
     togglePinnedPortal(button.dataset.pinRemove);
   });
+}
+
+function setupWorkspaceHeightSync() {
+  syncWorkspacePanelHeight();
+  window.addEventListener("resize", syncWorkspacePanelHeight);
+  if ("ResizeObserver" in window && els.sidePanel) {
+    const observer = new ResizeObserver(syncWorkspacePanelHeight);
+    observer.observe(els.sidePanel);
+  }
+}
+
+function syncWorkspacePanelHeight() {
+  if (!els.sidePanel || !els.resultsPanel) {
+    return;
+  }
+  if (window.matchMedia("(max-width: 900px)").matches) {
+    els.resultsPanel.style.removeProperty("--workspace-panel-height");
+    return;
+  }
+  const height = Math.ceil(els.sidePanel.getBoundingClientRect().height);
+  if (height > 0) {
+    els.resultsPanel.style.setProperty("--workspace-panel-height", `${height}px`);
+  }
 }
 
 function populateRolePacks() {

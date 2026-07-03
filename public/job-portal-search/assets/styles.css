@@ -864,7 +864,7 @@ pre {
   display: grid;
   grid-template-columns: 300px minmax(0, 1fr);
   gap: 18px;
-  align-items: stretch;
+  align-items: start;
 }
 
 .side-panel {
@@ -938,7 +938,8 @@ pre {
 }
 
 .results-panel {
-  min-height: 100%;
+  min-height: 420px;
+  height: var(--workspace-panel-height, min(920px, calc(100vh - 88px)));
   overflow: auto;
   scroll-padding-top: 14px;
 }
@@ -1216,6 +1217,7 @@ pre {
 
   .results-panel {
     order: -1;
+    height: auto;
   }
 
   .side-panel {
