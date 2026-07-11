@@ -18,13 +18,28 @@ const SPECIAL_TABS = [
 
 const ALL_TABS = [...EMPLOYER_TABS, ...SPECIAL_TABS];
 const EMPLOYER_SHEETS = new Set(EMPLOYER_TABS.map(tab => tab.sheet));
+const PRIMARY_EMPLOYER_SHEETS = [
+  "Apply First",
+  "Strong Targets",
+  "Hidden Gems",
+  "Entry Level Evidence",
+  "Sponsorship Review",
+  "Personalized Shortlist",
+  "Weekly Plan"
+];
+const STORAGE_KEY = "taran-h1b-intelligence-preferences-v2";
+const DEFAULT_ROLE_QUERY = "software data AI";
 
 const state = {
   tab: "applyFirst",
   visibleRows: [],
   visibleSheet: "Apply First",
   selectedRow: null,
-  rawSheet: "Personalized Shortlist"
+  rawSheet: "Personalized Shortlist",
+  pinnedEmployers: new Set(),
+  favoriteEmployers: new Set(),
+  checkedEmployers: new Set(),
+  customCareerLinks: {}
 };
 
 const els = {};
@@ -34,6 +49,8 @@ document.addEventListener("DOMContentLoaded", () => {
   populateSummaryMetrics();
   populateTabs();
   populateFilters();
+  loadPreferences();
+  applySyncFromUrl();
   bindEvents();
   loadTheme();
   render();
@@ -57,10 +74,22 @@ function cacheElements() {
     resetFiltersButton: document.getElementById("resetFiltersButton"),
     tabList: document.getElementById("tabList"),
     visibleSummary: document.getElementById("visibleSummary"),
+    openTopFiveButton: document.getElementById("openTopFiveButton"),
+    openSelectedButton: document.getElementById("openSelectedButton"),
+    copySelectedButton: document.getElementById("copySelectedButton"),
     copyPacketsButton: document.getElementById("copyPacketsButton"),
     copyCsvButton: document.getElementById("copyCsvButton"),
+    clearCheckedButton: document.getElementById("clearCheckedButton"),
+    copySyncButton: document.getElementById("copySyncButton"),
     contentPanel: document.getElementById("contentPanel"),
     selectedPanel: document.getElementById("selectedPanel"),
+    pinnedEmployersPanel: document.getElementById("pinnedEmployersPanel"),
+    pinnedCount: document.getElementById("pinnedCount"),
+    pinnedEmployersGrid: document.getElementById("pinnedEmployersGrid"),
+    openPinnedButton: document.getElementById("openPinnedButton"),
+    copyPinnedButton: document.getElementById("copyPinnedButton"),
+    clearPinnedButton: document.getElementById("clearPinnedButton"),
+    clearFavoritesButton: document.getElementById("clearFavoritesButton"),
     detailDialog: document.getElementById("detailDialog"),
     detailSheet: document.getElementById("detailSheet"),
     detailTitle: document.getElementById("detailTitle"),
@@ -83,13 +112,22 @@ function bindEvents() {
     els.minScoreFilter,
     els.minNewFilter
   ].forEach(control => {
-    control.addEventListener("input", render);
-    control.addEventListener("change", render);
+    control.addEventListener("input", handleFilterChange);
+    control.addEventListener("change", handleFilterChange);
   });
 
   els.resetFiltersButton.addEventListener("click", resetFilters);
+  els.openTopFiveButton.addEventListener("click", openTopFive);
+  els.openSelectedButton.addEventListener("click", openCheckedEmployers);
+  els.copySelectedButton.addEventListener("click", copyCheckedPackets);
   els.copyPacketsButton.addEventListener("click", copyVisiblePackets);
   els.copyCsvButton.addEventListener("click", copyVisibleCsv);
+  els.clearCheckedButton.addEventListener("click", clearCheckedEmployers);
+  els.copySyncButton.addEventListener("click", copySyncLink);
+  els.openPinnedButton.addEventListener("click", openPinnedEmployers);
+  els.copyPinnedButton.addEventListener("click", copyPinnedPackets);
+  els.clearPinnedButton.addEventListener("click", clearPinnedEmployers);
+  els.clearFavoritesButton.addEventListener("click", clearFavoriteEmployers);
   els.themeToggle.addEventListener("click", toggleTheme);
   els.closeDetailButton.addEventListener("click", () => els.detailDialog.close());
 }
@@ -125,6 +163,7 @@ function populateTabs() {
     button.dataset.tab = tab.id;
     button.addEventListener("click", () => {
       state.tab = tab.id;
+      persistPreferences();
       render();
     });
     fragment.appendChild(button);
@@ -181,6 +220,8 @@ function render() {
   } else {
     renderRawData();
   }
+  syncActionButtons();
+  renderPinnedEmployers();
 }
 
 function syncTabs() {
@@ -209,6 +250,26 @@ function renderEmployerSheet(sheetName) {
 function createEmployerCard(row, sheetName) {
   const card = document.createElement("article");
   card.className = "company-card";
+  const key = getEmployerKey(row);
+  if (state.pinnedEmployers.has(key)) {
+    card.classList.add("is-pinned");
+  }
+
+  const cardControls = document.createElement("div");
+  cardControls.className = "card-controls";
+  const checkLabel = document.createElement("label");
+  checkLabel.className = "check-control";
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.checked = state.checkedEmployers.has(key);
+  checkbox.addEventListener("change", () => toggleCheckedEmployer(row, checkbox.checked));
+  checkLabel.append(checkbox, document.createElement("span"));
+  checkLabel.lastChild.textContent = "Select";
+  cardControls.append(
+    checkLabel,
+    createButton(state.pinnedEmployers.has(key) ? "Unpin" : "Pin", () => togglePinnedEmployer(row)),
+    createButton(state.favoriteEmployers.has(key) ? "Unfavorite" : "Favorite", () => toggleFavoriteEmployer(row))
+  );
 
   const heading = document.createElement("div");
   heading.className = "card-heading";
@@ -224,7 +285,9 @@ function createEmployerCard(row, sheetName) {
     row.sponsorshipEvidence,
     row.dataConfidence,
     row.employerModel,
-    row.employerReviewFlag
+    row.employerReviewFlag,
+    state.favoriteEmployers.has(key) ? "favorite" : "",
+    hasCustomCareerLink(row) ? "custom link" : ""
   ].filter(Boolean).forEach(value => pills.appendChild(createPill(value, /review|staffing|consulting/i.test(value) ? "review" : "")));
 
   const note = createElement("p", row.whyApply || "No workbook reason supplied.", "card-note");
@@ -242,18 +305,19 @@ function createEmployerCard(row, sheetName) {
   splitList(row.topRoleFamilies).slice(0, 6).forEach(value => rolePills.appendChild(createPill(value)));
   splitList(row.topWorksiteStates).slice(0, 5).forEach(value => rolePills.appendChild(createPill(value, "warning")));
 
-  card.append(heading, pills, note, evidence, rolePills, createActions(row, sheetName));
+  card.append(cardControls, heading, pills, note, evidence, rolePills, createActions(row, sheetName));
   return card;
 }
 
 function createActions(row, sheetName) {
   const actions = document.createElement("div");
   actions.className = "card-actions";
+  getEmployerActionItems(row).forEach(action => actions.appendChild(createLink(action.label, action.url)));
   actions.append(
-    createLink("Career Search", row.careerSearchUrl || buildGoogleCompanyUrl(row)),
-    createLink("Google Company", buildGoogleCompanyUrl(row)),
-    createLink("LinkedIn Jobs", buildLinkedInJobsUrl(row)),
-    createLink("LinkedIn Recruiters", buildLinkedInRecruiterUrl(row)),
+    createButton("Update Link", () => editCareerLink(row)),
+    createButton("Reset Link", () => resetCareerLink(row)),
+    createButton("Open All", () => openEmployerLinkPack(row)),
+    createButton("Copy All", () => copyEmployerLinkPack(row)),
     createButton("Copy Packet", () => copyRowsAsPackets([row])),
     createButton("Details", () => showDetails(row, sheetName))
   );
@@ -369,7 +433,8 @@ function renderRawData() {
   select.value = state.rawSheet;
   select.addEventListener("change", () => {
     state.rawSheet = select.value;
-    renderRawData();
+    persistPreferences();
+    render();
   });
   label.append(createElement("span", "Workbook sheet"), select);
   tools.append(label, createElement("p", "Raw Data exposes every sheet, row, and column from the workbook.", "muted"));
@@ -440,6 +505,197 @@ function renderSelectedPanel(row, sheetName) {
   );
 }
 
+function renderPinnedEmployers() {
+  const rows = getSavedEmployerRows();
+  els.pinnedCount.textContent = `${formatNumber(state.pinnedEmployers.size)} pinned / ${formatNumber(state.favoriteEmployers.size)} favorites`;
+  els.openPinnedButton.disabled = rows.length === 0;
+  els.copyPinnedButton.disabled = rows.length === 0;
+  els.clearPinnedButton.disabled = rows.length === 0;
+  els.clearFavoritesButton.disabled = state.favoriteEmployers.size === 0;
+
+  if (!rows.length) {
+    const empty = document.createElement("article");
+    empty.className = "company-card empty-card";
+    empty.append(
+      createElement("h3", "No saved H-1B companies yet"),
+      createElement("p", "Use Pin or Favorite on any employer card to keep the company here with all actions available.", "muted")
+    );
+    els.pinnedEmployersGrid.replaceChildren(empty);
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  rows.forEach(row => fragment.appendChild(createEmployerCard(row, row._sourceSheet || "Personalized Shortlist")));
+  els.pinnedEmployersGrid.replaceChildren(fragment);
+}
+
+function syncActionButtons() {
+  const selectedRows = getCheckedRows();
+  const hasVisibleEmployers = state.visibleRows.some(row => row.employerName);
+  els.openTopFiveButton.disabled = !hasVisibleEmployers;
+  els.openSelectedButton.disabled = selectedRows.length === 0;
+  els.copySelectedButton.disabled = selectedRows.length === 0;
+  els.clearCheckedButton.disabled = state.checkedEmployers.size === 0;
+}
+
+function handleFilterChange() {
+  persistPreferences();
+  render();
+}
+
+function toggleCheckedEmployer(row, checked) {
+  const key = getEmployerKey(row);
+  if (!key) return;
+  if (checked) {
+    state.checkedEmployers.add(key);
+  } else {
+    state.checkedEmployers.delete(key);
+  }
+  persistPreferences();
+  render();
+}
+
+function togglePinnedEmployer(row, forcePinned) {
+  const key = getEmployerKey(row);
+  if (!key) return;
+  const shouldPin = typeof forcePinned === "boolean" ? forcePinned : !state.pinnedEmployers.has(key);
+  if (shouldPin) {
+    state.pinnedEmployers.add(key);
+  } else {
+    state.pinnedEmployers.delete(key);
+  }
+  persistPreferences();
+  render();
+  showToast(`${row.employerName || "Employer"} ${shouldPin ? "pinned" : "unpinned"}`);
+}
+
+function toggleFavoriteEmployer(row, forceFavorite) {
+  const key = getEmployerKey(row);
+  if (!key) return;
+  const shouldFavorite = typeof forceFavorite === "boolean" ? forceFavorite : !state.favoriteEmployers.has(key);
+  if (shouldFavorite) {
+    state.favoriteEmployers.add(key);
+  } else {
+    state.favoriteEmployers.delete(key);
+  }
+  persistPreferences();
+  render();
+  showToast(`${row.employerName || "Employer"} ${shouldFavorite ? "favorited" : "unfavorited"}`);
+}
+
+function clearCheckedEmployers() {
+  state.checkedEmployers.clear();
+  persistPreferences();
+  render();
+  showToast("Cleared selected employers");
+}
+
+function clearPinnedEmployers() {
+  state.pinnedEmployers.clear();
+  persistPreferences();
+  render();
+  showToast("Cleared pinned employers");
+}
+
+function clearFavoriteEmployers() {
+  state.favoriteEmployers.clear();
+  persistPreferences();
+  render();
+  showToast("Cleared favorite employers");
+}
+
+function openTopFive() {
+  const rows = state.visibleRows.filter(row => row.employerName).slice(0, 5);
+  openCareerLinks(rows, "No visible employers to open", "Opened Top-5 employer links");
+}
+
+function openCheckedEmployers() {
+  openCareerLinks(getCheckedRows(), "Select employers first", "Opened selected employer links");
+}
+
+function openPinnedEmployers() {
+  openCareerLinks(getSavedEmployerRows(), "Save employers first", "Opened saved employer links");
+}
+
+function openCareerLinks(rows, emptyMessage, successMessage) {
+  const links = rows.map(getCareerUrl).filter(Boolean);
+  if (!links.length) {
+    showToast(emptyMessage);
+    return;
+  }
+  links.forEach(url => window.open(url, "_blank", "noopener"));
+  showToast(successMessage);
+}
+
+function copyCheckedPackets() {
+  const rows = getCheckedRows();
+  if (!rows.length) {
+    showToast("Select employers first");
+    return;
+  }
+  copyRowsAsPackets(rows);
+}
+
+function copyPinnedPackets() {
+  const rows = getSavedEmployerRows();
+  if (!rows.length) {
+    showToast("Save employers first");
+    return;
+  }
+  copyRowsAsPackets(rows);
+}
+
+function getSavedEmployerRows() {
+  const keys = [...new Set([...state.pinnedEmployers, ...state.favoriteEmployers])];
+  return keys.map(getEmployerByKey).filter(Boolean);
+}
+
+function openEmployerLinkPack(row) {
+  const links = getEmployerLinkPack(row);
+  if (!links.length) {
+    showToast("No links to open");
+    return;
+  }
+  links.forEach(url => window.open(url, "_blank", "noopener"));
+  showToast(`Opened ${links.length} links for ${row.employerName || "employer"}`);
+}
+
+function copyEmployerLinkPack(row) {
+  const lines = getEmployerActionItems(row).map(action => `${action.label}: ${action.url}`);
+  copyText(lines.join("\n"), `Copied links for ${row.employerName || "employer"}`);
+}
+
+function editCareerLink(row) {
+  const current = getCareerUrl(row);
+  const next = window.prompt(`Update saved career/search link for ${row.employerName || "this employer"}`, current);
+  if (next === null) return;
+  const trimmed = next.trim();
+  const key = getEmployerKey(row);
+  if (!trimmed) {
+    delete state.customCareerLinks[key];
+    persistPreferences();
+    render();
+    showToast("Custom link removed");
+    return;
+  }
+  if (!/^https?:\/\//i.test(trimmed)) {
+    showToast("Use a full https:// link");
+    return;
+  }
+  state.customCareerLinks[key] = trimmed;
+  persistPreferences();
+  render();
+  showToast("Custom link saved");
+}
+
+function resetCareerLink(row) {
+  const key = getEmployerKey(row);
+  delete state.customCareerLinks[key];
+  persistPreferences();
+  render();
+  showToast("Career link reset");
+}
+
 function matchesEmployerFilters(row) {
   const text = getSearchText(row);
   const query = normalize(els.searchInput.value);
@@ -505,7 +761,39 @@ function resetFilters() {
   ].forEach(select => {
     select.value = "";
   });
+  persistPreferences();
   render();
+}
+
+function getEmployerActionItems(row) {
+  const actions = [
+    { label: hasCustomCareerLink(row) ? "Careers (Custom)" : "Careers", url: getCareerUrl(row) },
+    { label: "Command Center", url: buildCommandCenterUrl(row) },
+    { label: "Google Company", url: buildGoogleCompanyUrl(row) },
+    { label: "LinkedIn Jobs", url: buildLinkedInJobsUrl(row) },
+    { label: "LinkedIn Posts", url: buildLinkedInPostsUrl(row) },
+    { label: "LinkedIn Recruiters", url: buildLinkedInRecruiterUrl(row) },
+    { label: "LinkedIn Company", url: buildLinkedInCompanyUrl(row) },
+    { label: "Indeed", url: buildIndeedUrl(row) }
+  ];
+  return actions.filter(action => action.url);
+}
+
+function getEmployerLinkPack(row) {
+  return getEmployerActionItems(row).map(action => action.url).filter(Boolean);
+}
+
+function getCareerUrl(row) {
+  const key = getEmployerKey(row);
+  return state.customCareerLinks[key] || row.careerSearchUrl || buildGoogleCompanyUrl(row);
+}
+
+function hasCustomCareerLink(row) {
+  return Boolean(state.customCareerLinks[getEmployerKey(row)]);
+}
+
+function getCheckedRows() {
+  return Array.from(state.checkedEmployers).map(getEmployerByKey).filter(Boolean);
 }
 
 function copyVisiblePackets() {
@@ -533,7 +821,9 @@ function copyRowsAsPackets(rows) {
     `Top cities: ${row.topCities || "n/a"}`,
     `Median wage: ${formatCurrency(row.medianAnnualWage)}`,
     `Review flag: ${row.employerReviewFlag || "n/a"}`,
-    `Career search: ${row.careerSearchUrl || buildGoogleCompanyUrl(row)}`
+    `Career link: ${getCareerUrl(row)}`,
+    `LinkedIn jobs: ${buildLinkedInJobsUrl(row)}`,
+    `Command Center: ${buildCommandCenterUrl(row)}`
   ].join("\n"));
   copyText(packets.join("\n\n---\n\n"), `Copied ${rows.length} sponsorship packet${rows.length === 1 ? "" : "s"}`);
 }
@@ -557,6 +847,119 @@ function copyVisibleCsv() {
 
 function copyText(text, message) {
   navigator.clipboard.writeText(text).then(() => showToast(message)).catch(() => showToast("Copy failed"));
+}
+
+function getPreferencesSnapshot() {
+  return {
+    tab: state.tab,
+    rawSheet: state.rawSheet,
+    filters: {
+      search: els.searchInput.value,
+      roleFamily: els.roleFamilyFilter.value,
+      state: els.stateFilter.value,
+      city: els.cityFilter.value,
+      priority: els.priorityFilter.value,
+      evidence: els.evidenceFilter.value,
+      confidence: els.confidenceFilter.value,
+      model: els.modelFilter.value,
+      minScore: els.minScoreFilter.value,
+      minNew: els.minNewFilter.value
+    },
+    pinnedEmployers: Array.from(state.pinnedEmployers),
+    favoriteEmployers: Array.from(state.favoriteEmployers),
+    checkedEmployers: Array.from(state.checkedEmployers),
+    customCareerLinks: sanitizeCustomLinks(state.customCareerLinks)
+  };
+}
+
+function persistPreferences() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(getPreferencesSnapshot()));
+}
+
+function loadPreferences() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    if (stored) applyPreferences(stored);
+  } catch {
+    localStorage.removeItem(STORAGE_KEY);
+  }
+}
+
+function applySyncFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("h1bPrefs");
+  if (!token) return;
+  const prefs = decodeSyncToken(token);
+  if (!prefs) {
+    showToast("Sync link could not be read");
+    return;
+  }
+  applyPreferences(prefs);
+  persistPreferences();
+  showToast("H-1B settings synced");
+}
+
+function applyPreferences(prefs) {
+  if (!prefs || typeof prefs !== "object") return;
+  const validTab = ALL_TABS.some(tab => tab.id === prefs.tab);
+  if (validTab) state.tab = prefs.tab;
+  if (DATA.sheets[prefs.rawSheet]) state.rawSheet = prefs.rawSheet;
+
+  const filters = prefs.filters || {};
+  setControlValue(els.searchInput, filters.search || "");
+  setControlValue(els.roleFamilyFilter, filters.roleFamily || "");
+  setControlValue(els.stateFilter, filters.state || "");
+  setControlValue(els.cityFilter, filters.city || "");
+  setControlValue(els.priorityFilter, filters.priority || "");
+  setControlValue(els.evidenceFilter, filters.evidence || "");
+  setControlValue(els.confidenceFilter, filters.confidence || "");
+  setControlValue(els.modelFilter, filters.model || "");
+  setControlValue(els.minScoreFilter, filters.minScore || "");
+  setControlValue(els.minNewFilter, filters.minNew || "");
+
+  state.pinnedEmployers = new Set(Array.isArray(prefs.pinnedEmployers) ? prefs.pinnedEmployers : []);
+  state.favoriteEmployers = new Set(Array.isArray(prefs.favoriteEmployers) ? prefs.favoriteEmployers : []);
+  state.checkedEmployers = new Set(Array.isArray(prefs.checkedEmployers) ? prefs.checkedEmployers : []);
+  state.customCareerLinks = sanitizeCustomLinks(prefs.customCareerLinks || {});
+}
+
+function setControlValue(control, value) {
+  if (!control) return;
+  if (control.tagName === "SELECT") {
+    control.value = [...control.options].some(option => option.value === value) ? value : "";
+  } else {
+    control.value = value;
+  }
+}
+
+function sanitizeCustomLinks(links) {
+  if (!links || typeof links !== "object" || Array.isArray(links)) return {};
+  return Object.fromEntries(Object.entries(links).filter(([, value]) => typeof value === "string" && /^https?:\/\//i.test(value)));
+}
+
+function copySyncLink() {
+  const url = new URL(window.location.href);
+  url.search = "";
+  url.hash = "";
+  url.searchParams.set("h1bPrefs", encodeSyncToken(getPreferencesSnapshot()));
+  copyText(url.toString(), "Copied portable H-1B sync link");
+}
+
+function encodeSyncToken(value) {
+  return btoa(unescape(encodeURIComponent(JSON.stringify(value))))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
+
+function decodeSyncToken(token) {
+  try {
+    const normalized = token.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+    return JSON.parse(decodeURIComponent(escape(atob(padded))));
+  } catch {
+    return null;
+  }
 }
 
 function showToast(message) {
@@ -628,24 +1031,84 @@ function createElement(tag, text, className = "") {
   return element;
 }
 
+function getEmployerKey(row) {
+  if (!row) return "";
+  return row._employerKey || normalizeEmployerKey(row.employerName);
+}
+
+function normalizeEmployerKey(value) {
+  return String(value || "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9 ]+/g, " ")
+    .replace(/\b(INCORPORATED|INC|CORPORATION|CORP|COMPANY|CO|LLC|LLP|LP|LTD|LIMITED|PLC)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getEmployerByKey(key) {
+  if (!key) return null;
+  for (const sheetName of PRIMARY_EMPLOYER_SHEETS) {
+    const row = getSheetRows(sheetName).find(item => getEmployerKey(item) === key);
+    if (row) return row;
+  }
+  return null;
+}
+
 function buildGoogleCompanyUrl(row) {
-  const query = `"${row.employerName || ""}" careers jobs sponsorship software data`;
+  const query = `"${row.employerName || ""}" careers jobs sponsorship ${DEFAULT_ROLE_QUERY}`;
   return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
 }
 
 function buildLinkedInJobsUrl(row) {
   const params = new URLSearchParams();
-  params.set("keywords", `${row.employerName || ""} software data`);
+  params.set("keywords", `${row.employerName || ""} ${DEFAULT_ROLE_QUERY}`);
   params.set("location", "United States");
   params.set("sortBy", "DD");
   return `https://www.linkedin.com/jobs/search/?${params.toString()}`;
 }
 
+function buildLinkedInPostsUrl(row) {
+  const params = new URLSearchParams();
+  params.set("keywords", `"${row.employerName || ""}" hiring ${DEFAULT_ROLE_QUERY}`);
+  params.set("origin", "GLOBAL_SEARCH_HEADER");
+  params.set("sortBy", "[\"date_posted\"]");
+  params.set("datePosted", "[\"past-week\"]");
+  params.set("contentType", "[\"jobs\"]");
+  return `https://www.linkedin.com/search/results/content/?${params.toString()}`;
+}
+
 function buildLinkedInRecruiterUrl(row) {
   const params = new URLSearchParams();
-  params.set("keywords", `"${row.employerName || ""}" recruiter "talent acquisition"`);
+  params.set("keywords", `"${row.employerName || ""}" recruiter "talent acquisition" ${DEFAULT_ROLE_QUERY}`);
   params.set("origin", "GLOBAL_SEARCH_HEADER");
   return `https://www.linkedin.com/search/results/people/?${params.toString()}`;
+}
+
+function buildLinkedInCompanyUrl(row) {
+  const params = new URLSearchParams();
+  params.set("keywords", row.employerName || "");
+  params.set("origin", "GLOBAL_SEARCH_HEADER");
+  return `https://www.linkedin.com/search/results/companies/?${params.toString()}`;
+}
+
+function buildIndeedUrl(row) {
+  const params = new URLSearchParams();
+  params.set("q", `${row.employerName || ""} ${DEFAULT_ROLE_QUERY}`);
+  params.set("l", "United States");
+  params.set("sort", "date");
+  return `https://www.indeed.com/jobs?${params.toString()}`;
+}
+
+function buildCommandCenterUrl(row) {
+  const params = new URLSearchParams();
+  params.set("profile", "freshDirect");
+  params.set("rolePack", "all-role-families");
+  params.set("companyRole", "Software Engineer");
+  params.set("companyFilter", row.employerName || "");
+  params.set("companyLocation", "usa");
+  params.set("companyTime", "24hours");
+  params.set("companySort", "latest");
+  return `../?${params.toString()}#careersHeading`;
 }
 
 function splitList(value) {

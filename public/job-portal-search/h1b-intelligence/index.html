@@ -27,6 +27,13 @@
     </header>
 
     <main class="app-shell">
+      <nav class="quick-rail" aria-label="Connected job-search pages">
+        <a href="../">Command Center</a>
+        <a href="../#careersHeading">Company Search</a>
+        <a href="../#vendorHeading">Vendor Outreach</a>
+        <a href="../#resourcesHeading">OPT Resources</a>
+      </nav>
+
       <section class="hero-panel">
         <div>
           <p class="eyebrow">International student sponsorship targeting</p>
@@ -98,8 +105,13 @@
           <strong id="visibleSummary">Ready</strong>
         </div>
         <div class="action-row">
+          <button class="primary-button" type="button" id="openTopFiveButton">Open Top-5</button>
+          <button class="secondary-button" type="button" id="openSelectedButton">Open Selected</button>
+          <button class="secondary-button" type="button" id="copySelectedButton">Copy Selected</button>
           <button class="secondary-button" type="button" id="copyPacketsButton">Copy Visible Packets</button>
           <button class="secondary-button" type="button" id="copyCsvButton">Copy Visible CSV</button>
+          <button class="secondary-button" type="button" id="clearCheckedButton">Clear Checks</button>
+          <button class="secondary-button" type="button" id="copySyncButton">Copy Sync Link</button>
         </div>
       </section>
 
@@ -124,6 +136,23 @@
             <p class="muted">Select Details on any card to inspect every workbook column.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="pinned-panel" id="pinnedEmployersPanel" aria-labelledby="pinnedHeading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Saved sponsor targets</p>
+            <h2 id="pinnedHeading">Pinned and favorite H-1B companies</h2>
+          </div>
+          <div class="action-row">
+            <span class="status-pill" id="pinnedCount">0 saved</span>
+            <button class="secondary-button" type="button" id="openPinnedButton">Open Saved</button>
+            <button class="secondary-button" type="button" id="copyPinnedButton">Copy Saved</button>
+            <button class="secondary-button" type="button" id="clearPinnedButton">Clear Pins</button>
+            <button class="secondary-button" type="button" id="clearFavoritesButton">Clear Favorites</button>
+          </div>
+        </div>
+        <div class="cards-grid" id="pinnedEmployersGrid"></div>
       </section>
     </main>
 

@@ -104,7 +104,8 @@ a {
 .ghost-button,
 .secondary-button,
 .primary-button,
-.tab-button {
+.tab-button,
+.quick-rail a {
   min-height: 38px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -125,7 +126,8 @@ a {
 .secondary-button:hover,
 .ghost-button:hover,
 .back-link:hover,
-.tab-button:hover {
+.tab-button:hover,
+.quick-rail a:hover {
   border-color: var(--accent);
   color: var(--accent);
 }
@@ -136,12 +138,25 @@ a {
   padding: 0 0 28px;
 }
 
+.quick-rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quick-rail a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .hero-panel,
 .controls-panel,
 .tabs-panel,
 .action-panel,
 .content-panel,
 .side-panel,
+.pinned-panel,
 .detail-dialog {
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -155,6 +170,7 @@ a {
 :root:not(.dark) .action-panel,
 :root:not(.dark) .content-panel,
 :root:not(.dark) .side-panel,
+:root:not(.dark) .pinned-panel,
 :root:not(.dark) .detail-dialog {
   background: var(--surface);
 }
@@ -210,7 +226,8 @@ a {
 .tabs-panel,
 .action-panel,
 .content-panel,
-.side-panel {
+.side-panel,
+.pinned-panel {
   padding: 14px;
 }
 
@@ -314,6 +331,44 @@ a {
   padding: 12px;
 }
 
+.company-card.is-pinned {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, var(--accent-soft), var(--surface-strong));
+}
+
+.empty-card {
+  min-height: 140px;
+  align-content: center;
+}
+
+.card-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.check-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 7px 10px;
+  font-size: .8rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.check-control input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
 .card-heading {
   display: flex;
   align-items: flex-start;
@@ -400,7 +455,8 @@ a {
 }
 
 .card-actions a,
-.card-actions button {
+.card-actions button,
+.card-controls button {
   min-height: 34px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -413,8 +469,15 @@ a {
   cursor: pointer;
 }
 
+.card-actions a[aria-disabled="true"],
+button:disabled {
+  cursor: not-allowed;
+  opacity: .5;
+}
+
 .card-actions a:hover,
-.card-actions button:hover {
+.card-actions button:hover,
+.card-controls button:hover {
   border-color: var(--accent);
   color: var(--accent);
 }
