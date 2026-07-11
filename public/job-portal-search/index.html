@@ -6,7 +6,11 @@
     <meta name="description" content="Taran's personal US job search command center - OPT-aware searches for software, AI, data, analytics, and adjacent roles.">
     <title>Taran's Job Command Center</title>
     <link rel="icon" href="assets/portal-scout-mark.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/styles.css">
+    <script src="h1b-intelligence/data.js"></script>
     <script src="assets/app.js" defer></script>
   </head>
   <body>
@@ -581,5 +585,15 @@
       <p>Taran's personal job-search launcher for the US market. It does not scrape, rank, or store job listings.</p>
       <p>This is job-search tooling, not immigration or legal advice.</p>
     </footer>
+    <dialog id="detailDialog" class="detail-dialog">
+      <div class="dialog-heading">
+        <div>
+          <p class="eyebrow" id="detailSheet">Workbook row</p>
+          <h2 id="detailTitle">Details</h2>
+        </div>
+        <button class="ghost-button" type="button" id="closeDetailButton">Close</button>
+      </div>
+      <div id="detailBody" class="detail-body"></div>
+    </dialog>
   </body>
 </html>

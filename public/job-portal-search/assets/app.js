@@ -8720,6 +8720,11 @@ function cacheElements() {
     profileDescription: document.getElementById("profileDescription"),
     relatedBlock: document.getElementById("relatedBlock"),
     relatedTitles: document.getElementById("relatedTitles"),
+    detailDialog: document.getElementById("detailDialog"),
+    detailSheet: document.getElementById("detailSheet"),
+    detailTitle: document.getElementById("detailTitle"),
+    detailBody: document.getElementById("detailBody"),
+    closeDetailButton: document.getElementById("closeDetailButton"),
     toast: document.getElementById("toast")
   });
 }
@@ -8855,6 +8860,7 @@ function bindEvents() {
   els.quickApplyButton.addEventListener("click", applyQuickApplyFlow);
   els.freshDirectButton.addEventListener("click", applyFreshDirectFlow);
   els.themeToggle.addEventListener("click", toggleTheme);
+  els.closeDetailButton.addEventListener("click", () => els.detailDialog.close());
 
   els.pinnedOperators.addEventListener("click", event => {
     const button = event.target.closest("button[data-pin-remove]");
@@ -9069,6 +9075,143 @@ function populateResources() {
   });
 }
 
+function findWorkbookRow(companyName) {
+  if (!window.H1B_INTELLIGENCE_DATA || !window.H1B_INTELLIGENCE_DATA.sheets) return null;
+  const sheets = window.H1B_INTELLIGENCE_DATA.sheets;
+  const searchSheets = ["Personalized Shortlist", "Apply First", "Strong Targets", "Hidden Gems", "Sponsorship Review", "Entry Level Evidence"];
+  const normalizedSearchName = companyName.toLowerCase().replace(/[^a-z0-9]+/g, "");
+  for (const sheetName of searchSheets) {
+    const sheet = sheets[sheetName];
+    if (sheet && sheet.rows) {
+      const found = sheet.rows.find(row => {
+        const rowName = (row.employerName || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+        return rowName === normalizedSearchName;
+      });
+      if (found) return [found, sheetName];
+    }
+  }
+  return null;
+}
+
+function showDetails(row, sheetName) {
+  if (!els.detailDialog) return;
+  els.detailSheet.textContent = sheetName;
+  els.detailTitle.textContent = row.employerName || "Workbook row";
+  const table = document.createElement("table");
+  table.className = "detail-table";
+  const tbody = document.createElement("tbody");
+  Object.entries(row).forEach(([key, val]) => {
+    if (key.startsWith("_") || typeof val === "object") return;
+    const tr = document.createElement("tr");
+    const th = document.createElement("th");
+    th.textContent = key.replace(/([A-Z])/g, " $1").replace(/^./, str => str.toUpperCase());
+    const td = document.createElement("td");
+    td.textContent = val == null || val === "" ? "n/a" : String(val);
+    tr.append(th, td);
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  els.detailBody.replaceChildren(table);
+  els.detailDialog.showModal();
+}
+
+function localCreateElement(tag, text, className = "") {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  element.textContent = text == null || text === "" ? "n/a" : String(text);
+  return element;
+}
+
+function localFormatScore(value) {
+  return Number.isFinite(Number(value)) ? Number(value).toFixed(1) : "n/a";
+}
+
+function localFormatNumber(value) {
+  if (value == null || value === "") return "0";
+  const number = Number(value);
+  return Number.isFinite(number) ? number.toLocaleString() : String(value);
+}
+
+function localFormatCurrency(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0
+    ? number.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })
+    : "n/a";
+}
+
+function localSplitList(value) {
+  return String(value || "").split(",").map(item => item.trim()).filter(Boolean);
+}
+
+function localBuildGoogleCompanyUrl(row) {
+  const query = `"${row.employerName || ""}" careers jobs sponsorship software data`;
+  return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+}
+
+function localBuildLinkedInJobsUrl(row) {
+  const params = new URLSearchParams();
+  params.set("keywords", `${row.employerName || ""} software data`);
+  params.set("location", "United States");
+  params.set("sortBy", "DD");
+  return `https://www.linkedin.com/jobs/search/?${params.toString()}`;
+}
+
+function localBuildLinkedInRecruiterUrl(row) {
+  const params = new URLSearchParams();
+  params.set("keywords", `"${row.employerName || ""}" recruiter "talent acquisition"`);
+  params.set("origin", "GLOBAL_SEARCH_HEADER");
+  return `https://www.linkedin.com/search/results/people/?${params.toString()}`;
+}
+
+function localCopyRowsAsPackets(rows) {
+  const packets = rows.map(row => [
+    `Employer: ${row.employerName || "Unknown"}`,
+    `Fit score: ${localFormatScore(row.candidateFitScore)}`,
+    `Priority: ${row.applicationPriority || "n/a"}`,
+    `Student friendliness: ${row.studentFriendliness || "n/a"}`,
+    `Sponsorship evidence: ${row.sponsorshipEvidence || "n/a"}`,
+    `Data confidence: ${row.dataConfidence || "n/a"}`,
+    `Why apply: ${row.whyApply || row.recommendedAction || "n/a"}`,
+    `New employment positions: ${localFormatNumber(row.newEmploymentPositions)}`,
+    `Certified tech LCAs: ${localFormatNumber(row.certifiedTechLcas)}`,
+    `Entry cases: ${localFormatNumber(row.explicitEntryCases)}`,
+    `Top role families: ${row.topRoleFamilies || "n/a"}`,
+    `Top states: ${row.topWorksiteStates || "n/a"}`,
+    `Top cities: ${row.topCities || "n/a"}`,
+    `Median wage: ${localFormatCurrency(row.medianAnnualWage)}`,
+    `Review flag: ${row.employerReviewFlag || "n/a"}`,
+    `Career search: ${row.careerSearchUrl || localBuildGoogleCompanyUrl(row)}`
+  ].join("\n"));
+  copyLinks([packets.join("\n\n---\n\n")], `Copied ${rows.length} sponsorship packet${rows.length === 1 ? "" : "s"}`);
+}
+
+function createEvidence(label, value) {
+  const item = document.createElement("div");
+  item.className = "evidence-item";
+  item.append(localCreateElement("span", label), localCreateElement("strong", value || "0"));
+  return item;
+}
+
+function createLink(label, url) {
+  const link = document.createElement("a");
+  link.href = url || "#";
+  link.target = "_blank";
+  link.rel = "noopener";
+  link.textContent = label;
+  if (!url) {
+    link.setAttribute("aria-disabled", "true");
+  }
+  return link;
+}
+
+function createButton(label, handler) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = label;
+  button.addEventListener("click", handler);
+  return button;
+}
+
 function renderSponsorGrid() {
   els.sponsorGrid.innerHTML = "";
   const sponsorPool = state.visibleCompanies && state.visibleCompanies.length ? state.visibleCompanies : COMPANIES;
@@ -9085,35 +9228,83 @@ function renderSponsorGrid() {
   }
   const fragment = document.createDocumentFragment();
   sponsors.forEach(company => {
+    const workbookMatch = findWorkbookRow(company.name);
+    let row, sheetName;
+    if (workbookMatch) {
+      row = workbookMatch[0];
+      sheetName = workbookMatch[1];
+    } else {
+      sheetName = "All Sponsors Mock";
+      row = {
+        rank: company.rank || "",
+        employerName: company.name,
+        applicationPriority: "No priority",
+        candidateFitScore: company.sponsorTier === "tier1" ? 90 : company.sponsorTier === "tier2" ? 75 : company.sponsorTier === "tier3" ? 60 : 50,
+        studentFriendliness: company.sponsorTier === "tier1" ? "Very Friendly" : "Neutral",
+        sponsorshipEvidence: company.sponsorTier === "tier1" ? "Very Strong" : company.sponsorTier === "tier2" ? "Strong" : company.sponsorTier === "tier3" ? "Moderate" : "n/a",
+        dataConfidence: "High",
+        employerModel: company.companyKind === "vendor" ? "Vendor / Staffing" : "Direct Employer",
+        employerReviewFlag: company.companyKind === "vendor" ? "Vendor staffing caution" : "",
+        whyApply: `Identified as a sponsor with ${company.h1bFilings.toLocaleString()} H-1B filings. Category: ${company.category}.`,
+        newEmploymentPositions: company.h1bFilings,
+        certifiedTechLcas: company.h1bFilings,
+        explicitEntryCases: Math.round(company.h1bFilings * 0.1),
+        medianAnnualWage: "",
+        topRoleFamilies: company.category,
+        topWorksiteStates: company.tags ? company.tags.join(", ") : "",
+        topCities: "",
+        topJobTitles: "",
+        careerSearchUrl: getCompanyCareersUrl(company)
+      };
+    }
+
     const card = document.createElement("article");
-    card.className = "sponsor-card";
-    const title = document.createElement("div");
-    title.className = "sponsor-title";
-    const name = document.createElement("strong");
-    name.textContent = company.name;
-    const filings = createPill(`${company.h1bFilings.toLocaleString()} filings`);
-    title.append(name, filings);
-    const meta = document.createElement("div");
-    meta.className = "portal-meta";
-    meta.append(createPill(company.companyKind === "vendor" ? "Vendor" : "Direct employer"));
-    meta.append(createPill(FILTER_LABELS.sponsorTier[company.sponsorTier] || company.sponsorTier));
-    meta.append(createPill(company.category));
-    const action = document.createElement("button");
-    action.type = "button";
-    action.className = "secondary-button";
-    action.textContent = "Use in companies";
-    action.addEventListener("click", () => {
-      els.companySponsorTier.value = company.sponsorTier;
-      els.companyKind.value = company.companyKind;
-      els.companyCategorySelect.value = "all";
-      els.companyFilter.value = company.name;
-      renderCompanyOptions(els.companyFilter.value);
-      const match = state.visibleCompanies.find(item => item.id === company.id);
-      els.companySelect.value = match ? company.id : ALL_COMPANIES_ID;
-      syncCompanyCard();
-      document.getElementById("careersHeading").scrollIntoView({ behavior: "smooth" });
-    });
-    card.append(title, meta, action);
+    card.className = "company-card";
+
+    const heading = document.createElement("div");
+    heading.className = "card-heading";
+    const titleBlock = document.createElement("div");
+    titleBlock.append(localCreateElement("h3", `${row.rank || ""}. ${row.employerName || "Unknown employer"}`.trim()));
+    titleBlock.append(localCreateElement("p", row.applicationPriority || "No priority", "row-subtitle"));
+    heading.append(titleBlock, localCreateElement("div", localFormatScore(row.candidateFitScore), "score-badge"));
+
+    const pills = document.createElement("div");
+    pills.className = "pill-list";
+    [
+      row.studentFriendliness,
+      row.sponsorshipEvidence,
+      row.dataConfidence,
+      row.employerModel,
+      row.employerReviewFlag
+    ].filter(Boolean).forEach(value => pills.appendChild(createPill(value, /review|staffing|consulting/i.test(value) ? "review" : "")));
+
+    const note = localCreateElement("p", row.whyApply || "No workbook reason supplied.", "card-note");
+    const evidence = document.createElement("div");
+    evidence.className = "evidence-grid";
+    evidence.append(
+      createEvidence("New positions", localFormatNumber(row.newEmploymentPositions)),
+      createEvidence("Tech LCAs", localFormatNumber(row.certifiedTechLcas)),
+      createEvidence("Entry cases", localFormatNumber(row.explicitEntryCases)),
+      createEvidence("Median wage", localFormatCurrency(row.medianAnnualWage))
+    );
+
+    const rolePills = document.createElement("div");
+    rolePills.className = "pill-list";
+    localSplitList(row.topRoleFamilies).slice(0, 6).forEach(value => rolePills.appendChild(createPill(value)));
+    localSplitList(row.topWorksiteStates).slice(0, 5).forEach(value => rolePills.appendChild(createPill(value, "pill-location")));
+
+    const actions = document.createElement("div");
+    actions.className = "card-actions";
+    actions.append(
+      createLink("Career Search", row.careerSearchUrl || localBuildGoogleCompanyUrl(row)),
+      createLink("Google Company", localBuildGoogleCompanyUrl(row)),
+      createLink("LinkedIn Jobs", localBuildLinkedInJobsUrl(row)),
+      createLink("LinkedIn Recruiters", localBuildLinkedInRecruiterUrl(row)),
+      createButton("Copy Packet", () => localCopyRowsAsPackets([row])),
+      createButton("Details", () => showDetails(row, sheetName))
+    );
+
+    card.append(heading, pills, note, evidence, rolePills, actions);
     fragment.appendChild(card);
   });
   els.sponsorGrid.appendChild(fragment);
@@ -11464,7 +11655,8 @@ function renderFavoriteCompanies() {
   toolbar.className = "favorite-company-toolbar";
   toolbar.append(
     createCompanyActionButton("Open Top Favorites Today", openTopFavoriteCompanyPacks),
-    createCompanyActionButton("Copy Top Favorite Packs", copyTopFavoriteCompanyPacks)
+    createCompanyActionButton("Copy Top Favorite Packs", copyTopFavoriteCompanyPacks),
+    createCompanyActionButton("Open All Careers", openAllFavoriteCareers)
   );
   fragment.appendChild(toolbar);
 
@@ -11526,6 +11718,20 @@ function copyTopFavoriteCompanyPacks() {
   }
   setDailyChecklistItem("favoriteCompanies", true);
   copyLinks(links, `Copied ${favorites.length} favorite company packs`);
+}
+
+function openAllFavoriteCareers() {
+  const favorites = COMPANIES.filter(company => state.favoriteCompanies.has(company.id));
+  if (!favorites.length) {
+    showToast("No favorite companies pinned yet");
+    return;
+  }
+  const links = favorites.map(company => getCompanyCareersUrl(company)).filter(Boolean);
+  if (links.length > 25 && !window.confirm(`This will open ${links.length} career pages. Continue?`)) {
+    return;
+  }
+  links.forEach(url => window.open(url, "_blank", "noopener"));
+  showToast(`Opened ${links.length} careers pages`);
 }
 
 function createCompanySuggestionButton(label, company, handler) {

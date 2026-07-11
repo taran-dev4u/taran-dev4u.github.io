@@ -71,6 +71,10 @@ function cacheElements() {
     modelFilter: document.getElementById("modelFilter"),
     minScoreFilter: document.getElementById("minScoreFilter"),
     minNewFilter: document.getElementById("minNewFilter"),
+    sponsorTierFilter: document.getElementById("sponsorTierFilter"),
+    minEntryFilter: document.getElementById("minEntryFilter"),
+    minWageFilter: document.getElementById("minWageFilter"),
+    reviewFilter: document.getElementById("reviewFilter"),
     resetFiltersButton: document.getElementById("resetFiltersButton"),
     tabList: document.getElementById("tabList"),
     visibleSummary: document.getElementById("visibleSummary"),
@@ -110,7 +114,11 @@ function bindEvents() {
     els.confidenceFilter,
     els.modelFilter,
     els.minScoreFilter,
-    els.minNewFilter
+    els.minNewFilter,
+    els.sponsorTierFilter,
+    els.minEntryFilter,
+    els.minWageFilter,
+    els.reviewFilter
   ].forEach(control => {
     control.addEventListener("input", handleFilterChange);
     control.addEventListener("change", handleFilterChange);
@@ -180,6 +188,7 @@ function populateFilters() {
   fillSelect(els.evidenceFilter, "All evidence", collectValues(rows, "sponsorshipEvidence"));
   fillSelect(els.confidenceFilter, "All confidence", collectValues(rows, "dataConfidence"));
   fillSelect(els.modelFilter, "All employer models", collectValues(rows, "employerModel"));
+  fillSelect(els.reviewFilter, "All review flags", collectValues(rows, "employerReviewFlag"));
 }
 
 function fillSelect(select, label, values) {
@@ -709,6 +718,10 @@ function matchesEmployerFilters(row) {
   if (els.modelFilter.value && row.employerModel !== els.modelFilter.value) return false;
   if (Number(els.minScoreFilter.value || 0) && Number(row.candidateFitScore || 0) < Number(els.minScoreFilter.value)) return false;
   if (Number(els.minNewFilter.value || 0) && Number(row.newEmploymentPositions || 0) < Number(els.minNewFilter.value)) return false;
+  if (els.sponsorTierFilter.value && getSponsorTier(row) !== els.sponsorTierFilter.value) return false;
+  if (Number(els.minEntryFilter.value || 0) && Number(row.explicitEntryCases || 0) < Number(els.minEntryFilter.value)) return false;
+  if (Number(els.minWageFilter.value || 0) && Number(row.medianAnnualWage || 0) < Number(els.minWageFilter.value)) return false;
+  if (els.reviewFilter.value && row.employerReviewFlag !== els.reviewFilter.value) return false;
   return true;
 }
 
@@ -720,7 +733,20 @@ function matchesWeeklyFilters(row) {
   if (els.stateFilter.value && !splitList(row.topWorksiteStates).includes(els.stateFilter.value)) return false;
   if (els.priorityFilter.value && row.applicationPriority !== els.priorityFilter.value) return false;
   if (Number(els.minScoreFilter.value || 0) && Number(row.candidateFitScore || 0) < Number(els.minScoreFilter.value)) return false;
+  if (els.sponsorTierFilter.value && getSponsorTier(row) !== els.sponsorTierFilter.value) return false;
+  if (Number(els.minEntryFilter.value || 0) && Number(row.explicitEntryCases || 0) < Number(els.minEntryFilter.value)) return false;
+  if (Number(els.minWageFilter.value || 0) && Number(row.medianAnnualWage || 0) < Number(els.minWageFilter.value)) return false;
+  if (els.reviewFilter.value && row.employerReviewFlag !== els.reviewFilter.value) return false;
   return true;
+}
+
+function getSponsorTier(row) {
+  const score = Number(row.candidateFitScore || 0);
+  const positions = Number(row.newEmploymentPositions || 0);
+  const evidence = normalize(row.sponsorshipEvidence);
+  if (score >= 88 || positions >= 200 || evidence.includes("strong")) return "tier1";
+  if (score >= 82 || positions >= 25 || evidence.includes("moderate")) return "tier2";
+  return "tier3";
 }
 
 function filterRawRows(rows) {
@@ -746,7 +772,9 @@ function resetFilters() {
   [
     els.searchInput,
     els.minScoreFilter,
-    els.minNewFilter
+    els.minNewFilter,
+    els.minEntryFilter,
+    els.minWageFilter
   ].forEach(input => {
     input.value = "";
   });
@@ -757,7 +785,9 @@ function resetFilters() {
     els.priorityFilter,
     els.evidenceFilter,
     els.confidenceFilter,
-    els.modelFilter
+    els.modelFilter,
+    els.sponsorTierFilter,
+    els.reviewFilter
   ].forEach(select => {
     select.value = "";
   });
@@ -863,7 +893,11 @@ function getPreferencesSnapshot() {
       confidence: els.confidenceFilter.value,
       model: els.modelFilter.value,
       minScore: els.minScoreFilter.value,
-      minNew: els.minNewFilter.value
+      minNew: els.minNewFilter.value,
+      sponsorTier: els.sponsorTierFilter.value,
+      minEntry: els.minEntryFilter.value,
+      minWage: els.minWageFilter.value,
+      review: els.reviewFilter.value
     },
     pinnedEmployers: Array.from(state.pinnedEmployers),
     favoriteEmployers: Array.from(state.favoriteEmployers),
@@ -916,6 +950,10 @@ function applyPreferences(prefs) {
   setControlValue(els.modelFilter, filters.model || "");
   setControlValue(els.minScoreFilter, filters.minScore || "");
   setControlValue(els.minNewFilter, filters.minNew || "");
+  setControlValue(els.sponsorTierFilter, filters.sponsorTier || "");
+  setControlValue(els.minEntryFilter, filters.minEntry || "");
+  setControlValue(els.minWageFilter, filters.minWage || "");
+  setControlValue(els.reviewFilter, filters.review || "");
 
   state.pinnedEmployers = new Set(Array.isArray(prefs.pinnedEmployers) ? prefs.pinnedEmployers : []);
   state.favoriteEmployers = new Set(Array.isArray(prefs.favoriteEmployers) ? prefs.favoriteEmployers : []);
