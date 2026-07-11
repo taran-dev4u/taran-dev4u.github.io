@@ -39,6 +39,7 @@ const state = {
   pinnedEmployers: new Set(),
   favoriteEmployers: new Set(),
   checkedEmployers: new Set(),
+  savedEmployerOrder: [],
   customCareerLinks: {}
 };
 
@@ -243,7 +244,7 @@ function syncTabs() {
 
 function renderEmployerSheet(sheetName) {
   state.visibleSheet = sheetName;
-  const rows = getSheetRows(sheetName).filter(matchesEmployerFilters);
+  const rows = sortEmployerRowsForView(getSheetRows(sheetName).filter(matchesEmployerFilters));
   state.visibleRows = rows;
   els.visibleSummary.textContent = `${formatNumber(rows.length)} visible from ${sheetName}`;
   els.copyPacketsButton.disabled = rows.length === 0;
@@ -341,7 +342,7 @@ function createActions(row, sheetName) {
 }
 
 function renderWeeklyPlan() {
-  const rows = getSheetRows("Weekly Plan").filter(matchesWeeklyFilters);
+  const rows = sortEmployerRowsForView(getSheetRows("Weekly Plan").filter(matchesWeeklyFilters));
   state.visibleSheet = "Weekly Plan";
   state.visibleRows = rows;
   els.visibleSummary.textContent = `${formatNumber(rows.length)} weekly targets`;
@@ -541,8 +542,28 @@ function renderPinnedEmployers() {
   }
 
   const fragment = document.createDocumentFragment();
-  rows.forEach(row => fragment.appendChild(createEmployerCard(row, row._sourceSheet || "Personalized Shortlist")));
+  rows.forEach(row => fragment.appendChild(createSavedEmployerCard(row, rows)));
   els.pinnedEmployersGrid.replaceChildren(fragment);
+}
+
+function createSavedEmployerCard(row, rows) {
+  const key = getEmployerKey(row);
+  const card = createEmployerCard(row, row._sourceSheet || "Personalized Shortlist");
+  const orderedRows = rows.filter(item => isSameSavedGroup(key, getEmployerKey(item)));
+  const groupIndex = orderedRows.findIndex(item => getEmployerKey(item) === key);
+  const orderControls = document.createElement("div");
+  orderControls.className = "saved-order-controls";
+  orderControls.append(
+    createElement("span", state.pinnedEmployers.has(key) ? "Pinned order" : "Favorite order", "saved-order-label"),
+    createButton("Top", () => moveSavedEmployerToTop(row)),
+    createButton("Up", () => moveSavedEmployer(row, -1)),
+    createButton("Down", () => moveSavedEmployer(row, 1))
+  );
+  orderControls.querySelectorAll("button")[0].disabled = groupIndex <= 0;
+  orderControls.querySelectorAll("button")[1].disabled = groupIndex <= 0;
+  orderControls.querySelectorAll("button")[2].disabled = groupIndex < 0 || groupIndex >= orderedRows.length - 1;
+  card.prepend(orderControls);
+  return card;
 }
 
 function syncActionButtons() {
@@ -581,8 +602,10 @@ function togglePinnedEmployer(row, forcePinned) {
   const shouldPin = typeof forcePinned === "boolean" ? forcePinned : !state.pinnedEmployers.has(key);
   if (shouldPin) {
     state.pinnedEmployers.add(key);
+    moveSavedKeyToGroupTop(key);
   } else {
     state.pinnedEmployers.delete(key);
+    removeSavedKeyIfUnused(key);
   }
   persistPreferences();
   render();
@@ -595,8 +618,10 @@ function toggleFavoriteEmployer(row, forceFavorite) {
   const shouldFavorite = typeof forceFavorite === "boolean" ? forceFavorite : !state.favoriteEmployers.has(key);
   if (shouldFavorite) {
     state.favoriteEmployers.add(key);
+    moveSavedKeyToGroupTop(key);
   } else {
     state.favoriteEmployers.delete(key);
+    removeSavedKeyIfUnused(key);
   }
   persistPreferences();
   render();
@@ -612,6 +637,7 @@ function clearCheckedEmployers() {
 
 function clearPinnedEmployers() {
   state.pinnedEmployers.clear();
+  cleanupSavedEmployerOrder();
   persistPreferences();
   render();
   showToast("Cleared pinned employers");
@@ -619,6 +645,7 @@ function clearPinnedEmployers() {
 
 function clearFavoriteEmployers() {
   state.favoriteEmployers.clear();
+  cleanupSavedEmployerOrder();
   persistPreferences();
   render();
   showToast("Cleared favorite employers");
@@ -685,8 +712,113 @@ function copyPinnedPackets() {
 }
 
 function getSavedEmployerRows() {
-  const keys = [...new Set([...state.pinnedEmployers, ...state.favoriteEmployers])];
-  return keys.map(getEmployerByKey).filter(Boolean);
+  cleanupSavedEmployerOrder();
+  return getSavedEmployerKeys()
+    .sort(compareSavedKeys)
+    .map(getEmployerByKey)
+    .filter(Boolean);
+}
+
+function getSavedEmployerKeys() {
+  return [...new Set([...state.pinnedEmployers, ...state.favoriteEmployers])];
+}
+
+function cleanupSavedEmployerOrder() {
+  const saved = new Set(getSavedEmployerKeys());
+  state.savedEmployerOrder = state.savedEmployerOrder.filter(key => saved.has(key));
+  getSavedEmployerKeys().forEach(key => {
+    if (!state.savedEmployerOrder.includes(key)) {
+      state.savedEmployerOrder.push(key);
+    }
+  });
+}
+
+function compareSavedKeys(a, b) {
+  const groupDiff = getSavedGroupRank(a) - getSavedGroupRank(b);
+  if (groupDiff) return groupDiff;
+  const indexA = getSavedOrderIndex(a);
+  const indexB = getSavedOrderIndex(b);
+  return indexA - indexB;
+}
+
+function getSavedGroupRank(key) {
+  if (state.pinnedEmployers.has(key)) return 0;
+  if (state.favoriteEmployers.has(key)) return 1;
+  return 2;
+}
+
+function getSavedOrderIndex(key) {
+  const index = state.savedEmployerOrder.indexOf(key);
+  return index >= 0 ? index : Number.MAX_SAFE_INTEGER;
+}
+
+function sortEmployerRowsForView(rows) {
+  cleanupSavedEmployerOrder();
+  return [...rows].sort((a, b) => {
+    const keyA = getEmployerKey(a);
+    const keyB = getEmployerKey(b);
+    const savedDiff = getSavedGroupRank(keyA) - getSavedGroupRank(keyB);
+    if (savedDiff) return savedDiff;
+    const indexDiff = getSavedOrderIndex(keyA) - getSavedOrderIndex(keyB);
+    if (indexDiff) return indexDiff;
+    return 0;
+  });
+}
+
+function isSameSavedGroup(a, b) {
+  return getSavedGroupRank(a) === getSavedGroupRank(b);
+}
+
+function moveSavedEmployer(row, direction) {
+  const key = getEmployerKey(row);
+  if (!key) return;
+  cleanupSavedEmployerOrder();
+  const groupKeys = getSavedEmployerKeys().sort(compareSavedKeys).filter(item => isSameSavedGroup(key, item));
+  const currentIndex = groupKeys.indexOf(key);
+  const nextIndex = currentIndex + direction;
+  if (currentIndex < 0 || nextIndex < 0 || nextIndex >= groupKeys.length) {
+    return;
+  }
+  [groupKeys[currentIndex], groupKeys[nextIndex]] = [groupKeys[nextIndex], groupKeys[currentIndex]];
+  writeSavedGroupOrder(key, groupKeys);
+  persistPreferences();
+  render();
+}
+
+function moveSavedEmployerToTop(row) {
+  const key = getEmployerKey(row);
+  if (!key) return;
+  cleanupSavedEmployerOrder();
+  const groupKeys = getSavedEmployerKeys().sort(compareSavedKeys).filter(item => isSameSavedGroup(key, item));
+  const nextGroupKeys = [key, ...groupKeys.filter(item => item !== key)];
+  writeSavedGroupOrder(key, nextGroupKeys);
+  persistPreferences();
+  render();
+}
+
+function moveSavedKeyToGroupTop(key) {
+  cleanupSavedEmployerOrder();
+  const groupKeys = getSavedEmployerKeys().sort(compareSavedKeys).filter(item => isSameSavedGroup(key, item));
+  writeSavedGroupOrder(key, [key, ...groupKeys.filter(item => item !== key)]);
+}
+
+function removeSavedKeyIfUnused(key) {
+  if (state.pinnedEmployers.has(key) || state.favoriteEmployers.has(key)) {
+    return;
+  }
+  state.savedEmployerOrder = state.savedEmployerOrder.filter(item => item !== key);
+}
+
+function writeSavedGroupOrder(referenceKey, groupKeys) {
+  const groupRank = getSavedGroupRank(referenceKey);
+  const otherKeys = state.savedEmployerOrder.filter(key => getSavedGroupRank(key) !== groupRank);
+  if (groupRank === 0) {
+    state.savedEmployerOrder = [...groupKeys, ...otherKeys];
+    return;
+  }
+  const pinnedKeys = state.savedEmployerOrder.filter(key => getSavedGroupRank(key) === 0);
+  const remainingOtherKeys = otherKeys.filter(key => getSavedGroupRank(key) !== 0);
+  state.savedEmployerOrder = [...pinnedKeys, ...groupKeys, ...remainingOtherKeys];
 }
 
 function getUncheckedEmployerRows() {
@@ -953,6 +1085,7 @@ function getPreferencesSnapshot() {
     pinnedEmployers: Array.from(state.pinnedEmployers),
     favoriteEmployers: Array.from(state.favoriteEmployers),
     checkedEmployers: Array.from(state.checkedEmployers),
+    savedEmployerOrder: state.savedEmployerOrder,
     customCareerLinks: sanitizeCustomLinks(state.customCareerLinks)
   };
 }
@@ -1009,6 +1142,8 @@ function applyPreferences(prefs) {
   state.pinnedEmployers = new Set(Array.isArray(prefs.pinnedEmployers) ? prefs.pinnedEmployers : []);
   state.favoriteEmployers = new Set(Array.isArray(prefs.favoriteEmployers) ? prefs.favoriteEmployers : []);
   state.checkedEmployers = new Set(Array.isArray(prefs.checkedEmployers) ? prefs.checkedEmployers : []);
+  state.savedEmployerOrder = Array.isArray(prefs.savedEmployerOrder) ? prefs.savedEmployerOrder.filter(key => typeof key === "string") : [];
+  cleanupSavedEmployerOrder();
   state.customCareerLinks = sanitizeCustomLinks(prefs.customCareerLinks || {});
 }
 

@@ -313,6 +313,29 @@ a {
 
 .content-panel {
   min-height: 540px;
+  max-height: min(74vh, 900px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: var(--accent) var(--surface-strong);
+  scrollbar-width: thin;
+}
+
+.content-panel > .section-heading {
+  position: sticky;
+  top: -14px;
+  z-index: 3;
+  margin: -14px -14px 12px;
+  padding: 14px;
+  border-bottom: 1px solid var(--line);
+  background:
+    linear-gradient(135deg, rgba(72, 198, 239, .12), transparent 42%),
+    var(--surface);
+}
+
+:root.dark .content-panel > .section-heading {
+  background:
+    linear-gradient(135deg, rgba(72, 198, 239, .12), transparent 42%),
+    var(--surface);
 }
 
 .side-panel {
@@ -401,6 +424,41 @@ a {
   width: 16px;
   height: 16px;
   accent-color: var(--accent);
+}
+
+.saved-order-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 8px;
+}
+
+.saved-order-label {
+  color: var(--muted);
+  font-size: .78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.saved-order-controls button {
+  min-height: 30px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  color: var(--ink);
+  padding: 5px 9px;
+  font-size: .78rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.saved-order-controls button:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .card-heading {
