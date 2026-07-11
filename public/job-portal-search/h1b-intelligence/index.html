@@ -29,6 +29,9 @@
     <main class="app-shell">
       <nav class="quick-rail" aria-label="Connected job-search pages">
         <a href="../">Command Center</a>
+        <a href="#pinnedEmployersPanel">Saved</a>
+        <a href="#filtersHeading">Filters</a>
+        <a href="#contentPanel">Workbook</a>
         <a href="../#careersHeading">Company Search</a>
         <a href="../#vendorHeading">Vendor Outreach</a>
         <a href="../#resourcesHeading">OPT Resources</a>
@@ -137,6 +140,24 @@
         </div>
       </section>
 
+      <section class="pinned-panel saved-workbench" id="pinnedEmployersPanel" aria-labelledby="pinnedHeading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Saved sponsor targets</p>
+            <h2 id="pinnedHeading">Pinned and favorite H-1B companies</h2>
+          </div>
+          <div class="action-row">
+            <span class="status-pill" id="pinnedCount">0 saved</span>
+            <button class="secondary-button" type="button" id="openPinnedButton">Open Saved</button>
+            <button class="secondary-button" type="button" id="copyPinnedButton">Copy Saved</button>
+            <button class="secondary-button" type="button" id="clearPinnedButton">Clear Pins</button>
+            <button class="secondary-button" type="button" id="clearFavoritesButton">Clear Favorites</button>
+          </div>
+        </div>
+        <div class="saved-strip" id="savedEmployersStrip" aria-label="Compact saved H-1B companies"></div>
+        <div class="cards-grid" id="pinnedEmployersGrid"></div>
+      </section>
+
       <section class="content-grid">
         <div class="content-panel" id="contentPanel" aria-live="polite"></div>
         <aside class="side-panel">
@@ -160,22 +181,6 @@
         </aside>
       </section>
 
-      <section class="pinned-panel" id="pinnedEmployersPanel" aria-labelledby="pinnedHeading">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Saved sponsor targets</p>
-            <h2 id="pinnedHeading">Pinned and favorite H-1B companies</h2>
-          </div>
-          <div class="action-row">
-            <span class="status-pill" id="pinnedCount">0 saved</span>
-            <button class="secondary-button" type="button" id="openPinnedButton">Open Saved</button>
-            <button class="secondary-button" type="button" id="copyPinnedButton">Copy Saved</button>
-            <button class="secondary-button" type="button" id="clearPinnedButton">Clear Pins</button>
-            <button class="secondary-button" type="button" id="clearFavoritesButton">Clear Favorites</button>
-          </div>
-        </div>
-        <div class="cards-grid" id="pinnedEmployersGrid"></div>
-      </section>
     </main>
 
     <dialog id="detailDialog" class="detail-dialog">

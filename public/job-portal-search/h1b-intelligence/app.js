@@ -91,6 +91,7 @@ function cacheElements() {
     selectedPanel: document.getElementById("selectedPanel"),
     pinnedEmployersPanel: document.getElementById("pinnedEmployersPanel"),
     pinnedCount: document.getElementById("pinnedCount"),
+    savedEmployersStrip: document.getElementById("savedEmployersStrip"),
     pinnedEmployersGrid: document.getElementById("pinnedEmployersGrid"),
     openPinnedButton: document.getElementById("openPinnedButton"),
     copyPinnedButton: document.getElementById("copyPinnedButton"),
@@ -259,6 +260,101 @@ function renderEmployerSheet(sheetName) {
   els.contentPanel.replaceChildren(heading, grid);
 }
 
+function getDomainFromUrl(url) {
+  try {
+    const parsed = new URL(url);
+    return parsed.hostname.replace(/^www\./i, "");
+  } catch {
+    return "";
+  }
+}
+
+function getCompanyIdentity(row) {
+  const name = row?.employerName || "Company";
+  const domain = getDomainFromUrl(getCareerUrl(row));
+  const initials = String(name)
+    .replace(/[^a-z0-9 ]/gi, " ")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(part => part[0].toUpperCase())
+    .join("") || "CO";
+  const hue = Array.from(String(name)).reduce((sum, char) => sum + char.charCodeAt(0), 0) % 360;
+  return {
+    name,
+    domain,
+    initials,
+    brandColor: `hsl(${hue} 72% 62%)`,
+    logoUrl: domain ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64` : ""
+  };
+}
+
+function renderCompanyLogo(row, size = "md") {
+  const identity = getCompanyIdentity(row);
+  const logo = document.createElement("span");
+  logo.className = `company-logo company-logo-${size}`;
+  logo.style.setProperty("--logo-color", identity.brandColor);
+  logo.setAttribute("aria-hidden", "true");
+  const initials = document.createElement("span");
+  initials.className = "company-logo-initials";
+  initials.textContent = identity.initials;
+  logo.appendChild(initials);
+  if (identity.logoUrl) {
+    const image = document.createElement("img");
+    image.src = identity.logoUrl;
+    image.alt = "";
+    image.loading = "lazy";
+    image.addEventListener("load", () => {
+      logo.classList.add("has-image");
+      initials.hidden = true;
+    }, { once: true });
+    image.addEventListener("error", () => image.remove(), { once: true });
+    logo.appendChild(image);
+  }
+  return logo;
+}
+
+function createCompanyIdentityHeader(row, options = {}) {
+  const header = document.createElement("div");
+  header.className = "company-identity-header";
+  header.appendChild(renderCompanyLogo(row, options.logoSize || "md"));
+  const copy = document.createElement("div");
+  copy.className = "company-identity-copy";
+  copy.append(
+    createElement(options.level || "h3", options.title || `${row.rank || ""}. ${row.employerName || "Unknown employer"}`.trim()),
+    createElement("p", options.subtitle || row.applicationPriority || "No priority", "row-subtitle")
+  );
+  header.appendChild(copy);
+  if (options.score) {
+    header.appendChild(createElement("div", options.score, "score-badge"));
+  }
+  return header;
+}
+
+function createActionGroup(label, items) {
+  const group = document.createElement("div");
+  group.className = "action-group";
+  group.appendChild(createElement("span", label, "action-group-label"));
+  const buttons = document.createElement("div");
+  buttons.className = "action-group-buttons";
+  items.filter(Boolean).forEach(item => {
+    if (item.url) {
+      buttons.appendChild(createLink(item.label, item.url));
+    } else if (item.handler) {
+      buttons.appendChild(createButton(item.label, item.handler));
+    }
+  });
+  if (!buttons.children.length) {
+    return document.createDocumentFragment();
+  }
+  group.appendChild(buttons);
+  return group;
+}
+
+function findAction(actions, label) {
+  return actions.find(action => action.label === label);
+}
+
 function createEmployerCard(row, sheetName) {
   const card = document.createElement("article");
   card.className = "company-card";
@@ -289,12 +385,10 @@ function createEmployerCard(row, sheetName) {
     createButton(state.favoriteEmployers.has(key) ? "Unfavorite" : "Favorite", () => toggleFavoriteEmployer(row))
   );
 
-  const heading = document.createElement("div");
-  heading.className = "card-heading";
-  const titleBlock = document.createElement("div");
-  titleBlock.append(createElement("h3", `${row.rank || ""}. ${row.employerName || "Unknown employer"}`.trim()));
-  titleBlock.append(createElement("p", row.applicationPriority || "No priority", "row-subtitle"));
-  heading.append(titleBlock, createElement("div", formatScore(row.candidateFitScore), "score-badge"));
+  const heading = createCompanyIdentityHeader(row, {
+    subtitle: row.applicationPriority || "No priority",
+    score: formatScore(row.candidateFitScore)
+  });
 
   const pills = document.createElement("div");
   pills.className = "pill-list";
@@ -328,15 +422,31 @@ function createEmployerCard(row, sheetName) {
 
 function createActions(row, sheetName) {
   const actions = document.createElement("div");
-  actions.className = "card-actions";
-  getEmployerActionItems(row).forEach(action => actions.appendChild(createLink(action.label, action.url)));
+  actions.className = "company-action-groups";
+  const links = getEmployerActionItems(row);
   actions.append(
-    createButton("Update Link", () => editCareerLink(row)),
-    createButton("Reset Link", () => resetCareerLink(row)),
-    createButton("Open All", () => openEmployerLinkPack(row)),
-    createButton("Copy All", () => copyEmployerLinkPack(row)),
-    createButton("Copy Packet", () => copyRowsAsPackets([row])),
-    createButton("Details", () => showDetails(row, sheetName))
+    createActionGroup("Primary", [
+      findAction(links, "Careers"),
+      findAction(links, "Command Center"),
+      findAction(links, "LinkedIn Jobs")
+    ]),
+    createActionGroup("Signals", [
+      findAction(links, "LinkedIn Posts"),
+      findAction(links, "LinkedIn Recruiters"),
+      findAction(links, "LinkedIn Company")
+    ]),
+    createActionGroup("Research", [
+      findAction(links, "Indeed"),
+      findAction(links, "Google Company")
+    ]),
+    createActionGroup("Manage", [
+      { label: "Update Link", handler: () => editCareerLink(row) },
+      hasCustomCareerLink(row) ? { label: "Reset Link", handler: () => resetCareerLink(row) } : null,
+      { label: "Open Pack", handler: () => openEmployerLinkPack(row) },
+      { label: "Copy Pack", handler: () => copyEmployerLinkPack(row) },
+      { label: "Copy Packet", handler: () => copyRowsAsPackets([row]) },
+      { label: "Details", handler: () => showDetails(row, sheetName) }
+    ])
   );
   return actions;
 }
@@ -497,26 +607,108 @@ function showDetails(row, sheetName) {
   state.selectedRow = row;
   els.detailSheet.textContent = sheetName;
   els.detailTitle.textContent = row.employerName || "Workbook row";
+  els.detailBody.replaceChildren(createDetailTabs(row, sheet));
+  renderSelectedPanel(row, sheetName);
+  els.detailDialog.showModal();
+}
+
+function createDetailTabs(row, sheet) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "detail-tabs";
+  const tabList = document.createElement("div");
+  tabList.className = "detail-tab-list";
+  const panels = document.createElement("div");
+  panels.className = "detail-tab-panels";
+  const tabs = [
+    ["summary", "Summary", [
+      ["Priority", row.applicationPriority],
+      ["Fit score", formatScore(row.candidateFitScore)],
+      ["Why apply", row.whyApply || row.recommendedAction],
+      ["Student friendliness", row.studentFriendliness],
+      ["Employer model", row.employerModel],
+      ["Review flag", row.employerReviewFlag || "None"]
+    ]],
+    ["evidence", "Evidence", [
+      ["Sponsorship evidence", row.sponsorshipEvidence],
+      ["Data confidence", row.dataConfidence],
+      ["New employment positions", formatNumber(row.newEmploymentPositions)],
+      ["New employment cases", formatNumber(row.newEmploymentCases)],
+      ["Certified tech LCAs", formatNumber(row.certifiedTechLcas)],
+      ["Entry cases", formatNumber(row.explicitEntryCases)],
+      ["Early-career signals", formatNumber(row.earlyCareerSignalCases)]
+    ]],
+    ["roles", "Roles", [
+      ["Role families", row.topRoleFamilies],
+      ["Top job titles", row.topJobTitles],
+      ["Role family count", row.roleFamilyCount],
+      ["Trend", row.trendLabel],
+      ["Active fiscal years", row.activeFiscalYears]
+    ]],
+    ["locations", "Locations", [
+      ["States", row.topWorksiteStates],
+      ["Cities", row.topCities],
+      ["Direct employer signal", row.directEmployerSignal],
+      ["Secondary entity share", row.secondaryEntityShare],
+      ["H1B dependent share", row.h1bDependentShare]
+    ]],
+    ["wages", "Wages", [
+      ["Median annual wage", formatCurrency(row.medianAnnualWage)],
+      ["PW level I/II share", row.pwLevel12Share],
+      ["Total worker positions", formatNumber(row.totalWorkerPositions)],
+      ["Career link", getCareerUrl(row)]
+    ]],
+    ["raw", "Raw Row", sheet.columns.map(column => [column, formatCell(row[keyForColumn(sheet, column)])])]
+  ];
+
+  tabs.forEach(([id, label, entries], index) => {
+    const button = createButton(label, () => activateDetailTab(wrapper, id));
+    button.className = "detail-tab-button";
+    button.dataset.detailTab = id;
+    button.setAttribute("aria-selected", String(index === 0));
+    tabList.appendChild(button);
+
+    const panel = document.createElement("section");
+    panel.className = "detail-tab-panel";
+    panel.dataset.detailPanel = id;
+    panel.hidden = index !== 0;
+    panel.appendChild(createDetailTable(entries));
+    panels.appendChild(panel);
+  });
+
+  wrapper.append(tabList, panels);
+  return wrapper;
+}
+
+function activateDetailTab(wrapper, id) {
+  wrapper.querySelectorAll("[data-detail-tab]").forEach(button => {
+    button.setAttribute("aria-selected", String(button.dataset.detailTab === id));
+  });
+  wrapper.querySelectorAll("[data-detail-panel]").forEach(panel => {
+    panel.hidden = panel.dataset.detailPanel !== id;
+  });
+}
+
+function createDetailTable(entries) {
   const table = document.createElement("table");
   table.className = "detail-table";
   const tbody = document.createElement("tbody");
-  sheet.columns.forEach(column => {
-    const key = keyForColumn(sheet, column);
+  entries.forEach(([label, value]) => {
     const tr = document.createElement("tr");
-    tr.append(createElement("th", column), createElement("td", formatCell(row[key])));
+    tr.append(createElement("th", label), createElement("td", value));
     tbody.appendChild(tr);
   });
   table.appendChild(tbody);
-  els.detailBody.replaceChildren(table);
-  renderSelectedPanel(row, sheetName);
-  els.detailDialog.showModal();
+  return table;
 }
 
 function renderSelectedPanel(row, sheetName) {
   els.selectedPanel.innerHTML = "";
   els.selectedPanel.append(
-    createElement("h2", row.employerName || "Selected company"),
-    createElement("p", `${sheetName} - Fit ${formatScore(row.candidateFitScore)}`, "muted"),
+    createCompanyIdentityHeader(row, {
+      title: row.employerName || "Selected company",
+      subtitle: `${sheetName} - Fit ${formatScore(row.candidateFitScore)}`,
+      logoSize: "sm"
+    }),
     createElement("p", row.whyApply || row.recommendedAction || "No note supplied.", "card-note"),
     createActions(row, sheetName)
   );
@@ -537,13 +729,36 @@ function renderPinnedEmployers() {
       createElement("h3", "No saved H-1B companies yet"),
       createElement("p", "Use Pin or Favorite on any employer card to keep the company here with all actions available.", "muted")
     );
+    els.savedEmployersStrip.replaceChildren(createElement("span", "Save companies to build a shortcut strip.", "muted"));
     els.pinnedEmployersGrid.replaceChildren(empty);
     return;
   }
 
+  const strip = document.createDocumentFragment();
+  rows.slice(0, 12).forEach(row => strip.appendChild(createSavedStripButton(row)));
+  els.savedEmployersStrip.replaceChildren(strip);
+
   const fragment = document.createDocumentFragment();
   rows.forEach(row => fragment.appendChild(createSavedEmployerCard(row, rows)));
   els.pinnedEmployersGrid.replaceChildren(fragment);
+}
+
+function createSavedStripButton(row) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "saved-strip-button";
+  button.append(
+    renderCompanyLogo(row, "sm"),
+    createElement("span", row.employerName || "Employer"),
+    createElement("strong", formatScore(row.candidateFitScore))
+  );
+  button.addEventListener("click", () => {
+    state.checkedEmployers.add(getEmployerKey(row));
+    renderSelectedPanel(row, row._sourceSheet || state.visibleSheet || "Personalized Shortlist");
+    persistPreferences();
+    render();
+  });
+  return button;
 }
 
 function createSavedEmployerCard(row, rows) {
@@ -1105,6 +1320,10 @@ function loadPreferences() {
 
 function applySyncFromUrl() {
   const params = new URLSearchParams(window.location.search);
+  const tabId = params.get("h1bTab");
+  if (tabId && ALL_TABS.some(tab => tab.id === tabId)) {
+    state.tab = tabId;
+  }
   const token = params.get("h1bPrefs");
   if (!token) return;
   const prefs = decodeSyncToken(token);
@@ -1244,8 +1463,21 @@ function createButton(label, handler) {
 }
 
 function createPill(text, className = "") {
-  const pill = createElement("span", text, className ? `pill ${className}` : "pill");
+  const tone = className || getPillToneClass(text);
+  const pill = createElement("span", text, tone ? `pill ${tone}` : "pill");
   return pill;
+}
+
+function getPillToneClass(text) {
+  const value = String(text || "").toLowerCase();
+  if (/review|caution|warning|staffing|consulting/.test(value)) return "review";
+  if (/favorite|pinned|selected/.test(value)) return "favorite";
+  if (/very high|strong|tier a|apply first/.test(value)) return "strong";
+  if (/moderate|tier b/.test(value)) return "moderate";
+  if (/direct employer|stronger direct/.test(value)) return "direct";
+  if (/h1b|h-1b|sponsor|e-verify|opt/.test(value)) return "sponsor";
+  if (/entry|early|new grad/.test(value)) return "entry";
+  return "";
 }
 
 function createElement(tag, text, className = "") {

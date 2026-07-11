@@ -262,36 +262,53 @@ pre {
 
 .daily-checklist {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 10px;
 }
 
 .daily-check-item {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 8px;
-  min-height: 48px;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 9px;
+  min-height: 126px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: var(--surface-strong);
-  padding: 8px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 12%, transparent), transparent 54%),
+    var(--surface-strong);
+  padding: 10px;
   color: var(--ink);
   font-size: .86rem;
   font-weight: 900;
 }
 
 .daily-check-item input {
-  width: 18px;
-  min-height: 18px;
+  width: 16px;
+  min-height: 16px;
+  margin-top: 3px;
   accent-color: var(--green);
 }
 
-.daily-check-item span {
+.daily-check-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.daily-check-copy strong,
+.daily-check-copy small {
   overflow-wrap: anywhere;
 }
 
+.daily-check-copy small {
+  color: var(--muted);
+  font-size: .76rem;
+  line-height: 1.25;
+}
+
 .daily-check-item button {
+  grid-column: 1 / -1;
   min-height: 32px;
   border-color: var(--line);
   background: var(--surface);
@@ -304,6 +321,13 @@ pre {
 .daily-check-item button:hover {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+.daily-check-item.is-done {
+  border-color: color-mix(in srgb, var(--green) 66%, var(--line));
+  background:
+    linear-gradient(135deg, var(--green-soft), transparent 58%),
+    var(--surface-strong);
 }
 
 .search-tool,
@@ -654,6 +678,108 @@ pre {
 
 .favorite-company-card strong {
   overflow-wrap: anywhere;
+}
+
+.company-identity-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.company-identity-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.company-identity-copy h3,
+.company-identity-copy strong,
+.company-identity-copy p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.company-logo {
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--logo-color, var(--accent)) 70%, var(--line));
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--logo-color, var(--accent)) 38%, transparent), transparent 72%),
+    var(--surface);
+  color: var(--ink);
+  font-size: .78rem;
+  font-weight: 900;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--surface) 45%, transparent);
+}
+
+.company-logo-sm {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  font-size: .68rem;
+}
+
+.company-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 6px;
+  background: #fff;
+}
+
+.company-logo.has-image {
+  background: #fff;
+}
+
+.company-action-groups {
+  display: grid;
+  gap: 9px;
+}
+
+.action-group {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.action-group-label {
+  color: var(--muted);
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.action-group-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.action-group-buttons a,
+.action-group-buttons button {
+  min-height: 32px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 7px 10px;
+  font-size: .78rem;
+  font-weight: 900;
+  text-align: center;
+  text-decoration: none;
+}
+
+.action-group-buttons a:hover,
+.action-group-buttons button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .vendor-controls {
@@ -1101,6 +1227,77 @@ pre {
   border-color: color-mix(in srgb, var(--accent) 70%, var(--line));
   background: var(--accent-soft);
   color: var(--accent-strong);
+}
+
+.pill-direct,
+.health-native {
+  border-color: color-mix(in srgb, var(--green) 65%, var(--line));
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.pill-vendor,
+.pill-custom,
+.health-custom {
+  border-color: color-mix(in srgb, #c084fc 66%, var(--line));
+  background: color-mix(in srgb, #7c3aed 24%, var(--surface));
+  color: #ddb7ff;
+}
+
+.pill-sponsor,
+.pill-strong {
+  border-color: color-mix(in srgb, var(--accent) 72%, var(--line));
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.pill-moderate,
+.pill-fresh,
+.health-google {
+  border-color: color-mix(in srgb, var(--yellow) 72%, var(--line));
+  background: var(--yellow-soft);
+  color: var(--yellow);
+}
+
+.pill-review,
+.health-optional {
+  border-color: color-mix(in srgb, var(--red) 72%, var(--line));
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.pill-favorite,
+.query-mode-pill {
+  border-color: color-mix(in srgb, #7dd3fc 65%, var(--line));
+  background: color-mix(in srgb, #0ea5e9 20%, var(--surface));
+  color: #a7e5ff;
+}
+
+.pill-muted,
+.health-broad {
+  border-color: var(--line);
+  background: color-mix(in srgb, var(--surface-strong) 80%, var(--surface));
+  color: var(--muted);
+}
+
+.source-health-native {
+  border-left: 4px solid var(--green);
+}
+
+.source-health-google {
+  border-left: 4px solid var(--yellow);
+}
+
+.source-health-custom {
+  border-left: 4px solid #c084fc;
+}
+
+.source-health-optional {
+  border-left: 4px solid var(--red);
+}
+
+.source-health-broad {
+  border-left: 4px solid var(--line);
 }
 
 .safety-check ul {
