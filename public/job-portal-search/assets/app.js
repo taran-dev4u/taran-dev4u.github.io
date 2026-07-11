@@ -9218,7 +9218,7 @@ function renderSponsorGrid() {
   const sponsors = sponsorPool
     .filter(company => company.h1bFilings > 0)
     .sort((a, b) => b.h1bFilings - a.h1bFilings)
-    .slice(0, 16);
+    .slice(0, 24);
   if (!sponsors.length) {
     const note = document.createElement("p");
     note.className = "empty-note";
@@ -9259,7 +9259,7 @@ function renderSponsorGrid() {
     }
 
     const card = document.createElement("article");
-    card.className = "company-card";
+    card.className = `company-card sponsor-card sponsor-tier-${company.sponsorTier || "curated"}`;
 
     const heading = document.createElement("div");
     heading.className = "card-heading";
@@ -9296,10 +9296,12 @@ function renderSponsorGrid() {
     const actions = document.createElement("div");
     actions.className = "card-actions";
     actions.append(
-      createLink("Career Search", row.careerSearchUrl || localBuildGoogleCompanyUrl(row)),
+      createLink("Careers", getCompanyCareersUrl(company) || row.careerSearchUrl || localBuildGoogleCompanyUrl(row)),
       createLink("Google Company", localBuildGoogleCompanyUrl(row)),
       createLink("LinkedIn Jobs", localBuildLinkedInJobsUrl(row)),
       createLink("LinkedIn Recruiters", localBuildLinkedInRecruiterUrl(row)),
+      createButton("Use Company", () => selectCompanySuggestion(company)),
+      createButton(state.favoriteCompanies.has(company.id) ? "Unfavorite" : "Favorite", () => toggleFavoriteCompanyById(company.id)),
       createButton("Copy Packet", () => localCopyRowsAsPackets([row])),
       createButton("Details", () => showDetails(row, sheetName))
     );
@@ -11654,9 +11656,12 @@ function renderFavoriteCompanies() {
   const toolbar = document.createElement("div");
   toolbar.className = "favorite-company-toolbar";
   toolbar.append(
-    createCompanyActionButton("Open Top Favorites Today", openTopFavoriteCompanyPacks),
-    createCompanyActionButton("Copy Top Favorite Packs", copyTopFavoriteCompanyPacks),
-    createCompanyActionButton("Open All Careers", openAllFavoriteCareers)
+    createCompanyActionButton("Open Top 5", openTopFavoriteCompanyPacks),
+    createCompanyActionButton("Copy Top 5", copyTopFavoriteCompanyPacks),
+    createCompanyActionButton("Open Top 5 Careers", openTopFavoriteCareers),
+    createCompanyActionButton("Copy Top 5 Careers", copyTopFavoriteCareers),
+    createCompanyActionButton("Open All Careers", openAllFavoriteCareers),
+    createCompanyActionButton("Copy All Careers", copyAllFavoriteCareers)
   );
   fragment.appendChild(toolbar);
 
@@ -11679,7 +11684,9 @@ function renderFavoriteCompanies() {
       actions.appendChild(createCompanySuggestionLink(action.label, action.url));
     });
     actions.append(
+      createCompanySuggestionButton("Update Careers", company, () => editCompanyCareersLink(company)),
       createCompanySuggestionButton("Open Pack", company, () => openCompanyLinkPack(company)),
+      createCompanySuggestionButton("Copy Pack", company, () => copyCompanyLinkPack(company)),
       createCompanySuggestionButton("Remove", company, () => toggleFavoriteCompanyById(company.id, false))
     );
     card.append(name, meta, actions);
@@ -11720,6 +11727,29 @@ function copyTopFavoriteCompanyPacks() {
   copyLinks(links, `Copied ${favorites.length} favorite company packs`);
 }
 
+function openTopFavoriteCareers() {
+  const favorites = getTopFavoriteCompanies(5);
+  const links = favorites.map(company => getCompanyCareersUrl(company)).filter(Boolean);
+  if (!links.length) {
+    showToast("No favorite companies pinned yet");
+    return;
+  }
+  links.forEach(url => window.open(url, "_blank", "noopener"));
+  setDailyChecklistItem("favoriteCompanies", true);
+  showToast(`Opened ${links.length} top favorite careers`);
+}
+
+function copyTopFavoriteCareers() {
+  const favorites = getTopFavoriteCompanies(5);
+  const links = favorites.map(company => `${company.name}: ${getCompanyCareersUrl(company)}`).filter(Boolean);
+  if (!links.length) {
+    showToast("No favorite companies pinned yet");
+    return;
+  }
+  setDailyChecklistItem("favoriteCompanies", true);
+  copyLinks(links, `Copied ${favorites.length} top favorite career links`);
+}
+
 function openAllFavoriteCareers() {
   const favorites = COMPANIES.filter(company => state.favoriteCompanies.has(company.id));
   if (!favorites.length) {
@@ -11732,6 +11762,16 @@ function openAllFavoriteCareers() {
   }
   links.forEach(url => window.open(url, "_blank", "noopener"));
   showToast(`Opened ${links.length} careers pages`);
+}
+
+function copyAllFavoriteCareers() {
+  const favorites = COMPANIES.filter(company => state.favoriteCompanies.has(company.id));
+  const links = favorites.map(company => `${company.name}: ${getCompanyCareersUrl(company)}`).filter(Boolean);
+  if (!links.length) {
+    showToast("No favorite companies pinned yet");
+    return;
+  }
+  copyLinks(links, `Copied ${links.length} favorite career links`);
 }
 
 function createCompanySuggestionButton(label, company, handler) {
@@ -11859,9 +11899,6 @@ function syncCompanyCard() {
   if (favorite) {
     meta.append(createPill("favorite"));
   }
-  if (hasCustomCompanyCareers(company)) {
-    meta.append(createPill("custom careers"));
-  }
 
   const url = document.createElement("a");
   url.href = getCompanyCareersUrl(company);
@@ -11949,7 +11986,7 @@ function renderAllCompanyCard() {
     careers.href = getCompanyCareersUrl(row.company);
     careers.target = "_blank";
     careers.rel = "noopener";
-    careers.textContent = hasCustomCompanyCareers(row.company) ? "Careers (Custom)" : "Careers";
+    careers.textContent = "Careers";
 
     links.appendChild(careers);
     links.appendChild(createCompanyActionButton("Update Careers", () => editCompanyCareersLink(row.company)));
@@ -12004,7 +12041,7 @@ function createCompanyActionGrid(company, title, context) {
 
 function getCompanyActionItems(company, title, context) {
   const actions = [
-    { label: hasCustomCompanyCareers(company) ? "Careers (Custom)" : "Careers", url: getCompanyCareersUrl(company) },
+    { label: "Careers", url: getCompanyCareersUrl(company) },
     { label: "Filtered Search", url: buildCompanySearchUrl(company, title, context) },
     { label: "LinkedIn Jobs", url: getCompanyActionUrls(company, title, context, "linkedinJobs")[0] },
     { label: "LinkedIn Posts", url: getCompanyActionUrls(company, title, context, "linkedinPosts")[0] },

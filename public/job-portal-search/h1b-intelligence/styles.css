@@ -164,6 +164,24 @@ a {
   box-shadow: var(--shadow);
 }
 
+.hero-panel {
+  background:
+    linear-gradient(135deg, rgba(72, 198, 239, .2), transparent 38%),
+    linear-gradient(180deg, rgba(139, 226, 139, .08), rgba(17, 25, 37, .94));
+}
+
+.action-panel {
+  background:
+    linear-gradient(135deg, rgba(244, 201, 93, .12), transparent 42%),
+    rgba(17, 25, 37, .94);
+}
+
+.pinned-panel {
+  background:
+    linear-gradient(135deg, rgba(139, 226, 139, .12), transparent 44%),
+    rgba(17, 25, 37, .94);
+}
+
 :root:not(.dark) .hero-panel,
 :root:not(.dark) .controls-panel,
 :root:not(.dark) .tabs-panel,
@@ -333,7 +351,23 @@ a {
 
 .company-card.is-pinned {
   border-color: var(--accent);
-  background: linear-gradient(180deg, var(--accent-soft), var(--surface-strong));
+  border-left: 4px solid var(--accent);
+  background:
+    linear-gradient(180deg, var(--accent-soft), var(--surface-strong));
+}
+
+.company-card.is-favorite {
+  border-color: var(--accent-2);
+  border-left: 4px solid var(--accent-2);
+}
+
+.company-card.is-checked {
+  box-shadow: 0 0 0 2px rgba(139, 226, 139, .2), var(--shadow);
+}
+
+.company-card.is-checked .check-control {
+  border-color: var(--accent-2);
+  background: var(--green-soft);
 }
 
 .empty-card {

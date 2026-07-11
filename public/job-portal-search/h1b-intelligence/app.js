@@ -79,6 +79,7 @@ function cacheElements() {
     tabList: document.getElementById("tabList"),
     visibleSummary: document.getElementById("visibleSummary"),
     openTopFiveButton: document.getElementById("openTopFiveButton"),
+    copyTopFiveButton: document.getElementById("copyTopFiveButton"),
     openSelectedButton: document.getElementById("openSelectedButton"),
     copySelectedButton: document.getElementById("copySelectedButton"),
     copyPacketsButton: document.getElementById("copyPacketsButton"),
@@ -126,6 +127,7 @@ function bindEvents() {
 
   els.resetFiltersButton.addEventListener("click", resetFilters);
   els.openTopFiveButton.addEventListener("click", openTopFive);
+  els.copyTopFiveButton.addEventListener("click", copyTopFive);
   els.openSelectedButton.addEventListener("click", openCheckedEmployers);
   els.copySelectedButton.addEventListener("click", copyCheckedPackets);
   els.copyPacketsButton.addEventListener("click", copyVisiblePackets);
@@ -263,6 +265,12 @@ function createEmployerCard(row, sheetName) {
   if (state.pinnedEmployers.has(key)) {
     card.classList.add("is-pinned");
   }
+  if (state.favoriteEmployers.has(key)) {
+    card.classList.add("is-favorite");
+  }
+  if (state.checkedEmployers.has(key)) {
+    card.classList.add("is-checked");
+  }
 
   const cardControls = document.createElement("div");
   cardControls.className = "card-controls";
@@ -295,8 +303,7 @@ function createEmployerCard(row, sheetName) {
     row.dataConfidence,
     row.employerModel,
     row.employerReviewFlag,
-    state.favoriteEmployers.has(key) ? "favorite" : "",
-    hasCustomCareerLink(row) ? "custom link" : ""
+    state.favoriteEmployers.has(key) ? "favorite" : ""
   ].filter(Boolean).forEach(value => pills.appendChild(createPill(value, /review|staffing|consulting/i.test(value) ? "review" : "")));
 
   const note = createElement("p", row.whyApply || "No workbook reason supplied.", "card-note");
@@ -539,9 +546,13 @@ function renderPinnedEmployers() {
 }
 
 function syncActionButtons() {
-  const selectedRows = getCheckedRows();
-  const hasVisibleEmployers = state.visibleRows.some(row => row.employerName);
-  els.openTopFiveButton.disabled = !hasVisibleEmployers;
+  const selectedRows = getVisibleCheckedRows();
+  const uncheckedRows = getUncheckedEmployerRows();
+  const batchSize = Math.min(5, uncheckedRows.length);
+  els.openTopFiveButton.textContent = selectedRows.length ? `Open Next ${batchSize || 5}` : `Open Top ${batchSize || 5}`;
+  els.openTopFiveButton.disabled = uncheckedRows.length === 0;
+  els.copyTopFiveButton.textContent = selectedRows.length ? `Copy Next ${batchSize || 5}` : `Copy Top ${batchSize || 5}`;
+  els.copyTopFiveButton.disabled = uncheckedRows.length === 0;
   els.openSelectedButton.disabled = selectedRows.length === 0;
   els.copySelectedButton.disabled = selectedRows.length === 0;
   els.clearCheckedButton.disabled = state.checkedEmployers.size === 0;
@@ -614,32 +625,51 @@ function clearFavoriteEmployers() {
 }
 
 function openTopFive() {
-  const rows = state.visibleRows.filter(row => row.employerName).slice(0, 5);
-  openCareerLinks(rows, "No visible employers to open", "Opened Top-5 employer links");
+  const rows = getUncheckedEmployerRows().slice(0, 5);
+  openCareerLinks(rows, "All visible employers are already selected", `Opened ${rows.length} employer links`, { markChecked: true });
+}
+
+function copyTopFive() {
+  const rows = getUncheckedEmployerRows().slice(0, 5);
+  if (!rows.length) {
+    showToast("All visible employers are already selected");
+    return;
+  }
+  copyEmployerCareerLinks(rows, `Copied ${rows.length} employer career links`);
 }
 
 function openCheckedEmployers() {
-  openCareerLinks(getCheckedRows(), "Select employers first", "Opened selected employer links");
+  openCareerLinks(getVisibleCheckedRows(), "Select visible employers first", "Opened selected employer links");
 }
 
 function openPinnedEmployers() {
   openCareerLinks(getSavedEmployerRows(), "Save employers first", "Opened saved employer links");
 }
 
-function openCareerLinks(rows, emptyMessage, successMessage) {
+function openCareerLinks(rows, emptyMessage, successMessage, options = {}) {
   const links = rows.map(getCareerUrl).filter(Boolean);
   if (!links.length) {
     showToast(emptyMessage);
     return;
   }
+  if (options.markChecked) {
+    rows.forEach(row => {
+      const key = getEmployerKey(row);
+      if (key) state.checkedEmployers.add(key);
+    });
+    persistPreferences();
+  }
   links.forEach(url => window.open(url, "_blank", "noopener"));
+  if (options.markChecked) {
+    render();
+  }
   showToast(successMessage);
 }
 
 function copyCheckedPackets() {
-  const rows = getCheckedRows();
+  const rows = getVisibleCheckedRows();
   if (!rows.length) {
-    showToast("Select employers first");
+    showToast("Select visible employers first");
     return;
   }
   copyRowsAsPackets(rows);
@@ -657,6 +687,21 @@ function copyPinnedPackets() {
 function getSavedEmployerRows() {
   const keys = [...new Set([...state.pinnedEmployers, ...state.favoriteEmployers])];
   return keys.map(getEmployerByKey).filter(Boolean);
+}
+
+function getUncheckedEmployerRows() {
+  return state.visibleRows
+    .filter(row => row.employerName)
+    .filter(row => !state.checkedEmployers.has(getEmployerKey(row)));
+}
+
+function copyEmployerCareerLinks(rows, message) {
+  const links = rows.map(row => `${row.employerName || "Employer"}: ${getCareerUrl(row)}`).filter(Boolean);
+  if (!links.length) {
+    showToast("No links to copy");
+    return;
+  }
+  copyText(links.join("\n"), message);
 }
 
 function openEmployerLinkPack(row) {
@@ -797,7 +842,7 @@ function resetFilters() {
 
 function getEmployerActionItems(row) {
   const actions = [
-    { label: hasCustomCareerLink(row) ? "Careers (Custom)" : "Careers", url: getCareerUrl(row) },
+    { label: "Careers", url: getCareerUrl(row) },
     { label: "Command Center", url: buildCommandCenterUrl(row) },
     { label: "Google Company", url: buildGoogleCompanyUrl(row) },
     { label: "LinkedIn Jobs", url: buildLinkedInJobsUrl(row) },
@@ -824,6 +869,12 @@ function hasCustomCareerLink(row) {
 
 function getCheckedRows() {
   return Array.from(state.checkedEmployers).map(getEmployerByKey).filter(Boolean);
+}
+
+function getVisibleCheckedRows() {
+  return state.visibleRows
+    .filter(row => row.employerName)
+    .filter(row => state.checkedEmployers.has(getEmployerKey(row)));
 }
 
 function copyVisiblePackets() {

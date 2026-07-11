@@ -514,6 +514,7 @@ pre {
   color: var(--ink);
   border-color: var(--line);
   padding: 0 14px;
+  text-decoration: none;
 }
 
 .secondary-button:hover,
@@ -613,7 +614,9 @@ pre {
 .favorite-companies-panel {
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: var(--surface);
+  background:
+    linear-gradient(135deg, var(--accent-soft), transparent 42%),
+    linear-gradient(180deg, var(--surface), var(--surface-strong));
   padding: 14px;
 }
 
@@ -641,9 +644,11 @@ pre {
 .favorite-company-card {
   display: grid;
   gap: 8px;
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--accent) 44%, var(--line));
+  border-left: 4px solid var(--accent);
   border-radius: var(--radius);
-  background: var(--surface-strong);
+  background:
+    linear-gradient(180deg, var(--surface), var(--surface-strong));
   padding: 10px;
 }
 
@@ -1135,8 +1140,8 @@ pre {
 
 .sponsor-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 }
 
 .resource-card,
@@ -1156,6 +1161,53 @@ pre {
 
 .sponsor-card {
   min-height: 150px;
+  border-left: 4px solid var(--accent);
+  background:
+    linear-gradient(135deg, var(--accent-soft), transparent 34%),
+    var(--surface-strong);
+}
+
+.sponsor-tier-tier1 {
+  border-color: color-mix(in srgb, var(--green) 70%, var(--line));
+  border-left-color: var(--green);
+}
+
+.sponsor-tier-tier1 .score-badge {
+  border-color: var(--green);
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.sponsor-tier-tier2 {
+  border-color: color-mix(in srgb, var(--accent) 65%, var(--line));
+  border-left-color: var(--accent);
+}
+
+.sponsor-tier-tier2 .score-badge {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.sponsor-tier-tier3,
+.sponsor-tier-curated {
+  border-color: color-mix(in srgb, var(--yellow) 65%, var(--line));
+  border-left-color: var(--yellow);
+}
+
+.sponsor-tier-tier3 .score-badge,
+.sponsor-tier-curated .score-badge {
+  border-color: var(--yellow);
+  background: var(--yellow-soft);
+  color: var(--yellow);
+}
+
+.sponsor-card .evidence-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.sponsor-card .card-actions {
+  gap: 6px;
 }
 
 .sponsor-title {
