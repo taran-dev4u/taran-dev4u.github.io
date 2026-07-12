@@ -29,6 +29,7 @@ const PRIMARY_EMPLOYER_SHEETS = [
 ];
 const STORAGE_KEY = "taran-h1b-intelligence-preferences-v2";
 const DEFAULT_ROLE_QUERY = "software data AI";
+const EMPLOYER_CARD_BATCH_SIZE = 60;
 
 const state = {
   tab: "applyFirst",
@@ -40,7 +41,8 @@ const state = {
   favoriteEmployers: new Set(),
   checkedEmployers: new Set(),
   savedEmployerOrder: [],
-  customCareerLinks: {}
+  customCareerLinks: {},
+  employerCardLimit: EMPLOYER_CARD_BATCH_SIZE
 };
 
 const els = {};
@@ -175,6 +177,7 @@ function populateTabs() {
     button.dataset.tab = tab.id;
     button.addEventListener("click", () => {
       state.tab = tab.id;
+      resetEmployerCardLimit();
       persistPreferences();
       render();
     });
@@ -247,7 +250,8 @@ function renderEmployerSheet(sheetName) {
   state.visibleSheet = sheetName;
   const rows = sortEmployerRowsForView(getSheetRows(sheetName).filter(matchesEmployerFilters));
   state.visibleRows = rows;
-  els.visibleSummary.textContent = `${formatNumber(rows.length)} visible from ${sheetName}`;
+  const visibleRows = rows.slice(0, getEmployerCardLimit(rows.length));
+  els.visibleSummary.textContent = `${formatNumber(rows.length)} visible from ${sheetName} - showing ${formatNumber(visibleRows.length)}`;
   els.copyPacketsButton.disabled = rows.length === 0;
   els.copyCsvButton.disabled = rows.length === 0;
 
@@ -255,9 +259,45 @@ function renderEmployerSheet(sheetName) {
   const grid = document.createElement("div");
   grid.className = "cards-grid";
   const fragment = document.createDocumentFragment();
-  rows.forEach(row => fragment.appendChild(createEmployerCard(row, sheetName)));
+  visibleRows.forEach(row => fragment.appendChild(createEmployerCard(row, sheetName)));
   grid.appendChild(fragment);
-  els.contentPanel.replaceChildren(heading, grid);
+  const nodes = [heading, grid];
+  if (visibleRows.length < rows.length) {
+    nodes.push(createEmployerLoadPanel(rows.length, visibleRows.length));
+  }
+  els.contentPanel.replaceChildren(...nodes);
+}
+
+function getEmployerCardLimit(total) {
+  const limit = Number(state.employerCardLimit || EMPLOYER_CARD_BATCH_SIZE);
+  return Math.min(total, Math.max(EMPLOYER_CARD_BATCH_SIZE, limit));
+}
+
+function resetEmployerCardLimit() {
+  state.employerCardLimit = EMPLOYER_CARD_BATCH_SIZE;
+}
+
+function createEmployerLoadPanel(total, visible) {
+  const panel = document.createElement("div");
+  panel.className = "progressive-load-panel";
+  panel.appendChild(createElement("p", `Showing ${formatNumber(visible)} of ${formatNumber(total)} employer cards for speed. Filters, Open Top-5, Copy Visible Packets, and CSV still use the full matching result set.`, "muted"));
+  const actions = document.createElement("div");
+  actions.className = "progressive-load-actions";
+  actions.append(
+    createButton(`Show next ${formatNumber(Math.min(EMPLOYER_CARD_BATCH_SIZE, total - visible))}`, () => {
+      state.employerCardLimit = visible + EMPLOYER_CARD_BATCH_SIZE;
+      render();
+    }),
+    createButton("Show all cards", () => {
+      if (total > 250 && !window.confirm(`This will render ${formatNumber(total)} rich cards and may be slower. Continue?`)) {
+        return;
+      }
+      state.employerCardLimit = total;
+      render();
+    })
+  );
+  panel.appendChild(actions);
+  return panel;
 }
 
 function getDomainFromUrl(url) {
@@ -795,6 +835,7 @@ function syncActionButtons() {
 }
 
 function handleFilterChange() {
+  resetEmployerCardLimit();
   persistPreferences();
   render();
 }
@@ -1183,6 +1224,7 @@ function resetFilters() {
   ].forEach(select => {
     select.value = "";
   });
+  resetEmployerCardLimit();
   persistPreferences();
   render();
 }

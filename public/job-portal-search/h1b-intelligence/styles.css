@@ -745,6 +745,44 @@ button:disabled {
   border-radius: var(--radius);
 }
 
+.progressive-load-panel {
+  display: grid;
+  gap: 10px;
+  border: 1px dashed color-mix(in srgb, var(--accent) 52%, var(--line));
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, var(--accent-soft), transparent 58%),
+    var(--surface-strong);
+  padding: 12px;
+}
+
+.progressive-load-panel p {
+  margin: 0;
+}
+
+.progressive-load-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.progressive-load-actions button {
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 7px 10px;
+  font-size: .82rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.progressive-load-actions button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 table {
   width: 100%;
   border-collapse: collapse;

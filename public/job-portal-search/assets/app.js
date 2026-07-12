@@ -7,6 +7,7 @@ const DEFAULT_PROFILE_ID = "softwareAiDataEntryOpt";
 const DEFAULT_ROLE_PACK_ID = "all-role-families";
 const CAUTION_EXCLUDE_TERMS = ["unpaid", "commission only", "clearance", "US citizenship required", "must be a US citizen"];
 const MINUTE_SIGNAL_TIMES = new Set(["5minutes", "10minutes", "15minutes", "30minutes", "45minutes"]);
+const COMPANY_LIST_BATCH_SIZE = 60;
 
 const CATEGORY_ROWS = [
   ["top", "Top Sources", true],
@@ -8573,7 +8574,8 @@ const state = {
   customCompanyCareers: {},
   dailyChecklist: {},
   visibleCompanies: COMPANIES,
-  visibleVendors: []
+  visibleVendors: [],
+  companyListLimit: COMPANY_LIST_BATCH_SIZE
 };
 
 const els = {};
@@ -8779,18 +8781,21 @@ function bindEvents() {
   });
 
   els.companyFilter.addEventListener("input", () => {
+    resetCompanyListLimit();
     renderCompanyOptions(els.companyFilter.value);
     syncCompanyCard();
     renderSponsorGrid();
     savePreferences();
   });
   els.companyRole.addEventListener("input", () => {
+    resetCompanyListLimit();
     syncCompanyCard();
     renderFavoriteCompanies();
     savePreferences();
   });
   [els.companyIncludeTerms, els.companyExcludeTerms, els.companyCustomLinkName, els.companyCustomLinkUrl].forEach(input => {
     input.addEventListener("change", () => {
+      resetCompanyListLimit();
       syncCompanyCard();
       renderFavoriteCompanies();
       savePreferences();
@@ -8810,6 +8815,7 @@ function bindEvents() {
     els.companyKind
   ].forEach(control => {
     control.addEventListener("change", () => {
+      resetCompanyListLimit();
       renderCompanyOptions(els.companyFilter.value);
       syncCompanyCard();
       renderSponsorGrid();
@@ -8818,6 +8824,7 @@ function bindEvents() {
     });
   });
   els.companySelect.addEventListener("change", () => {
+    resetCompanyListLimit();
     syncCompanyCard();
     savePreferences();
   });
@@ -12223,7 +12230,8 @@ function renderAllCompanyCard() {
 
   const list = document.createElement("div");
   list.className = "company-link-list";
-  rows.forEach(row => {
+  const visibleRows = rows.slice(0, getCompanyListLimit(rows.length));
+  visibleRows.forEach(row => {
     const item = document.createElement("article");
     item.className = "company-link-row";
 
@@ -12279,6 +12287,43 @@ function renderAllCompanyCard() {
   });
 
   els.companyCard.append(title, meta, note, bulkActions, list);
+  if (visibleRows.length < rows.length) {
+    els.companyCard.appendChild(createCompanyListLoadPanel(rows.length, visibleRows.length));
+  }
+}
+
+function getCompanyListLimit(total) {
+  const limit = Number(state.companyListLimit || COMPANY_LIST_BATCH_SIZE);
+  return Math.min(total, Math.max(COMPANY_LIST_BATCH_SIZE, limit));
+}
+
+function resetCompanyListLimit() {
+  state.companyListLimit = COMPANY_LIST_BATCH_SIZE;
+}
+
+function createCompanyListLoadPanel(total, visible) {
+  const panel = document.createElement("div");
+  panel.className = "progressive-load-panel";
+  const note = document.createElement("p");
+  note.className = "company-note";
+  note.textContent = `Showing ${visible.toLocaleString()} of ${total.toLocaleString()} companies for speed. Use the filter box to narrow faster, or expand intentionally.`;
+  const actions = document.createElement("div");
+  actions.className = "progressive-load-actions";
+  actions.append(
+    createCompanyActionButton(`Show next ${Math.min(COMPANY_LIST_BATCH_SIZE, total - visible)}`, () => {
+      state.companyListLimit = visible + COMPANY_LIST_BATCH_SIZE;
+      renderAllCompanyCard();
+    }),
+    createCompanyActionButton("Show all", () => {
+      if (total > 250 && !window.confirm(`This will render ${total.toLocaleString()} company rows and may be slower. Continue?`)) {
+        return;
+      }
+      state.companyListLimit = total;
+      renderAllCompanyCard();
+    })
+  );
+  panel.append(note, actions);
+  return panel;
 }
 
 function createCompanyActionGrid(company, title, context) {
