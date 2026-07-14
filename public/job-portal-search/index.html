@@ -204,18 +204,19 @@
           </label>
 
           <label class="field" for="customSourceName">
-            <span>Custom source</span>
-            <input id="customSourceName" name="customSourceName" type="text" autocomplete="off" placeholder="My custom link">
+            <span>Custom source label(s)</span>
+            <input id="customSourceName" name="customSourceName" type="text" autocomplete="off" placeholder="My board, Backup board">
           </label>
 
           <label class="field field-wide" for="customSourceUrl">
-            <span>Custom source URL</span>
-            <input id="customSourceUrl" name="customSourceUrl" type="text" autocomplete="off" placeholder="https://example.com/jobs?q={role}&location={location}">
+            <span>Custom source URL(s)</span>
+            <textarea id="customSourceUrl" name="customSourceUrl" rows="3" autocomplete="off" placeholder="Label | https://example.com/jobs?q={role}&location={location}"></textarea>
+            <small>One per line. Tokens: {role}, {query}, {location}, {time}, {source}.</small>
           </label>
 
           <div class="field custom-link-tools">
             <span>Portable link</span>
-            <button class="secondary-button" type="button" id="copyCustomSyncButton">Copy Sync Link</button>
+            <button class="secondary-button" type="button" id="copyCustomSyncButton">Copy Permanent Sync Link</button>
           </div>
 
           <label class="field field-wide" for="excludeTerms">
@@ -451,12 +452,13 @@
             <input id="companyExcludeTerms" type="text" autocomplete="off" placeholder="unpaid, clearance, senior">
           </label>
           <label class="field" for="companyCustomLinkName">
-            <span>Custom company link</span>
-            <input id="companyCustomLinkName" type="text" autocomplete="off" placeholder="My company link">
+            <span>Custom company label(s)</span>
+            <input id="companyCustomLinkName" type="text" autocomplete="off" placeholder="Referral search, Alumni search">
           </label>
           <label class="field company-wide" for="companyCustomLinkUrl">
-            <span>Custom company URL</span>
-            <input id="companyCustomLinkUrl" type="text" autocomplete="off" placeholder="https://example.com/search?company={company}&q={role}">
+            <span>Custom company URL(s)</span>
+            <textarea id="companyCustomLinkUrl" rows="3" autocomplete="off" placeholder="Label | https://example.com/search?company={company}&q={role}"></textarea>
+            <small>Saved instantly here; use the permanent sync link to load these on another system.</small>
           </label>
           <label class="field" for="companySortSelect">
             <span>Company order</span>
