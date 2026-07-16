@@ -626,6 +626,91 @@ pre {
   width: 100%;
 }
 
+.company-vault-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  border: 1px solid rgba(34, 211, 238, .35);
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(34, 211, 238, .12), rgba(16, 185, 129, .08));
+  padding: 12px;
+}
+
+.company-vault-panel strong {
+  display: block;
+  color: var(--ink);
+  font-size: .92rem;
+  margin-bottom: 3px;
+}
+
+.company-vault-panel span {
+  color: var(--muted);
+  font-size: .82rem;
+  font-weight: 800;
+}
+
+.company-vault-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.company-vault-actions button {
+  min-height: 36px;
+  font-size: .8rem;
+  padding: 8px 10px;
+}
+
+.settings-dialog {
+  width: min(560px, calc(100vw - 28px));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  color: var(--ink);
+  padding: 0;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .42);
+}
+
+.settings-dialog::backdrop {
+  background: rgba(2, 6, 23, .68);
+  backdrop-filter: blur(4px);
+}
+
+.settings-dialog form {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+}
+
+.settings-dialog h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.settings-dialog p {
+  margin: 0;
+  color: var(--muted);
+  font-size: .86rem;
+  line-height: 1.4;
+}
+
+.settings-dialog-input {
+  min-height: 46px;
+}
+
+textarea.settings-dialog-input {
+  min-height: 160px;
+}
+
+.settings-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .company-mini-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1512,6 +1597,15 @@ pre {
 
   .company-wide {
     grid-column: span 1;
+  }
+
+  .company-vault-panel {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .company-vault-actions {
+    justify-content: flex-start;
   }
 
   .vendor-wide {

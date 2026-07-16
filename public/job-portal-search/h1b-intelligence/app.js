@@ -28,6 +28,8 @@ const PRIMARY_EMPLOYER_SHEETS = [
   "Weekly Plan"
 ];
 const STORAGE_KEY = "taran-h1b-intelligence-preferences-v2";
+const VAULT_KEY = "taran-h1b-intelligence-vault";
+const VAULT_BACKUP_KEY = "taran-h1b-intelligence-vault-backup";
 const DEFAULT_ROLE_QUERY = "software data AI";
 const EMPLOYER_CARD_BATCH_SIZE = 60;
 
@@ -144,6 +146,9 @@ function bindEvents() {
   els.clearFavoritesButton.addEventListener("click", clearFavoriteEmployers);
   els.themeToggle.addEventListener("click", toggleTheme);
   els.closeDetailButton.addEventListener("click", () => els.detailDialog.close());
+  window.addEventListener("beforeunload", () => {
+    persistPreferences();
+  });
 }
 
 function populateSummaryMetrics() {
@@ -1107,9 +1112,70 @@ function copyEmployerLinkPack(row) {
   copyText(lines.join("\n"), `Copied links for ${row.employerName || "employer"}`);
 }
 
-function editCareerLink(row) {
+function requestTextInput({ title, message, value = "", placeholder = "" }) {
+  return new Promise(resolve => {
+    const dialog = document.createElement("dialog");
+    dialog.className = "settings-dialog";
+    const form = document.createElement("form");
+    form.method = "dialog";
+
+    const heading = document.createElement("h3");
+    heading.textContent = title;
+    const note = document.createElement("p");
+    note.textContent = message;
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = value || "";
+    input.placeholder = placeholder;
+
+    const actions = document.createElement("div");
+    actions.className = "settings-dialog-actions";
+    const cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.className = "secondary-button";
+    cancel.textContent = "Cancel";
+    const save = document.createElement("button");
+    save.type = "submit";
+    save.className = "primary-button";
+    save.textContent = "Save";
+
+    actions.append(cancel, save);
+    form.append(heading, note, input, actions);
+    dialog.appendChild(form);
+    document.body.appendChild(dialog);
+
+    let settled = false;
+    const finish = result => {
+      if (settled) return;
+      settled = true;
+      dialog.close();
+      dialog.remove();
+      resolve(result);
+    };
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      finish(input.value);
+    });
+    cancel.addEventListener("click", () => finish(null));
+    dialog.addEventListener("cancel", event => {
+      event.preventDefault();
+      finish(null);
+    });
+    dialog.showModal();
+    input.focus();
+    input.select();
+  });
+}
+
+async function editCareerLink(row) {
   const current = getCareerUrl(row);
-  const next = window.prompt(`Update saved career/search link for ${row.employerName || "this employer"}`, current);
+  const next = await requestTextInput({
+    title: `Update ${row.employerName || "employer"} link`,
+    message: "This saved link replaces the workbook/default career search link everywhere on this H-1B page.",
+    value: current,
+    placeholder: "https://company.com/careers"
+  });
   if (next === null) return;
   const trimmed = next.trim();
   const key = getEmployerKey(row);
@@ -1348,15 +1414,19 @@ function getPreferencesSnapshot() {
 }
 
 function persistPreferences() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(getPreferencesSnapshot()));
+  const snapshot = getPreferencesSnapshot();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+  saveVault(snapshot);
 }
 
 function loadPreferences() {
   try {
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
     if (stored) applyPreferences(stored);
+    mergeVaultIntoState(readVault());
   } catch {
     localStorage.removeItem(STORAGE_KEY);
+    mergeVaultIntoState(readVault());
   }
 }
 
@@ -1373,12 +1443,12 @@ function applySyncFromUrl() {
     showToast("Sync link could not be read");
     return;
   }
-  applyPreferences(prefs);
+  applyPreferences(prefs, { mergeSaved: true });
   persistPreferences();
   showToast("H-1B settings synced");
 }
 
-function applyPreferences(prefs) {
+function applyPreferences(prefs, options = {}) {
   if (!prefs || typeof prefs !== "object") return;
   const validTab = ALL_TABS.some(tab => tab.id === prefs.tab);
   if (validTab) state.tab = prefs.tab;
@@ -1400,12 +1470,75 @@ function applyPreferences(prefs) {
   setControlValue(els.minWageFilter, filters.minWage || "");
   setControlValue(els.reviewFilter, filters.review || "");
 
-  state.pinnedEmployers = new Set(Array.isArray(prefs.pinnedEmployers) ? prefs.pinnedEmployers : []);
-  state.favoriteEmployers = new Set(Array.isArray(prefs.favoriteEmployers) ? prefs.favoriteEmployers : []);
+  const pinned = new Set(Array.isArray(prefs.pinnedEmployers) ? prefs.pinnedEmployers : []);
+  const favorites = new Set(Array.isArray(prefs.favoriteEmployers) ? prefs.favoriteEmployers : []);
+  state.pinnedEmployers = options.mergeSaved ? new Set([...state.pinnedEmployers, ...pinned]) : pinned;
+  state.favoriteEmployers = options.mergeSaved ? new Set([...state.favoriteEmployers, ...favorites]) : favorites;
   state.checkedEmployers = new Set(Array.isArray(prefs.checkedEmployers) ? prefs.checkedEmployers : []);
   state.savedEmployerOrder = Array.isArray(prefs.savedEmployerOrder) ? prefs.savedEmployerOrder.filter(key => typeof key === "string") : [];
   cleanupSavedEmployerOrder();
-  state.customCareerLinks = sanitizeCustomLinks(prefs.customCareerLinks || {});
+  state.customCareerLinks = options.mergeSaved
+    ? { ...state.customCareerLinks, ...sanitizeCustomLinks(prefs.customCareerLinks || {}) }
+    : sanitizeCustomLinks(prefs.customCareerLinks || {});
+}
+
+function readStoredJson(key) {
+  try {
+    return JSON.parse(localStorage.getItem(key) || "null") || null;
+  } catch {
+    return null;
+  }
+}
+
+function normalizeVault(raw) {
+  const source = raw?.h1bVault || raw || {};
+  const pinned = Array.isArray(source.pinnedEmployers) ? source.pinnedEmployers : [];
+  const favorites = Array.isArray(source.favoriteEmployers) ? source.favoriteEmployers : [];
+  const order = Array.isArray(source.savedEmployerOrder) ? source.savedEmployerOrder : [];
+  return {
+    version: 2,
+    updatedAt: source.updatedAt || "",
+    pinnedEmployers: pinned.filter(key => getEmployerByKey(key)),
+    favoriteEmployers: favorites.filter(key => getEmployerByKey(key)),
+    savedEmployerOrder: order.filter(key => typeof key === "string" && getEmployerByKey(key)),
+    customCareerLinks: sanitizeCustomLinks(source.customCareerLinks || {})
+  };
+}
+
+function readVault() {
+  const primary = normalizeVault(readStoredJson(VAULT_KEY));
+  const backup = normalizeVault(readStoredJson(VAULT_BACKUP_KEY));
+  return {
+    version: 2,
+    updatedAt: primary.updatedAt || backup.updatedAt || "",
+    pinnedEmployers: [...new Set([...backup.pinnedEmployers, ...primary.pinnedEmployers])],
+    favoriteEmployers: [...new Set([...backup.favoriteEmployers, ...primary.favoriteEmployers])],
+    savedEmployerOrder: [...new Set([...backup.savedEmployerOrder, ...primary.savedEmployerOrder])],
+    customCareerLinks: { ...backup.customCareerLinks, ...primary.customCareerLinks }
+  };
+}
+
+function mergeVaultIntoState(raw) {
+  const vault = normalizeVault(raw);
+  vault.pinnedEmployers.forEach(key => state.pinnedEmployers.add(key));
+  vault.favoriteEmployers.forEach(key => state.favoriteEmployers.add(key));
+  state.savedEmployerOrder = [...new Set([...vault.savedEmployerOrder, ...state.savedEmployerOrder])];
+  state.customCareerLinks = { ...state.customCareerLinks, ...vault.customCareerLinks };
+  cleanupSavedEmployerOrder();
+}
+
+function saveVault(snapshot = getPreferencesSnapshot()) {
+  const vault = {
+    version: 2,
+    updatedAt: new Date().toISOString(),
+    pinnedEmployers: snapshot.pinnedEmployers || [],
+    favoriteEmployers: snapshot.favoriteEmployers || [],
+    savedEmployerOrder: snapshot.savedEmployerOrder || [],
+    customCareerLinks: sanitizeCustomLinks(snapshot.customCareerLinks || {})
+  };
+  const serialized = JSON.stringify(vault);
+  localStorage.setItem(VAULT_KEY, serialized);
+  localStorage.setItem(VAULT_BACKUP_KEY, serialized);
 }
 
 function setControlValue(control, value) {

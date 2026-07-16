@@ -2,6 +2,8 @@
 
 const STORAGE_KEY = "optJobCommandCenterPrefs";
 const THEME_KEY = "optJobCommandCenterTheme";
+const COMPANY_VAULT_KEY = "optJobCommandCenterCompanyVault";
+const COMPANY_VAULT_BACKUP_KEY = "optJobCommandCenterCompanyVaultBackup";
 const ALL_COMPANIES_ID = "__all_companies__";
 const DEFAULT_PROFILE_ID = "softwareAiDataEntryOpt";
 const DEFAULT_ROLE_PACK_ID = "all-role-families";
@@ -8600,7 +8602,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupWorkspaceHeightSync();
 
   loadPreferences();
-  const hydratedFromUrl = hydrateFromUrl();
+  hydrateFromUrl();
   if (!els.companyRole.value && els.jobTitle.value) {
     els.companyRole.value = els.jobTitle.value;
   }
@@ -8616,9 +8618,7 @@ document.addEventListener("DOMContentLoaded", () => {
   syncCompanyCard();
   renderPinnedOperators();
   renderDailyChecklist();
-  if (hydratedFromUrl) {
-    savePreferences();
-  }
+  savePreferences();
   if (hasJobTitle()) {
     generateResults(false);
   } else {
@@ -8676,6 +8676,10 @@ function cacheElements() {
     companyKind: document.getElementById("companyKind"),
     companyCount: document.getElementById("companyCount"),
     companyCard: document.getElementById("companyCard"),
+    companyVaultStatus: document.getElementById("companyVaultStatus"),
+    copyCompanyVaultButton: document.getElementById("copyCompanyVaultButton"),
+    restoreCompanyVaultButton: document.getElementById("restoreCompanyVaultButton"),
+    copyCompanyVaultSyncButton: document.getElementById("copyCompanyVaultSyncButton"),
     favoriteCompaniesPanel: document.getElementById("favoriteCompaniesPanel"),
     favoriteCompanyCount: document.getElementById("favoriteCompanyCount"),
     favoriteCompaniesGrid: document.getElementById("favoriteCompaniesGrid"),
@@ -8843,6 +8847,9 @@ function bindEvents() {
   });
   els.copyTopVendorPacketButton.addEventListener("click", copyTopVendorPacket);
   els.openTopVendorSearchesButton.addEventListener("click", openTopVendorSearches);
+  els.copyCompanyVaultButton.addEventListener("click", copyCompanyVaultBackup);
+  els.restoreCompanyVaultButton.addEventListener("click", restoreCompanyVaultBackup);
+  els.copyCompanyVaultSyncButton.addEventListener("click", copyPortableSyncLink);
 
   els.openBatchButton.addEventListener("click", openNextBatch);
   els.openHighValueBatchButton.addEventListener("click", openHighValueBatch);
@@ -8876,6 +8883,10 @@ function bindEvents() {
       return;
     }
     togglePinnedPortal(button.dataset.pinRemove);
+  });
+
+  window.addEventListener("beforeunload", () => {
+    savePreferences();
   });
 }
 
@@ -9398,7 +9409,10 @@ function hydrateFromUrl() {
     state.customPortalLinks = decodeJsonParam(params.get("sourceLinks")) || {};
   }
   if (params.has("careerLinks")) {
-    state.customCompanyCareers = decodeCompanyCareerLinksParam(params.get("careerLinks")) || {};
+    state.customCompanyCareers = mergeCompanyCareerLinks(
+      state.customCompanyCareers,
+      decodeCompanyCareerLinksParam(params.get("careerLinks")) || {}
+    );
   }
   if (params.has("include")) {
     els.includeTerms.value = params.get("include") || "";
@@ -9414,11 +9428,16 @@ function hydrateFromUrl() {
   }
   const pins = params.get("pins");
   if (pins) {
-    state.pinnedPortals = new Set(pins.split(",").filter(id => PORTALS.some(portal => portal.id === id)));
+    pins.split(",")
+      .filter(id => PORTALS.some(portal => portal.id === id))
+      .forEach(id => state.pinnedPortals.add(id));
   }
   const favorites = params.get("favCompanies");
   if (favorites) {
-    state.favoriteCompanies = new Set(favorites.split(",").filter(id => COMPANIES.some(company => company.id === id)));
+    favorites.split(",")
+      .map(id => resolveCompanyId(id))
+      .filter(Boolean)
+      .forEach(id => state.favoriteCompanies.add(id));
   }
   const checklist = params.get("checklist");
   if (checklist) {
@@ -9511,6 +9530,7 @@ function loadPreferences() {
   if (data.customCompanyCareers && typeof data.customCompanyCareers === "object" && !Array.isArray(data.customCompanyCareers)) {
     state.customCompanyCareers = sanitizeCompanyCareerLinks(data.customCompanyCareers);
   }
+  mergeCompanyVaultIntoState(readCompanyVault());
   if (data.dailyChecklist && typeof data.dailyChecklist === "object") {
     state.dailyChecklist = data.dailyChecklist.date === getTodayStamp() ? data.dailyChecklist : { date: getTodayStamp(), items: {} };
   }
@@ -9526,6 +9546,155 @@ function loadPreferences() {
 
 function getTodayStamp() {
   return new Date().toISOString().slice(0, 10);
+}
+
+function getStoredJson(key) {
+  try {
+    return JSON.parse(localStorage.getItem(key) || "null") || null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function resolveCompanyId(reference) {
+  const rawId = typeof reference === "string" ? reference : String(reference?.id || reference?.companyId || "");
+  if (rawId && COMPANIES.some(company => company.id === rawId)) {
+    return rawId;
+  }
+
+  const name = typeof reference === "string" ? reference : String(reference?.name || reference?.companyName || reference?.employerName || "");
+  const slug = name ? slugify(name) : "";
+  if (slug && COMPANIES.some(company => company.id === slug)) {
+    return slug;
+  }
+
+  const normalizedName = name.trim().toLowerCase();
+  if (!normalizedName) {
+    return "";
+  }
+  const match = COMPANIES.find(company =>
+    company.name.toLowerCase() === normalizedName ||
+    (company.aliases || []).some(alias => alias.toLowerCase() === normalizedName)
+  );
+  return match?.id || "";
+}
+
+function normalizeCompanyVault(raw) {
+  const source = raw?.companyVault || raw || {};
+  const clean = {
+    version: 2,
+    updatedAt: source.updatedAt || "",
+    favoriteCompanies: [],
+    pinnedPortals: [],
+    customCompanyCareers: {}
+  };
+
+  (Array.isArray(source.favoriteCompanies) ? source.favoriteCompanies : []).forEach(item => {
+    const id = resolveCompanyId(item);
+    if (id && !clean.favoriteCompanies.includes(id)) {
+      clean.favoriteCompanies.push(id);
+    }
+  });
+
+  (Array.isArray(source.pinnedPortals) ? source.pinnedPortals : []).forEach(item => {
+    const id = typeof item === "string" ? item : String(item?.id || "");
+    if (PORTALS.some(portal => portal.id === id) && !clean.pinnedPortals.includes(id)) {
+      clean.pinnedPortals.push(id);
+    }
+  });
+
+  Object.entries(source.customCompanyCareers || source.careerLinks || {}).forEach(([storedId, value]) => {
+    const url = typeof value === "string" ? value.trim() : String(value?.url || "").trim();
+    const id = resolveCompanyId({
+      id: storedId,
+      name: value?.name || value?.companyName || value?.employerName
+    });
+    const company = COMPANIES.find(item => item.id === id);
+    if (company && /^https?:\/\//i.test(url) && url !== company.careersUrl) {
+      clean.customCompanyCareers[id] = {
+        url,
+        name: company.name,
+        updatedAt: value?.updatedAt || clean.updatedAt || ""
+      };
+    }
+  });
+
+  return clean;
+}
+
+function readCompanyVault() {
+  const primary = normalizeCompanyVault(getStoredJson(COMPANY_VAULT_KEY));
+  const backup = normalizeCompanyVault(getStoredJson(COMPANY_VAULT_BACKUP_KEY));
+  return {
+    version: 2,
+    updatedAt: primary.updatedAt || backup.updatedAt || "",
+    favoriteCompanies: mergeUnique(primary.favoriteCompanies, backup.favoriteCompanies),
+    pinnedPortals: mergeUnique(primary.pinnedPortals, backup.pinnedPortals),
+    customCompanyCareers: mergeCompanyCareerLinks(backup.customCompanyCareers, primary.customCompanyCareers)
+  };
+}
+
+function mergeCompanyCareerLinks(...sources) {
+  const merged = {};
+  sources.forEach(source => {
+    Object.entries(sanitizeCompanyCareerLinks(source || {})).forEach(([id, link]) => {
+      merged[id] = link;
+    });
+  });
+  return sanitizeCompanyCareerLinks(merged);
+}
+
+function mergeCompanyVaultIntoState(vaultRaw) {
+  const vault = normalizeCompanyVault(vaultRaw);
+  vault.favoriteCompanies.forEach(id => state.favoriteCompanies.add(id));
+  vault.pinnedPortals.forEach(id => state.pinnedPortals.add(id));
+  state.customCompanyCareers = mergeCompanyCareerLinks(state.customCompanyCareers, vault.customCompanyCareers);
+}
+
+function createCompanyVaultSnapshot() {
+  const customCompanyCareers = sanitizeCompanyCareerLinks(state.customCompanyCareers);
+  const updatedAt = new Date().toISOString();
+  return {
+    version: 2,
+    updatedAt,
+    favoriteCompanies: Array.from(state.favoriteCompanies)
+      .map(id => COMPANIES.find(company => company.id === id))
+      .filter(Boolean)
+      .map(company => ({ id: company.id, name: company.name })),
+    pinnedPortals: Array.from(state.pinnedPortals).filter(id => PORTALS.some(portal => portal.id === id)),
+    customCompanyCareers: Object.fromEntries(Object.entries(customCompanyCareers).map(([id, link]) => {
+      const company = COMPANIES.find(item => item.id === id);
+      return [id, {
+        url: link.url,
+        name: company?.name || link.name || id,
+        updatedAt: link.updatedAt || updatedAt
+      }];
+    }))
+  };
+}
+
+function saveCompanyVault() {
+  const vault = createCompanyVaultSnapshot();
+  try {
+    const serialized = JSON.stringify(vault);
+    localStorage.setItem(COMPANY_VAULT_KEY, serialized);
+    localStorage.setItem(COMPANY_VAULT_BACKUP_KEY, serialized);
+  } catch (error) {
+    showToast("Company vault could not be saved. Copy a vault backup now.");
+  }
+  syncCompanyVaultStatus(vault);
+}
+
+function syncCompanyVaultStatus(vaultRaw = readCompanyVault()) {
+  if (!els.companyVaultStatus) {
+    return;
+  }
+  const vault = normalizeCompanyVault(vaultRaw);
+  const linkCount = Object.keys(vault.customCompanyCareers).length;
+  const favoriteCount = vault.favoriteCompanies.length;
+  const pinCount = vault.pinnedPortals.length;
+  const lastSaved = vault.updatedAt ? new Date(vault.updatedAt).toLocaleString() : "not saved yet";
+  els.companyVaultStatus.textContent = `${linkCount} custom Careers links, ${favoriteCount} favorite companies, ${pinCount} pinned sources saved. Last saved: ${lastSaved}.`;
 }
 
 function savePreferences() {
@@ -9588,6 +9757,7 @@ function savePreferences() {
     checkedDate: getTodayStamp()
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  saveCompanyVault();
 }
 
 function persistPortableState() {
@@ -9994,7 +10164,75 @@ function getPortalCustomLinks(portalId) {
   return custom.url ? [{ label: custom.label || "Custom Link", url: custom.url }] : [];
 }
 
-function editPortalCustomLink(portalId) {
+function requestTextInput({ title, message, value = "", placeholder = "", multiline = false }) {
+  return new Promise(resolve => {
+    const dialog = document.createElement("dialog");
+    dialog.className = "settings-dialog";
+
+    const form = document.createElement("form");
+    form.method = "dialog";
+
+    const heading = document.createElement("h3");
+    heading.textContent = title;
+
+    const note = document.createElement("p");
+    note.textContent = message;
+
+    const input = multiline ? document.createElement("textarea") : document.createElement("input");
+    input.className = "settings-dialog-input";
+    input.value = value || "";
+    input.placeholder = placeholder;
+    if (multiline) {
+      input.rows = 7;
+    } else {
+      input.type = "text";
+    }
+
+    const actions = document.createElement("div");
+    actions.className = "settings-dialog-actions";
+
+    const cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.className = "secondary-button";
+    cancel.textContent = "Cancel";
+
+    const save = document.createElement("button");
+    save.type = "submit";
+    save.className = "primary-button";
+    save.textContent = "Save";
+
+    actions.append(cancel, save);
+    form.append(heading, note, input, actions);
+    dialog.appendChild(form);
+    document.body.appendChild(dialog);
+
+    let settled = false;
+    const finish = result => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      dialog.close();
+      dialog.remove();
+      resolve(result);
+    };
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      finish(input.value);
+    });
+    cancel.addEventListener("click", () => finish(null));
+    dialog.addEventListener("cancel", event => {
+      event.preventDefault();
+      finish(null);
+    });
+    dialog.showModal();
+    input.focus();
+    input.select();
+  });
+}
+
+async function editPortalCustomLink(portalId) {
   const portal = PORTALS.find(item => item.id === portalId);
   if (!portal) {
     return;
@@ -10002,10 +10240,13 @@ function editPortalCustomLink(portalId) {
   const current = getPortalCustomLinks(portalId)
     .map(link => `${link.label || "Custom Link"} | ${link.url}`)
     .join("\n");
-  const next = window.prompt(
-    `Custom URL template(s) for ${portal.name}\nOne per line: Label | https://...\nTokens: {role}, {query}, {location}, {time}, {source}\nLeave blank to reset this board.`,
-    current
-  );
+  const next = await requestTextInput({
+    title: `${portal.name} custom links`,
+    message: "One per line: Label | https://... Tokens: {role}, {query}, {location}, {time}, {source}. Leave blank to reset this board.",
+    value: current,
+    multiline: true,
+    placeholder: `Primary | https://example.com/jobs?q={role}&location={location}`
+  });
   if (next === null) {
     return;
   }
@@ -10057,15 +10298,17 @@ function hasCustomCompanyCareers(company) {
   return Boolean(sanitizeCompanyCareerLinks(state.customCompanyCareers)[company.id]);
 }
 
-function editCompanyCareersLink(company) {
+async function editCompanyCareersLink(company) {
   if (!company) {
     return;
   }
   const current = getCompanyCareersUrl(company);
-  const next = window.prompt(
-    `Careers URL for ${company.name}\nDefault: ${company.careersUrl}\nLeave blank to reset this company to the default careers page.`,
-    current
-  );
+  const next = await requestTextInput({
+    title: `${company.name} Careers link`,
+    message: `Default: ${company.careersUrl}. Leave blank to reset this company to the default Careers page.`,
+    value: current,
+    placeholder: company.careersUrl || "https://company.com/careers"
+  });
   if (next === null) {
     return;
   }
@@ -10080,7 +10323,7 @@ function editCompanyCareersLink(company) {
   }
   state.customCompanyCareers = sanitizeCompanyCareerLinks({
     ...state.customCompanyCareers,
-    [company.id]: { url: cleaned }
+    [company.id]: { url: cleaned, name: company.name, updatedAt: new Date().toISOString() }
   });
   persistCompanyCareerChange(`${company.name} careers link saved`);
 }
@@ -10097,9 +10340,12 @@ function resetCompanyCareersLink(company) {
 
 function persistCompanyCareerChange(message) {
   savePreferences();
+  renderCompanyOptions(els.companyFilter.value);
   syncCompanyCard();
   renderFavoriteCompanies();
-  updateAddressBar(getSearchTitles(), getContext());
+  renderSponsorGrid();
+  renderVendorOutreach();
+  updateAddressBar(getSearchTitles(), getContext(), "replace");
   showToast(message);
 }
 
@@ -10149,13 +10395,21 @@ function normalizeCustomLinkEntries(value, fallbackLabel) {
 function sanitizeCompanyCareerLinks(raw) {
   const clean = {};
   Object.entries(raw || {}).forEach(([companyId, value]) => {
-    const company = COMPANIES.find(item => item.id === companyId);
+    const id = resolveCompanyId({
+      id: companyId,
+      name: value?.name || value?.companyName || value?.employerName
+    });
+    const company = COMPANIES.find(item => item.id === id);
     if (!company) {
       return;
     }
     const url = typeof value === "string" ? value.trim() : String(value?.url || "").trim();
     if (/^https?:\/\//i.test(url) && url !== company.careersUrl) {
-      clean[companyId] = { url };
+      clean[id] = {
+        url,
+        name: company.name,
+        updatedAt: value?.updatedAt || ""
+      };
     }
   });
   return clean;
@@ -13231,14 +13485,63 @@ function copyApplicationPacket() {
   copyLinks(packet, "Copied application packet");
 }
 
-function exportSettings() {
+function copyCompanyVaultBackup() {
   savePreferences();
-  const payload = localStorage.getItem(STORAGE_KEY) || "{}";
-  copyLinks([payload], "Copied settings JSON. Paste it in Import Settings on another browser.");
+  copyLinks([JSON.stringify(readCompanyVault(), null, 2)], "Copied company link vault backup");
 }
 
-function importSettings() {
-  const raw = window.prompt("Paste settings JSON exported from another browser:");
+async function restoreCompanyVaultBackup() {
+  const raw = await requestTextInput({
+    title: "Restore Company Link Vault",
+    message: "Paste the Company Link Vault backup JSON. Existing saved links and favorites are merged, not wiped.",
+    multiline: true,
+    placeholder: "{ \"customCompanyCareers\": { ... } }"
+  });
+  if (!raw || !raw.trim()) {
+    return;
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    showToast("Invalid company vault JSON");
+    return;
+  }
+  const vault = normalizeCompanyVault(parsed);
+  const hasData = vault.favoriteCompanies.length || vault.pinnedPortals.length || Object.keys(vault.customCompanyCareers).length;
+  if (!hasData) {
+    showToast("No company vault data found");
+    return;
+  }
+  mergeCompanyVaultIntoState(vault);
+  savePreferences();
+  renderCompanyOptions(els.companyFilter.value);
+  renderFavoriteCompanies();
+  syncCompanyCard();
+  renderSponsorGrid();
+  renderVendorOutreach();
+  renderPinnedOperators();
+  updateAddressBar(getSearchTitles(), getContext(), "replace");
+  showToast("Company link vault restored");
+}
+
+function exportSettings() {
+  savePreferences();
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    settings: getStoredJson(STORAGE_KEY) || {},
+    companyVault: readCompanyVault()
+  };
+  copyLinks([JSON.stringify(payload, null, 2)], "Copied settings and company vault JSON");
+}
+
+async function importSettings() {
+  const raw = await requestTextInput({
+    title: "Import Settings",
+    message: "Paste settings JSON exported from another browser. Company vault data is merged when included.",
+    multiline: true,
+    placeholder: "{ \"settings\": { ... }, \"companyVault\": { ... } }"
+  });
   if (!raw || !raw.trim()) {
     return;
   }
@@ -13247,11 +13550,17 @@ function importSettings() {
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
       throw new Error("not an object");
     }
+    const settings = parsed.settings && typeof parsed.settings === "object" ? parsed.settings : parsed;
+    const companyVault = parsed.companyVault ? normalizeCompanyVault(parsed.companyVault) : normalizeCompanyVault(parsed);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    if (companyVault.favoriteCompanies.length || companyVault.pinnedPortals.length || Object.keys(companyVault.customCompanyCareers).length) {
+      localStorage.setItem(COMPANY_VAULT_KEY, JSON.stringify(companyVault));
+      localStorage.setItem(COMPANY_VAULT_BACKUP_KEY, JSON.stringify(companyVault));
+    }
   } catch (error) {
     showToast("Invalid settings JSON");
     return;
   }
-  localStorage.setItem(STORAGE_KEY, raw.trim());
   window.location.replace(window.location.pathname);
 }
 
