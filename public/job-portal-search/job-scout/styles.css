@@ -258,7 +258,7 @@ a:focus-visible {
 
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 10px;
 }
 
@@ -340,7 +340,8 @@ a:focus-visible {
 }
 
 .source-card,
-.job-card {
+.job-card,
+.board-card {
   display: grid;
   gap: 10px;
   min-width: 0;
@@ -356,14 +357,23 @@ a:focus-visible {
   box-shadow: 0 0 0 2px rgba(76, 201, 240, .18);
 }
 
+.job-card.is-apply-first {
+  border-color: rgba(126, 231, 135, .62);
+  background:
+    linear-gradient(135deg, rgba(126, 231, 135, .08), transparent 36%),
+    var(--surface);
+}
+
 .source-card h3,
-.job-card h3 {
+.job-card h3,
+.board-card h3 {
   margin: 0;
   font-size: 1rem;
 }
 
 .source-card p,
-.job-card p {
+.job-card p,
+.board-card p {
   margin: 0;
   color: var(--muted);
   font-size: .9rem;
@@ -390,6 +400,102 @@ a:focus-visible {
   font-weight: 950;
 }
 
+.company-header {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.company-header h3,
+.company-header p {
+  overflow-wrap: anywhere;
+}
+
+.company-avatar {
+  display: inline-grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(76, 201, 240, .36);
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, rgba(76, 201, 240, .18), rgba(255, 122, 182, .12)),
+    var(--surface-strong);
+  color: var(--accent);
+  font-weight: 950;
+}
+
+.company-avatar img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.avatar-fallback {
+  color: var(--accent-3);
+}
+
+.query-preview {
+  overflow-wrap: anywhere;
+  border: 1px solid rgba(76, 201, 240, .18);
+  border-radius: var(--radius);
+  background: rgba(76, 201, 240, .05);
+  padding: 8px 9px;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: .76rem !important;
+}
+
+.status-select {
+  max-width: 220px;
+  min-height: 36px;
+  padding: 7px 9px;
+}
+
+.board-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.board-card {
+  align-content: start;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .035), transparent),
+    var(--surface);
+}
+
+.board-list {
+  display: grid;
+  gap: 8px;
+  max-height: 320px;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.board-row {
+  display: grid;
+  justify-items: start;
+  min-height: auto;
+  border-color: var(--line);
+  background: var(--surface-strong);
+  color: var(--ink);
+  padding: 9px;
+  text-align: left;
+}
+
+.board-row strong,
+.board-row span {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.board-row span {
+  color: var(--muted);
+  font-size: .78rem;
+}
+
 .results-toolbar {
   justify-content: space-between;
   margin-bottom: 12px;
@@ -408,6 +514,31 @@ pre {
   color: #dbeafe;
   padding: 14px;
   white-space: pre-wrap;
+}
+
+.settings-dialog {
+  width: min(720px, calc(100vw - 32px));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.settings-dialog::backdrop {
+  background: rgba(2, 8, 16, .72);
+  backdrop-filter: blur(5px);
+}
+
+.settings-dialog form,
+.settings-dialog-actions {
+  display: grid;
+  gap: 12px;
+}
+
+.settings-dialog-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .toast {
@@ -441,7 +572,8 @@ pre {
   }
 
   .source-grid,
-  .results-grid {
+  .results-grid,
+  .board-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -464,6 +596,7 @@ pre {
   .form-grid,
   .source-grid,
   .results-grid,
+  .board-grid,
   .metric-grid {
     grid-template-columns: 1fr;
   }

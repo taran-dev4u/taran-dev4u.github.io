@@ -11,7 +11,7 @@
   </head>
   <body>
     <header class="topbar">
-      <a class="back-link" href="../">Back to Command Center</a>
+      <a class="back-link" href="../index.html">Back to Command Center</a>
       <div class="brand">
         <img src="../assets/portal-scout-mark.svg" width="42" height="42" alt="">
         <div>
@@ -21,31 +21,33 @@
       </div>
       <div class="top-actions">
         <span class="status-pill" id="vaultStatus">Loading scout vault</span>
-        <a class="ghost-button" href="../h1b-intelligence/">H1B Intel</a>
+        <a class="ghost-button" href="../h1b-intelligence/index.html">H1B Intel</a>
         <button class="ghost-button" type="button" id="themeToggle">Light mode</button>
       </div>
     </header>
 
     <main class="app-shell">
       <nav class="quick-rail" aria-label="Connected job-search pages">
-        <a href="../">Command Center</a>
-        <a href="../h1b-intelligence/">H1B Intel</a>
+        <a href="../index.html">Command Center</a>
+        <a href="../h1b-intelligence/index.html">H1B Intel</a>
         <a href="#profilePanel">Profile</a>
         <a href="#searchPanel">Scout Links</a>
         <a href="#leadPanel">Add Lead</a>
         <a href="#resultsPanel">Ranked Jobs</a>
+        <a href="#reviewPanel">Review Board</a>
         <a href="#packetPanel">Apply Packet</a>
       </nav>
 
       <section class="hero-panel">
         <div>
-          <p class="eyebrow">Static job-scout layer</p>
+          <p class="eyebrow">Personal scout layer</p>
           <h2>Score every lead before you spend time applying.</h2>
-          <p>Built from the Job Scout workflow: saved profile, fresh searches, local scoring, ranked results, and ATS-safe packets.</p>
+          <p>Fresh searches, local fit scoring, warning checks, company identity, ranked review, and ATS-safe apply packets for your US OPT search.</p>
         </div>
         <div class="metric-grid">
           <div><strong id="metricLeads">0</strong><span>leads</span></div>
           <div><strong id="metricPassed">0</strong><span>above threshold</span></div>
+          <div><strong id="metricReady">0</strong><span>ready to apply</span></div>
           <div><strong id="metricAvg">0.0</strong><span>avg fit</span></div>
         </div>
       </section>
@@ -91,6 +93,10 @@ DevOps Engineer</textarea>
             <span>Domains</span>
             <input id="domainTerms" type="text" value="AI, data, cloud, SaaS, fintech, healthcare, developer tools">
           </label>
+          <label class="field" for="prioritySignals">
+            <span>Priority signals</span>
+            <input id="prioritySignals" type="text" value="Python, SQL, React, AWS, APIs, data pipelines, E-Verify, visa sponsorship">
+          </label>
           <label class="field" for="levelTerms">
             <span>Level wording</span>
             <input id="levelTerms" type="text" value="entry level, junior, new grad, university graduate, 0-2 years, early career">
@@ -98,6 +104,28 @@ DevOps Engineer</textarea>
           <label class="field" for="authTerms">
             <span>Authorization wording</span>
             <input id="authTerms" type="text" value="OPT, STEM OPT, F-1, E-Verify, visa sponsorship, H-1B, work authorization">
+          </label>
+          <label class="field" for="titleExcludes">
+            <span>Title excludes</span>
+            <input id="titleExcludes" type="text" value="senior, staff, principal, lead, manager, director, architect">
+          </label>
+          <label class="field" for="industryExcludes">
+            <span>Industry excludes</span>
+            <input id="industryExcludes" type="text" value="commission only, unpaid, MLM">
+          </label>
+          <label class="field" for="minBaseUsd">
+            <span>Minimum base</span>
+            <input id="minBaseUsd" type="number" min="0" step="5000" value="0">
+          </label>
+          <label class="field" for="workSetting">
+            <span>Work setting</span>
+            <select id="workSetting">
+              <option value="any" selected>Any US setting</option>
+              <option value="remote-hybrid-onsite">Remote + hybrid + onsite</option>
+              <option value="remote">Remote only</option>
+              <option value="hybrid-onsite">Hybrid + onsite</option>
+              <option value="onsite">Onsite only</option>
+            </select>
           </label>
           <label class="field" for="minScore">
             <span>Minimum fit</span>
@@ -132,7 +160,9 @@ DevOps Engineer</textarea>
           </div>
           <div class="action-row">
             <button class="primary-button" type="button" id="openTopSearchesButton">Open Top 5</button>
+            <button class="secondary-button" type="button" id="openSelectedSearchesButton">Open Selected</button>
             <button class="secondary-button" type="button" id="copySearchesButton">Copy All</button>
+            <button class="secondary-button" type="button" id="copyPromptButton">Copy Search Prompt</button>
           </div>
         </div>
         <div class="source-grid" id="sourceGrid"></div>
@@ -162,6 +192,15 @@ DevOps Engineer</textarea>
             <span>Location</span>
             <input id="leadLocation" type="text" placeholder="United States / Remote">
           </label>
+          <label class="field" for="leadWorkSetting">
+            <span>Work setting</span>
+            <select id="leadWorkSetting">
+              <option value="">Unknown</option>
+              <option value="remote">Remote</option>
+              <option value="hybrid">Hybrid</option>
+              <option value="onsite">Onsite</option>
+            </select>
+          </label>
           <label class="field" for="leadPosted">
             <span>Posted</span>
             <select id="leadPosted">
@@ -175,6 +214,30 @@ DevOps Engineer</textarea>
           <label class="field" for="leadSource">
             <span>Source</span>
             <input id="leadSource" type="text" placeholder="LinkedIn, Indeed, company careers">
+          </label>
+          <label class="field" for="leadCompensation">
+            <span>Compensation</span>
+            <input id="leadCompensation" type="text" placeholder="$85,000 - $120,000">
+          </label>
+          <label class="field" for="leadIndustry">
+            <span>Industry</span>
+            <input id="leadIndustry" type="text" placeholder="SaaS, healthcare, fintech">
+          </label>
+          <label class="field" for="leadCompanyWebsite">
+            <span>Company website</span>
+            <input id="leadCompanyWebsite" type="url" placeholder="https://company.com">
+          </label>
+          <label class="field" for="leadStatus">
+            <span>Status</span>
+            <select id="leadStatus">
+              <option value="Unopened" selected>Unopened</option>
+              <option value="Viewed">Viewed</option>
+              <option value="Applied">Applied</option>
+              <option value="Interviewing">Interviewing</option>
+              <option value="Rejected">Rejected</option>
+              <option value="Ignore">Ignore</option>
+              <option value="Expired">Expired</option>
+            </select>
           </label>
           <label class="field field-wide" for="leadUrl">
             <span>Apply URL</span>
@@ -194,7 +257,9 @@ DevOps Engineer</textarea>
             <h2 id="resultsHeading">Best-fit jobs</h2>
           </div>
           <div class="action-row">
+            <button class="primary-button" type="button" id="openApplyBatchButton">Open Apply Batch</button>
             <button class="secondary-button" type="button" id="copyRankedButton">Copy Ranked Table</button>
+            <button class="secondary-button" type="button" id="importLeadsButton">Import Leads</button>
             <button class="secondary-button" type="button" id="exportVaultButton">Export Vault</button>
             <button class="secondary-button" type="button" id="importVaultButton">Import Vault</button>
           </div>
@@ -205,7 +270,22 @@ DevOps Engineer</textarea>
             <select id="resultSort">
               <option value="fit" selected>Fit first</option>
               <option value="fresh">Fresh first</option>
+              <option value="health">Health first</option>
+              <option value="status">Status first</option>
               <option value="company">Company A-Z</option>
+            </select>
+          </label>
+          <label class="field" for="statusFilter">
+            <span>Status</span>
+            <select id="statusFilter">
+              <option value="all" selected>All active</option>
+              <option value="Unopened">Unopened</option>
+              <option value="Viewed">Viewed</option>
+              <option value="Applied">Applied</option>
+              <option value="Interviewing">Interviewing</option>
+              <option value="Rejected">Rejected</option>
+              <option value="Ignore">Ignore</option>
+              <option value="Expired">Expired</option>
             </select>
           </label>
           <label class="checkbox-line" for="showOnlyPassed">
@@ -214,6 +294,19 @@ DevOps Engineer</textarea>
           </label>
         </div>
         <div class="results-grid" id="resultsGrid"></div>
+      </section>
+
+      <section class="panel" id="reviewPanel" aria-labelledby="reviewHeading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Scout review</p>
+            <h2 id="reviewHeading">Decision board</h2>
+          </div>
+          <div class="action-row">
+            <button class="secondary-button" type="button" id="copyReviewButton">Copy Review Summary</button>
+          </div>
+        </div>
+        <div class="board-grid" id="reviewBoard"></div>
       </section>
 
       <section class="panel" id="packetPanel" aria-labelledby="packetHeading">
