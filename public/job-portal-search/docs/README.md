@@ -59,12 +59,15 @@ The job-search app is organized under `public/job-portal-search`.
 - Job Scout review board includes Unopened, Viewed, Applied, Interviewing, Rejected, Ignore, and Expired statuses so old leads can remain saved for duplicate detection without crowding active review.
 - Job Scout scoring now includes role fit, skill overlap, priority signals, work setting, compensation threshold, source quality, company identity, URL audit, warning evidence, and a static company-health-style risk proxy.
 - Job Scout Apply First queue and Open Apply Batch action support a manual daily fetch/review rhythm without background polling or scraping.
+- Job Scout resume-match layer inspired by the Python Job-Scout workflow: paste/import resume text, extract keywords locally, calculate browser-side cosine-style resume similarity, show resume-match chips, and include resume evidence in application packets.
+- Job Scout social/HN signal sources: X Hiring Posts, Hacker News Jobs, and HN Hiring Search are added as signal launchers for fresh recruiter/startup leads without requiring Twitter API keys or scraping from GitHub Pages.
 
 ## Recent Updates
 
 - Added `/job-portal-search/job-scout/` and connected it from Command Center and H1B Intelligence navigation.
 - Job Scout is browser-safe and static: it launches accurate searches and scores pasted/imported leads locally instead of pretending to run server-side scraping from GitHub Pages.
 - Upgraded Job Scout with ideas extracted from the researched `wallentx/jobscout` project: multiple source types, user-configurable sources, conditional source selection, import aliases, duplicate-friendly statuses, Apply First review board, URL audit, source quality, company identity, and health/risk evidence.
+- Added features from the researched Python Job-Scout project: resume text matching, keyword extraction, X/Twitter hiring query launcher, Hacker News job/search launchers, and top-fit recommendation evidence.
 - Google Advanced Search precision: single-domain source searches use `as_sitesearch=` instead of burying `site:` inside the main query.
 - Company career page searches use working `inurl:` patterns for careers, jobs, people, talent, employment, openings, and join-us pages.
 - iCIMS searches use the root `icims.com` domain so subdomain-hosted jobs are included.

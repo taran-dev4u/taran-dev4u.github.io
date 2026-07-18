@@ -447,6 +447,30 @@ a:focus-visible {
   font-size: .76rem !important;
 }
 
+.resume-insights {
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  min-height: 100%;
+  border: 1px solid rgba(247, 201, 72, .3);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgba(247, 201, 72, .1), rgba(76, 201, 240, .06)),
+    var(--surface);
+  color: var(--muted);
+  padding: 12px;
+  font-size: .86rem;
+  line-height: 1.45;
+}
+
+.resume-insights strong {
+  color: var(--accent-3);
+}
+
+.resume-insights span {
+  overflow-wrap: anywhere;
+}
+
 .status-select {
   max-width: 220px;
   min-height: 36px;

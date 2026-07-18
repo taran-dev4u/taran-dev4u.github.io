@@ -31,6 +31,7 @@
         <a href="../index.html">Command Center</a>
         <a href="../h1b-intelligence/index.html">H1B Intel</a>
         <a href="#profilePanel">Profile</a>
+        <a href="#resumePanel">Resume Match</a>
         <a href="#searchPanel">Scout Links</a>
         <a href="#leadPanel">Add Lead</a>
         <a href="#resultsPanel">Ranked Jobs</a>
@@ -149,6 +150,37 @@ DevOps Engineer</textarea>
             <span>Custom scout links</span>
             <textarea id="customSources" rows="3" placeholder="Label | https://example.com/search?q={role}&location={location}"></textarea>
           </label>
+        </div>
+      </section>
+
+      <section class="panel" id="resumePanel" aria-labelledby="resumeHeading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Resume matching</p>
+            <h2 id="resumeHeading">Resume signal lab</h2>
+          </div>
+          <div class="action-row">
+            <button class="secondary-button" type="button" id="analyzeResumeButton">Analyze Resume</button>
+            <button class="secondary-button" type="button" id="copySignalPackButton">Copy Signal Pack</button>
+            <button class="secondary-button" type="button" id="clearResumeButton">Clear Resume</button>
+          </div>
+        </div>
+        <div class="form-grid">
+          <label class="field full-row" for="resumeText">
+            <span>Resume text</span>
+            <textarea id="resumeText" rows="8" placeholder="Paste your resume text here. This stays in your browser vault and sync export only."></textarea>
+          </label>
+          <label class="field field-wide" for="resumeKeywords">
+            <span>Resume keywords</span>
+            <textarea id="resumeKeywords" rows="3" placeholder="Analyze resume to fill this, or type keywords like Python, SQL, React, AWS, ML, data pipelines"></textarea>
+          </label>
+          <label class="field" for="resumeFileInput">
+            <span>Import text file</span>
+            <input id="resumeFileInput" type="file" accept=".txt,.md,.json,.csv,.pdf">
+          </label>
+          <div class="resume-insights" id="resumeInsights">
+            Add resume text to unlock resume-match scoring.
+          </div>
         </div>
       </section>
 

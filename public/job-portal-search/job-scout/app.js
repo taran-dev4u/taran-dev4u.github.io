@@ -5,6 +5,12 @@ const BACKUP_KEY = "taranJobScoutVaultBackupV1";
 const JOB_STATUSES = ["Unopened", "Viewed", "Applied", "Interviewing", "Rejected", "Ignore", "Expired"];
 const ACTIVE_STATUSES = ["Unopened", "Viewed", "Applied", "Interviewing"];
 const STATUS_RANK = new Map(JOB_STATUSES.map((status, index) => [status, index]));
+const STOP_WORDS = new Set([
+  "and", "the", "for", "with", "from", "that", "this", "you", "your", "are", "was", "were", "will", "have", "has", "had",
+  "not", "but", "our", "their", "they", "them", "his", "her", "who", "what", "when", "where", "why", "how", "about",
+  "into", "over", "under", "than", "then", "can", "may", "all", "any", "use", "using", "used", "work", "job", "jobs",
+  "role", "roles", "team", "teams", "company", "experience", "years", "skills", "skill", "ability", "including"
+]);
 
 const state = {
   candidates: [],
@@ -44,6 +50,13 @@ function cacheElements() {
     minScore: document.getElementById("minScore"),
     freshness: document.getElementById("freshness"),
     customSources: document.getElementById("customSources"),
+    resumeText: document.getElementById("resumeText"),
+    resumeKeywords: document.getElementById("resumeKeywords"),
+    resumeFileInput: document.getElementById("resumeFileInput"),
+    resumeInsights: document.getElementById("resumeInsights"),
+    analyzeResumeButton: document.getElementById("analyzeResumeButton"),
+    copySignalPackButton: document.getElementById("copySignalPackButton"),
+    clearResumeButton: document.getElementById("clearResumeButton"),
     saveProfileButton: document.getElementById("saveProfileButton"),
     copySyncButton: document.getElementById("copySyncButton"),
     sourceGrid: document.getElementById("sourceGrid"),
@@ -102,7 +115,9 @@ function bindEvents() {
     els.workSetting,
     els.minScore,
     els.freshness,
-    els.customSources
+    els.customSources,
+    els.resumeText,
+    els.resumeKeywords
   ].forEach(control => {
     control.addEventListener("change", () => {
       saveVault();
@@ -115,6 +130,10 @@ function bindEvents() {
     renderAll();
     showToast("Scout profile saved");
   });
+  els.analyzeResumeButton.addEventListener("click", analyzeResume);
+  els.clearResumeButton.addEventListener("click", clearResume);
+  els.copySignalPackButton.addEventListener("click", copySignalSearchPack);
+  els.resumeFileInput.addEventListener("change", handleResumeFile);
   els.copySyncButton.addEventListener("click", copySyncLink);
   els.openTopSearchesButton.addEventListener("click", openTopSearches);
   els.openSelectedSearchesButton.addEventListener("click", openSelectedSearches);
@@ -152,7 +171,9 @@ function getProfile() {
     workSetting: els.workSetting.value,
     minScore: Number(els.minScore.value || 6),
     freshness: els.freshness.value,
-    customSources: els.customSources.value
+    customSources: els.customSources.value,
+    resumeText: els.resumeText.value,
+    resumeKeywords: splitTerms(els.resumeKeywords.value)
   };
 }
 
@@ -213,6 +234,8 @@ function applyVault(vault) {
   setValue(els.minScore, profile.minScore || els.minScore.value);
   setValue(els.freshness, profile.freshness || els.freshness.value);
   setValue(els.customSources, profile.customSources || els.customSources.value);
+  setValue(els.resumeText, profile.resumeText || els.resumeText.value);
+  setValue(els.resumeKeywords, profile.resumeKeywords || els.resumeKeywords.value);
   state.candidates = mergeCandidates(state.candidates, vault.candidates || []);
   state.selectedCandidateId = vault.selectedCandidateId || state.selectedCandidateId;
   state.checkedSources = new Set(vault.checkedSources.length ? vault.checkedSources : Array.from(state.checkedSources));
@@ -272,6 +295,7 @@ function syncVaultStatus(vault = normalizeVault(readJson(STORAGE_KEY))) {
 }
 
 function renderAll() {
+  renderResumeInsights();
   renderSources();
   rescoreAll();
   renderResults();
@@ -334,6 +358,36 @@ function getSourceDefinitions() {
       sourceQuality: 86,
       priority: 88,
       url: buildLinkedInPostsUrl(role, location, profile)
+    },
+    {
+      id: "xHiringPosts",
+      name: "X Hiring Posts",
+      note: "Live social search for hiring posts, recruiter signals, and fresh openings.",
+      health: "social signal",
+      sourceType: "social",
+      sourceQuality: 72,
+      priority: 87,
+      url: buildXHiringUrl(role, location, profile)
+    },
+    {
+      id: "hackerNewsJobs",
+      name: "Hacker News Jobs",
+      note: "HN job board and startup-heavy technical openings.",
+      health: "HN signal",
+      sourceType: "site",
+      sourceQuality: 70,
+      priority: 86,
+      url: "https://news.ycombinator.com/jobs"
+    },
+    {
+      id: "hnAlgoliaHiring",
+      name: "HN Hiring Search",
+      note: "Algolia date-sorted search across HN hiring posts and job discussions.",
+      health: "HN signal",
+      sourceType: "search",
+      sourceQuality: 70,
+      priority: 85,
+      url: buildHnAlgoliaUrl(role, location, profile)
     },
     {
       id: "h1bIntel",
@@ -587,6 +641,84 @@ function copySearchPrompt() {
   copyText(lines.join("\n"), "Copied scout search prompt");
 }
 
+function analyzeResume() {
+  const text = els.resumeText.value.trim();
+  if (!text) {
+    showToast("Paste resume text first");
+    return;
+  }
+  const keywords = extractResumeKeywords(text, getProfile()).slice(0, 36);
+  els.resumeKeywords.value = keywords.join(", ");
+  saveVault();
+  renderAll();
+  showToast(`Extracted ${keywords.length} resume keywords`);
+}
+
+function clearResume() {
+  els.resumeText.value = "";
+  els.resumeKeywords.value = "";
+  els.resumeFileInput.value = "";
+  saveVault();
+  renderAll();
+  showToast("Resume match data cleared");
+}
+
+function handleResumeFile() {
+  const file = els.resumeFileInput.files?.[0];
+  if (!file) return;
+  if (/\.pdf$/i.test(file.name) || file.type === "application/pdf") {
+    showToast("Static page cannot extract PDF text; export/paste resume text instead");
+    els.resumeFileInput.value = "";
+    return;
+  }
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    els.resumeText.value = String(reader.result || "");
+    analyzeResume();
+  });
+  reader.addEventListener("error", () => showToast("Resume file could not be read"));
+  reader.readAsText(file);
+}
+
+function renderResumeInsights() {
+  if (!els.resumeInsights) return;
+  const profile = getProfile();
+  const text = profile.resumeText.trim();
+  if (!text) {
+    els.resumeInsights.textContent = "Add resume text to unlock resume-match scoring.";
+    return;
+  }
+  const tokens = tokenize(text);
+  const keywords = profile.resumeKeywords.length ? profile.resumeKeywords : extractResumeKeywords(text, profile).slice(0, 18);
+  const scored = state.candidates.filter(candidate => typeof candidate.resumeSimilarity === "number");
+  const best = scored.length ? Math.max(...scored.map(candidate => candidate.resumeSimilarity || 0)) : 0;
+  els.resumeInsights.innerHTML = [
+    `<strong>${tokens.length}</strong> resume terms`,
+    `<strong>${keywords.length}</strong> saved keywords`,
+    `<strong>${Math.round(best * 100)}%</strong> best lead match`,
+    `<span>${escapeHtml(keywords.slice(0, 10).join(", ") || "No keywords yet")}</span>`
+  ].join("");
+}
+
+function copySignalSearchPack() {
+  const profile = getProfile();
+  const role = getPrimaryRole(profile);
+  const location = getPrimaryLocation(profile);
+  const lines = [
+    "Resume Signal Search Pack",
+    "",
+    `Role: ${role}`,
+    `Location: ${location}`,
+    `Resume keywords: ${getResumeKeywords(profile).slice(0, 24).join(", ") || "add resume text"}`,
+    "",
+    `X Hiring Posts: ${buildXHiringUrl(role, location, profile)}`,
+    `HN Hiring Search: ${buildHnAlgoliaUrl(role, location, profile)}`,
+    `LinkedIn Posts: ${buildLinkedInPostsUrl(role, location, profile)}`,
+    `Google Fresh Resume Match: ${buildGoogleUrl(buildResumeGoogleQuery(role, location, profile), profile.freshness)}`
+  ];
+  copyText(lines.join("\n"), "Copied resume signal pack");
+}
+
 function scoreLeadFromForm() {
   const lead = {
     id: "",
@@ -665,6 +797,13 @@ function scoreCandidate(candidate, profile) {
   const priorityHits = matchesFromTerms(text, profile.prioritySignals);
   const priorityScore = priorityHits.length >= 3 ? 1 : priorityHits.length ? .55 : 0;
 
+  const resumeKeywords = getResumeKeywords(profile);
+  const resumeHits = matchesFromTerms(text, resumeKeywords);
+  const resumeSimilarity = profile.resumeText ? cosineSimilarity(profile.resumeText, `${candidate.title} ${candidate.company} ${candidate.description} ${candidate.industry}`) : 0;
+  const resumeScore = profile.resumeText
+    ? resumeSimilarity >= .28 || resumeHits.length >= 6 ? 1.2 : resumeSimilarity >= .14 || resumeHits.length >= 3 ? .7 : .2
+    : 0;
+
   const locationHits = matchesFromTerms(text, profile.locations);
   const locationScore = locationHits.length || /\b(remote|united states|usa|u\.s\.)\b/i.test(candidate.location) ? .8 : 0;
 
@@ -684,7 +823,7 @@ function scoreCandidate(candidate, profile) {
   const industryExcludes = matchesFromTerms(text, profile.industryExcludes);
   const warnings = getWarnings(text);
   const penalty = warnings.penalty + urlAudit.penalty + salary.penalty + (workSettingScore ? 0 : workSetting.penalty) + (industryExcludes.length ? 1 : 0) + Math.min(1.8, seniorFlags.length * .9);
-  const rawScore = roleScore + responsibilityScore + skillsScore + experienceScore + domainScore + priorityScore + locationScore + salaryScore + workSettingScore + sourceScore + identityScore + healthScore - penalty;
+  const rawScore = roleScore + responsibilityScore + skillsScore + experienceScore + domainScore + priorityScore + resumeScore + locationScore + salaryScore + workSettingScore + sourceScore + identityScore + healthScore - penalty;
   const score = Math.max(0, Math.min(10, rawScore));
   const reasons = [
     roleMatches.length ? `Role matched: ${roleMatches.slice(0, 3).join(", ")}` : "Role is adjacent, not exact",
@@ -693,6 +832,7 @@ function scoreCandidate(candidate, profile) {
     locationScore ? "Location matches US/remote target" : "Location needs review",
     domainHits.length ? `Domain hits: ${domainHits.slice(0, 3).join(", ")}` : "Domain not obvious",
     priorityHits.length ? `Priority signals: ${priorityHits.slice(0, 4).join(", ")}` : "No extra priority signal",
+    profile.resumeText ? `Resume match: ${Math.round(resumeSimilarity * 100)}%${resumeHits.length ? ` (${resumeHits.slice(0, 4).join(", ")})` : ""}` : "Resume match not enabled",
     `Source quality: ${sourceQuality}/100`,
     health.note
   ];
@@ -700,6 +840,7 @@ function scoreCandidate(candidate, profile) {
   if (seniorFlags.length) gaps.push(`Possible seniority mismatch: ${seniorFlags.join(", ")}`);
   if (industryExcludes.length) gaps.push(`Excluded industry/noise terms: ${industryExcludes.join(", ")}`);
   if (!skillHits.length) gaps.push("Paste fuller description to verify skill overlap");
+  if (profile.resumeText && resumeSimilarity < .12 && resumeHits.length < 2) gaps.push("Resume overlap is weak; review before applying");
   if (!locationScore) gaps.push("Confirm US/remote eligibility");
   if (!identity.domain) gaps.push("Company identity is weak; verify official company domain");
   if (!salary.ok) gaps.push(salary.reason);
@@ -726,6 +867,7 @@ function scoreCandidate(candidate, profile) {
       experience: experienceScore,
       domain: domainScore,
       priority: priorityScore,
+      resume: resumeScore,
       location: locationScore,
       salary: salaryScore,
       workSetting: workSettingScore,
@@ -740,6 +882,8 @@ function scoreCandidate(candidate, profile) {
     skillHits,
     roleMatches,
     priorityHits,
+    resumeHits,
+    resumeSimilarity,
     freshnessRank: getFreshnessRank(candidate.posted),
     scoredAt: new Date().toISOString()
   };
@@ -805,6 +949,9 @@ function renderResults() {
     meta.append(createPill(formatPosted(candidate.posted), "pill-fresh"));
     meta.append(createPill(`Health ${candidate.healthScore}`, candidate.healthScore >= 70 ? "pill-fit" : candidate.healthScore >= 55 ? "pill-domain" : "pill-warning"));
     meta.append(createPill(`Confidence ${candidate.confidence}`, candidate.confidence === "high" ? "pill-fit" : candidate.confidence === "medium" ? "pill-domain" : "pill-warning"));
+    if (profile.resumeText) {
+      meta.append(createPill(`Resume ${Math.round((candidate.resumeSimilarity || 0) * 100)}%`, (candidate.resumeSimilarity || 0) >= .2 ? "pill-fit" : "pill-domain"));
+    }
     candidate.skillHits.slice(0, 4).forEach(skill => meta.append(createPill(skill, "pill-domain")));
     candidate.gaps.slice(0, 2).forEach(gap => meta.append(createPill(gap, "pill-warning")));
     const reasons = document.createElement("p");
@@ -993,6 +1140,7 @@ function buildPacket(candidate) {
     `Decision: ${candidate.decision}`,
     `Status: ${normalizeStatus(candidate.status)}`,
     `Confidence: ${candidate.confidence}`,
+    `Resume match: ${Math.round((candidate.resumeSimilarity || 0) * 100)}%`,
     `Company health signal: ${candidate.healthScore}/100 (${candidate.healthBand})`,
     `Posted: ${formatPosted(candidate.posted)}`,
     `Location: ${candidate.location || "Unknown"}`,
@@ -1014,6 +1162,9 @@ function buildPacket(candidate) {
     "",
     "ATS keywords from my profile:",
     profile.skills.slice(0, 18).join(", "),
+    "",
+    "Resume keywords to mirror when truthful:",
+    getResumeKeywords(profile).slice(0, 18).join(", ") || "No resume keywords saved.",
     "",
     "OPT wording:",
     "I am an F-1 OPT candidate with current US work authorization. My role must be related to my field of study. For STEM OPT, I will need an employer/payroll setup that supports the required training-plan process and E-Verify where applicable.",
@@ -1323,6 +1474,33 @@ function buildLinkedInPostsUrl(role, location, profile) {
   return `https://www.linkedin.com/search/results/content/?${params.toString()}`;
 }
 
+function buildXHiringUrl(role, location, profile) {
+  const keywords = getResumeKeywords(profile).slice(0, 5);
+  const signal = [
+    quote(role),
+    keywords.length ? `(${keywords.map(quote).join(" OR ")})` : "",
+    `("hiring" OR "#hiring" OR "#job" OR "#jobopening" OR "#nowhiring")`,
+    `("${location}" OR remote OR "United States" OR USA)`,
+    `("OPT" OR "STEM OPT" OR "visa sponsorship" OR "work authorization" OR "E-Verify")`,
+    "lang:en -filter:retweets"
+  ].filter(Boolean).join(" ");
+  return `https://x.com/search?q=${encodeURIComponent(signal)}&src=typed_query&f=live`;
+}
+
+function buildHnAlgoliaUrl(role, location, profile) {
+  const keywords = getResumeKeywords(profile).slice(0, 6).join(" ");
+  const query = [role, keywords, location, "hiring jobs"].filter(Boolean).join(" ");
+  const params = new URLSearchParams({
+    dateRange: "all",
+    page: "0",
+    prefix: "false",
+    query,
+    sort: "byDate",
+    type: "story"
+  });
+  return `https://hn.algolia.com/?${params.toString()}`;
+}
+
 function buildIndeedUrl(role, location, profile) {
   const params = new URLSearchParams({ q: role, l: location, sort: "date" });
   params.set("fromage", profile.freshness === "week" ? "7" : profile.freshness === "month" ? "14" : "1");
@@ -1333,6 +1511,12 @@ function buildGoogleJobQuery(role, location, profile) {
   const level = profile.levels.slice(0, 6).map(quote).join(" OR ");
   const auth = profile.authTerms.slice(0, 7).map(quote).join(" OR ");
   return `${quote(role)} (${level}) (${auth}) (${quote(location)} OR USA OR "U.S.") (jobs OR careers OR hiring)`;
+}
+
+function buildResumeGoogleQuery(role, location, profile) {
+  const keywords = getResumeKeywords(profile).slice(0, 8).map(quote).join(" OR ");
+  const keywordBlock = keywords ? `(${keywords})` : "";
+  return `${quote(role)} ${keywordBlock} (${quote(location)} OR USA OR "U.S.") (job OR careers OR hiring OR recruiter)`;
 }
 
 function buildGoogleUrl(query, freshness) {
@@ -1604,6 +1788,63 @@ function compactUrlPreview(url) {
   } catch (error) {
     return String(url || "").slice(0, 170);
   }
+}
+
+function getResumeKeywords(profile) {
+  if (profile.resumeKeywords?.length) return unique(profile.resumeKeywords);
+  if (!profile.resumeText) return [];
+  return extractResumeKeywords(profile.resumeText, profile).slice(0, 40);
+}
+
+function extractResumeKeywords(text, profile = {}) {
+  const preferred = [
+    ...(profile.skills || []),
+    ...(profile.prioritySignals || []),
+    ...(profile.targetRoles || []),
+    ...(profile.roleVariants || [])
+  ];
+  const counts = tokenCounts(text);
+  const preferredHits = preferred.filter(term => includesTerm(normalize(text), term));
+  const technical = Array.from(counts.entries())
+    .filter(([token, count]) => count >= 1 && token.length >= 3 && !STOP_WORDS.has(token))
+    .sort((a, b) => b[1] - a[1] || b[0].length - a[0].length)
+    .map(([token]) => token);
+  return unique([...preferredHits, ...technical]).slice(0, 60);
+}
+
+function cosineSimilarity(left, right) {
+  const leftCounts = tokenCounts(left);
+  const rightCounts = tokenCounts(right);
+  if (!leftCounts.size || !rightCounts.size) return 0;
+  const vocabulary = new Set([...leftCounts.keys(), ...rightCounts.keys()]);
+  let dot = 0;
+  let leftNorm = 0;
+  let rightNorm = 0;
+  vocabulary.forEach(token => {
+    const a = leftCounts.get(token) || 0;
+    const b = rightCounts.get(token) || 0;
+    dot += a * b;
+    leftNorm += a * a;
+    rightNorm += b * b;
+  });
+  if (!leftNorm || !rightNorm) return 0;
+  return dot / (Math.sqrt(leftNorm) * Math.sqrt(rightNorm));
+}
+
+function tokenCounts(value) {
+  const counts = new Map();
+  tokenize(value).forEach(token => {
+    counts.set(token, (counts.get(token) || 0) + 1);
+  });
+  return counts;
+}
+
+function tokenize(value) {
+  return normalize(value)
+    .replace(/[^a-z0-9+#. -]/g, " ")
+    .split(/\s+/)
+    .map(token => token.replace(/^[^a-z0-9]+|[^a-z0-9+#.]+$/g, ""))
+    .filter(token => token.length >= 2 && !STOP_WORDS.has(token));
 }
 
 function createPill(text, className = "") {
