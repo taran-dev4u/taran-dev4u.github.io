@@ -4,6 +4,7 @@ const STORAGE_KEY = "optJobCommandCenterPrefs";
 const THEME_KEY = "optJobCommandCenterTheme";
 const COMPANY_VAULT_KEY = "optJobCommandCenterCompanyVault";
 const COMPANY_VAULT_BACKUP_KEY = "optJobCommandCenterCompanyVaultBackup";
+const PROTECTED_LOCAL_STORAGE_PATTERN = /opt.*job.*command|job.*command.*center|company.*vault|career.*link/i;
 const ALL_COMPANIES_ID = "__all_companies__";
 const DEFAULT_PROFILE_ID = "softwareAiDataEntryOpt";
 const DEFAULT_ROLE_PACK_ID = "all-role-families";
@@ -9556,36 +9557,93 @@ function getStoredJson(key) {
   }
 }
 
+function getProtectedStorageSnapshots() {
+  const snapshots = [];
+  const seen = new Set();
+  [COMPANY_VAULT_BACKUP_KEY, COMPANY_VAULT_KEY, STORAGE_KEY].forEach(key => {
+    const value = getStoredJson(key);
+    if (value) {
+      seen.add(key);
+      snapshots.push(value);
+    }
+  });
+
+  try {
+    for (let index = 0; index < localStorage.length; index += 1) {
+      const key = localStorage.key(index);
+      if (!key || seen.has(key) || !PROTECTED_LOCAL_STORAGE_PATTERN.test(key)) {
+        continue;
+      }
+      const value = getStoredJson(key);
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        snapshots.push(value);
+      }
+    }
+  } catch (error) {
+    // Some privacy modes can block localStorage enumeration; direct keys above still work.
+  }
+  return snapshots;
+}
+
+function normalizeCompanyLookupName(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\b(inc|incorporated|llc|ltd|limited|corp|corporation|co|company|services|service|technologies|technology|systems|system|solutions|solution|group|holdings|holding|usa|us|u s|llp|plc|na|north america)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function companyLookupLabels(company) {
+  return [
+    company.id,
+    company.name,
+    ...(company.name || "").split(/[\/()]/),
+    ...(company.aliases || [])
+  ].filter(Boolean);
+}
+
 function resolveCompanyId(reference) {
   const rawId = typeof reference === "string" ? reference : String(reference?.id || reference?.companyId || "");
   if (rawId && COMPANIES.some(company => company.id === rawId)) {
     return rawId;
   }
 
-  const name = typeof reference === "string" ? reference : String(reference?.name || reference?.companyName || reference?.employerName || "");
-  const slug = name ? slugify(name) : "";
-  if (slug && COMPANIES.some(company => company.id === slug)) {
-    return slug;
+  const name = typeof reference === "string" ? reference : String(reference?.name || reference?.companyName || reference?.employerName || reference?.label || "");
+  const candidates = mergeUnique([rawId, name], [slugify(rawId), slugify(name)])
+    .map(value => String(value || "").trim())
+    .filter(Boolean);
+  const slugMatch = candidates.find(candidate => COMPANIES.some(company => company.id === candidate));
+  if (slugMatch) {
+    return slugMatch;
   }
 
-  const normalizedName = name.trim().toLowerCase();
-  if (!normalizedName) {
+  const normalizedCandidates = candidates.map(normalizeCompanyLookupName).filter(value => value.length >= 3);
+  if (!normalizedCandidates.length) {
     return "";
   }
   const match = COMPANIES.find(company =>
-    company.name.toLowerCase() === normalizedName ||
-    (company.aliases || []).some(alias => alias.toLowerCase() === normalizedName)
+    companyLookupLabels(company).some(label => {
+      const normalizedLabel = normalizeCompanyLookupName(label);
+      return normalizedLabel && normalizedCandidates.some(candidate =>
+        normalizedLabel === candidate ||
+        (candidate.length >= 4 && normalizedLabel.includes(candidate)) ||
+        (normalizedLabel.length >= 4 && candidate.includes(normalizedLabel))
+      );
+    })
   );
   return match?.id || "";
 }
 
 function normalizeCompanyVault(raw) {
-  const source = raw?.companyVault || raw || {};
+  const source = raw?.companyVault || raw?.settings || raw || {};
   const clean = {
     version: 2,
     updatedAt: source.updatedAt || "",
     favoriteCompanies: [],
     pinnedPortals: [],
+    customPortalLinks: {},
     customCompanyCareers: {}
   };
 
@@ -9619,10 +9677,49 @@ function normalizeCompanyVault(raw) {
     }
   });
 
+  clean.customPortalLinks = sanitizePortalLinks(source.customPortalLinks || source.portalLinks || source.sourceLinks || {});
+
   return clean;
 }
 
 function readCompanyVault() {
+  const snapshots = getProtectedStorageSnapshots().map(normalizeCompanyVault);
+  const merged = snapshots.reduce((acc, item) => mergeCompanyVaults(acc, item), normalizeCompanyVault({}));
+  return merged;
+}
+
+function mergeCompanyVaults(...vaults) {
+  return vaults.reduce((acc, itemRaw) => {
+    const item = normalizeCompanyVault(itemRaw);
+    return {
+      version: 2,
+      updatedAt: item.updatedAt || acc.updatedAt || "",
+      favoriteCompanies: mergeUnique(acc.favoriteCompanies, item.favoriteCompanies),
+      pinnedPortals: mergeUnique(acc.pinnedPortals, item.pinnedPortals),
+      customPortalLinks: mergePortalLinks(acc.customPortalLinks, item.customPortalLinks),
+      customCompanyCareers: mergeCompanyCareerLinks(acc.customCompanyCareers, item.customCompanyCareers)
+    };
+  }, {
+    version: 2,
+    updatedAt: "",
+    favoriteCompanies: [],
+    pinnedPortals: [],
+    customPortalLinks: {},
+    customCompanyCareers: {}
+  });
+}
+
+function mergePortalLinks(...sources) {
+  const merged = {};
+  sources.forEach(source => {
+    Object.entries(sanitizePortalLinks(source || {})).forEach(([id, link]) => {
+      merged[id] = link;
+    });
+  });
+  return sanitizePortalLinks(merged);
+}
+
+function readCurrentCompanyVaultKeysOnly() {
   const primary = normalizeCompanyVault(getStoredJson(COMPANY_VAULT_KEY));
   const backup = normalizeCompanyVault(getStoredJson(COMPANY_VAULT_BACKUP_KEY));
   return {
@@ -9630,6 +9727,7 @@ function readCompanyVault() {
     updatedAt: primary.updatedAt || backup.updatedAt || "",
     favoriteCompanies: mergeUnique(primary.favoriteCompanies, backup.favoriteCompanies),
     pinnedPortals: mergeUnique(primary.pinnedPortals, backup.pinnedPortals),
+    customPortalLinks: mergePortalLinks(backup.customPortalLinks, primary.customPortalLinks),
     customCompanyCareers: mergeCompanyCareerLinks(backup.customCompanyCareers, primary.customCompanyCareers)
   };
 }
@@ -9648,6 +9746,7 @@ function mergeCompanyVaultIntoState(vaultRaw) {
   const vault = normalizeCompanyVault(vaultRaw);
   vault.favoriteCompanies.forEach(id => state.favoriteCompanies.add(id));
   vault.pinnedPortals.forEach(id => state.pinnedPortals.add(id));
+  state.customPortalLinks = mergePortalLinks(state.customPortalLinks, vault.customPortalLinks);
   state.customCompanyCareers = mergeCompanyCareerLinks(state.customCompanyCareers, vault.customCompanyCareers);
 }
 
@@ -9662,6 +9761,7 @@ function createCompanyVaultSnapshot() {
       .filter(Boolean)
       .map(company => ({ id: company.id, name: company.name })),
     pinnedPortals: Array.from(state.pinnedPortals).filter(id => PORTALS.some(portal => portal.id === id)),
+    customPortalLinks: sanitizePortalLinks(state.customPortalLinks),
     customCompanyCareers: Object.fromEntries(Object.entries(customCompanyCareers).map(([id, link]) => {
       const company = COMPANIES.find(item => item.id === id);
       return [id, {
@@ -9673,8 +9773,11 @@ function createCompanyVaultSnapshot() {
   };
 }
 
-function saveCompanyVault() {
-  const vault = createCompanyVaultSnapshot();
+function saveCompanyVault(options = {}) {
+  const current = createCompanyVaultSnapshot();
+  const vault = options.replace
+    ? current
+    : mergeCompanyVaults(readCurrentCompanyVaultKeysOnly(), current);
   try {
     const serialized = JSON.stringify(vault);
     localStorage.setItem(COMPANY_VAULT_KEY, serialized);
@@ -9691,13 +9794,17 @@ function syncCompanyVaultStatus(vaultRaw = readCompanyVault()) {
   }
   const vault = normalizeCompanyVault(vaultRaw);
   const linkCount = Object.keys(vault.customCompanyCareers).length;
+  const boardLinkCount = Object.keys(vault.customPortalLinks).length;
   const favoriteCount = vault.favoriteCompanies.length;
   const pinCount = vault.pinnedPortals.length;
   const lastSaved = vault.updatedAt ? new Date(vault.updatedAt).toLocaleString() : "not saved yet";
-  els.companyVaultStatus.textContent = `${linkCount} custom Careers links, ${favoriteCount} favorite companies, ${pinCount} pinned sources saved. Last saved: ${lastSaved}.`;
+  els.companyVaultStatus.textContent = `${linkCount} custom Careers links, ${boardLinkCount} custom job-board link sets, ${favoriteCount} favorite companies, ${pinCount} pinned sources saved. Last saved: ${lastSaved}.`;
 }
 
-function savePreferences() {
+function savePreferences(options = {}) {
+  if (!options.replaceProtectedVault) {
+    mergeCompanyVaultIntoState(readCompanyVault());
+  }
   const payload = {
     profile: els.profileSelect.value,
     rolePack: els.rolePackSelect.value,
@@ -9757,7 +9864,7 @@ function savePreferences() {
     checkedDate: getTodayStamp()
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-  saveCompanyVault();
+  saveCompanyVault({ replace: Boolean(options.replaceProtectedVault) });
 }
 
 function persistPortableState() {
@@ -10279,7 +10386,7 @@ function resetPortalCustomLink(portalId) {
 }
 
 function persistPortalLinkChange(message) {
-  savePreferences();
+  savePreferences({ replaceProtectedVault: true });
   if (hasJobTitle()) {
     generateResults();
   } else {
@@ -10339,7 +10446,7 @@ function resetCompanyCareersLink(company) {
 }
 
 function persistCompanyCareerChange(message) {
-  savePreferences();
+  savePreferences({ replaceProtectedVault: true });
   renderCompanyOptions(els.companyFilter.value);
   syncCompanyCard();
   renderFavoriteCompanies();
@@ -11070,7 +11177,7 @@ function togglePinnedPortal(portalId) {
   } else {
     state.pinnedPortals.add(portalId);
   }
-  savePreferences();
+  savePreferences({ replaceProtectedVault: true });
   renderPinnedOperators();
   if (hasJobTitle()) {
     generateResults();
@@ -13255,7 +13362,7 @@ function toggleFavoriteCompanyById(companyId, forceFavorite) {
 }
 
 function persistFavoriteCompanies(message) {
-  savePreferences();
+  savePreferences({ replaceProtectedVault: true });
   renderCompanyOptions(els.companyFilter.value);
   renderFavoriteCompanies();
   syncCompanyCard();
@@ -13514,7 +13621,7 @@ async function restoreCompanyVaultBackup() {
     return;
   }
   mergeCompanyVaultIntoState(vault);
-  savePreferences();
+  savePreferences({ replaceProtectedVault: true });
   renderCompanyOptions(els.companyFilter.value);
   renderFavoriteCompanies();
   syncCompanyCard();
@@ -13688,7 +13795,6 @@ function resetSearch() {
   els.vendorCategory.value = "all";
   els.vendorKind.value = "vendor";
   els.vendorHasUrl.value = "all";
-  state.customPortalLinks = {};
   setCategorySelection(new Set(DEFAULT_CATEGORY_IDS));
   renderCompanyOptions("");
   renderVendorOutreach();

@@ -30,6 +30,7 @@ const PRIMARY_EMPLOYER_SHEETS = [
 const STORAGE_KEY = "taran-h1b-intelligence-preferences-v2";
 const VAULT_KEY = "taran-h1b-intelligence-vault";
 const VAULT_BACKUP_KEY = "taran-h1b-intelligence-vault-backup";
+const H1B_PROTECTED_STORAGE_PATTERN = /h1b.*intelligence|h1b.*vault|taran.*h1b/i;
 const DEFAULT_ROLE_QUERY = "software data AI";
 const EMPLOYER_CARD_BATCH_SIZE = 60;
 
@@ -868,7 +869,7 @@ function togglePinnedEmployer(row, forcePinned) {
     state.pinnedEmployers.delete(key);
     removeSavedKeyIfUnused(key);
   }
-  persistPreferences();
+  persistPreferences({ replaceVault: true });
   render();
   showToast(`${row.employerName || "Employer"} ${shouldPin ? "pinned" : "unpinned"}`);
 }
@@ -884,7 +885,7 @@ function toggleFavoriteEmployer(row, forceFavorite) {
     state.favoriteEmployers.delete(key);
     removeSavedKeyIfUnused(key);
   }
-  persistPreferences();
+  persistPreferences({ replaceVault: true });
   render();
   showToast(`${row.employerName || "Employer"} ${shouldFavorite ? "favorited" : "unfavorited"}`);
 }
@@ -899,7 +900,7 @@ function clearCheckedEmployers() {
 function clearPinnedEmployers() {
   state.pinnedEmployers.clear();
   cleanupSavedEmployerOrder();
-  persistPreferences();
+  persistPreferences({ replaceVault: true });
   render();
   showToast("Cleared pinned employers");
 }
@@ -907,7 +908,7 @@ function clearPinnedEmployers() {
 function clearFavoriteEmployers() {
   state.favoriteEmployers.clear();
   cleanupSavedEmployerOrder();
-  persistPreferences();
+  persistPreferences({ replaceVault: true });
   render();
   showToast("Cleared favorite employers");
 }
@@ -1042,7 +1043,7 @@ function moveSavedEmployer(row, direction) {
   }
   [groupKeys[currentIndex], groupKeys[nextIndex]] = [groupKeys[nextIndex], groupKeys[currentIndex]];
   writeSavedGroupOrder(key, groupKeys);
-  persistPreferences();
+  persistPreferences({ replaceVault: true });
   render();
 }
 
@@ -1053,7 +1054,7 @@ function moveSavedEmployerToTop(row) {
   const groupKeys = getSavedEmployerKeys().sort(compareSavedKeys).filter(item => isSameSavedGroup(key, item));
   const nextGroupKeys = [key, ...groupKeys.filter(item => item !== key)];
   writeSavedGroupOrder(key, nextGroupKeys);
-  persistPreferences();
+  persistPreferences({ replaceVault: true });
   render();
 }
 
@@ -1181,7 +1182,7 @@ async function editCareerLink(row) {
   const key = getEmployerKey(row);
   if (!trimmed) {
     delete state.customCareerLinks[key];
-    persistPreferences();
+    persistPreferences({ replaceVault: true });
     render();
     showToast("Custom link removed");
     return;
@@ -1191,7 +1192,7 @@ async function editCareerLink(row) {
     return;
   }
   state.customCareerLinks[key] = trimmed;
-  persistPreferences();
+  persistPreferences({ replaceVault: true });
   render();
   showToast("Custom link saved");
 }
@@ -1199,7 +1200,7 @@ async function editCareerLink(row) {
 function resetCareerLink(row) {
   const key = getEmployerKey(row);
   delete state.customCareerLinks[key];
-  persistPreferences();
+  persistPreferences({ replaceVault: true });
   render();
   showToast("Career link reset");
 }
@@ -1413,10 +1414,13 @@ function getPreferencesSnapshot() {
   };
 }
 
-function persistPreferences() {
+function persistPreferences(options = {}) {
+  if (!options.replaceVault) {
+    mergeVaultIntoState(readVault());
+  }
   const snapshot = getPreferencesSnapshot();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
-  saveVault(snapshot);
+  saveVault(snapshot, { replace: Boolean(options.replaceVault) });
 }
 
 function loadPreferences() {
@@ -1490,8 +1494,36 @@ function readStoredJson(key) {
   }
 }
 
+function readProtectedVaultSnapshots() {
+  const snapshots = [];
+  const seen = new Set();
+  [VAULT_BACKUP_KEY, VAULT_KEY, STORAGE_KEY].forEach(key => {
+    const value = readStoredJson(key);
+    if (value) {
+      seen.add(key);
+      snapshots.push(value);
+    }
+  });
+
+  try {
+    for (let index = 0; index < localStorage.length; index += 1) {
+      const key = localStorage.key(index);
+      if (!key || seen.has(key) || !H1B_PROTECTED_STORAGE_PATTERN.test(key)) {
+        continue;
+      }
+      const value = readStoredJson(key);
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        snapshots.push(value);
+      }
+    }
+  } catch {
+    // Direct keys above are enough when storage enumeration is unavailable.
+  }
+  return snapshots;
+}
+
 function normalizeVault(raw) {
-  const source = raw?.h1bVault || raw || {};
+  const source = raw?.h1bVault || raw?.settings || raw || {};
   const pinned = Array.isArray(source.pinnedEmployers) ? source.pinnedEmployers : [];
   const favorites = Array.isArray(source.favoriteEmployers) ? source.favoriteEmployers : [];
   const order = Array.isArray(source.savedEmployerOrder) ? source.savedEmployerOrder : [];
@@ -1506,6 +1538,12 @@ function normalizeVault(raw) {
 }
 
 function readVault() {
+  return readProtectedVaultSnapshots()
+    .map(normalizeVault)
+    .reduce((acc, item) => mergeVaults(acc, item), normalizeVault({}));
+}
+
+function readCurrentVaultKeysOnly() {
   const primary = normalizeVault(readStoredJson(VAULT_KEY));
   const backup = normalizeVault(readStoredJson(VAULT_BACKUP_KEY));
   return {
@@ -1518,6 +1556,27 @@ function readVault() {
   };
 }
 
+function mergeVaults(...vaults) {
+  return vaults.reduce((acc, itemRaw) => {
+    const item = normalizeVault(itemRaw);
+    return {
+      version: 2,
+      updatedAt: item.updatedAt || acc.updatedAt || "",
+      pinnedEmployers: [...new Set([...acc.pinnedEmployers, ...item.pinnedEmployers])],
+      favoriteEmployers: [...new Set([...acc.favoriteEmployers, ...item.favoriteEmployers])],
+      savedEmployerOrder: [...new Set([...acc.savedEmployerOrder, ...item.savedEmployerOrder])],
+      customCareerLinks: { ...acc.customCareerLinks, ...item.customCareerLinks }
+    };
+  }, {
+    version: 2,
+    updatedAt: "",
+    pinnedEmployers: [],
+    favoriteEmployers: [],
+    savedEmployerOrder: [],
+    customCareerLinks: {}
+  });
+}
+
 function mergeVaultIntoState(raw) {
   const vault = normalizeVault(raw);
   vault.pinnedEmployers.forEach(key => state.pinnedEmployers.add(key));
@@ -1527,8 +1586,8 @@ function mergeVaultIntoState(raw) {
   cleanupSavedEmployerOrder();
 }
 
-function saveVault(snapshot = getPreferencesSnapshot()) {
-  const vault = {
+function saveVault(snapshot = getPreferencesSnapshot(), options = {}) {
+  const current = {
     version: 2,
     updatedAt: new Date().toISOString(),
     pinnedEmployers: snapshot.pinnedEmployers || [],
@@ -1536,6 +1595,7 @@ function saveVault(snapshot = getPreferencesSnapshot()) {
     savedEmployerOrder: snapshot.savedEmployerOrder || [],
     customCareerLinks: sanitizeCustomLinks(snapshot.customCareerLinks || {})
   };
+  const vault = options.replace ? current : mergeVaults(readCurrentVaultKeysOnly(), current);
   const serialized = JSON.stringify(vault);
   localStorage.setItem(VAULT_KEY, serialized);
   localStorage.setItem(VAULT_BACKUP_KEY, serialized);
