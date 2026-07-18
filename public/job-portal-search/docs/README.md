@@ -10,6 +10,8 @@ The job-search app is organized under `public/job-portal-search`.
 - `../assets/app.js` contains the search logic, URL builders, company data, vendor actions, favorites, sync links, and saved settings.
 - `../assets/styles.css` contains the dark command-center UI.
 - `../assets/portal-scout-mark.svg` is the local app mark.
+- `../job-scout/` is the connected static Job Scout layer for profile-aware lead scoring and application packets.
+- `../h1b-intelligence/` is the separate workbook-backed H1B sponsor intelligence module.
 - `README.md` is this project guide.
 - `PROJECT_CONTEXT.md` is local-only planning/context and is ignored by Git.
 
@@ -50,9 +52,12 @@ The job-search app is organized under `public/job-portal-search`.
 - Company search cards with related company results, reset, careers, LinkedIn recruiter/company, LinkedIn jobs/posts, Indeed/Google, Google Company, custom company links, and link-pack open/copy actions.
 - Per-company Careers links default to the company careers page and can be updated/reset from the company card; saved custom Careers links are included in local settings and sync URLs.
 - Favorite company shortcuts above the company search controls, including instant favorite/unfavorite saving, top-favorites launch/copy actions, and visible LinkedIn Jobs, LinkedIn Posts, LinkedIn Recruiters, LinkedIn Company, Indeed/Google, and Google Company links.
+- Job Scout page for profile-aware job discovery, adapted for static GitHub Pages: saved profile, fresh source launcher, manual lead intake, local fit scoring, dedupe, ranked cards, markdown table copy, ATS-safe application packet, vault export/import, sync links, and dark UI.
 
 ## Recent Updates
 
+- Added `/job-portal-search/job-scout/` and connected it from Command Center and H1B Intelligence navigation.
+- Job Scout is browser-safe and static: it launches accurate searches and scores pasted/imported leads locally instead of pretending to run server-side scraping from GitHub Pages.
 - Google Advanced Search precision: single-domain source searches use `as_sitesearch=` instead of burying `site:` inside the main query.
 - Company career page searches use working `inurl:` patterns for careers, jobs, people, talent, employment, openings, and join-us pages.
 - iCIMS searches use the root `icims.com` domain so subdomain-hosted jobs are included.
