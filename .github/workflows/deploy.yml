@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+  schedule:
+    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -31,6 +33,13 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Update Job Scout live feed
+        run: node scripts/job-scout/update-live-feed.mjs
+        env:
+          USAJOBS_API_KEY: ${{ secrets.USAJOBS_API_KEY }}
+          USAJOBS_USER_AGENT: ${{ secrets.USAJOBS_USER_AGENT }}
+          USAJOBS_EMAIL: ${{ secrets.USAJOBS_EMAIL }}
 
       - name: Build
         run: npm run build

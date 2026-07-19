@@ -5,6 +5,7 @@ const BACKUP_KEY = "taranJobScoutVaultBackupV1";
 const JOB_STATUSES = ["Unopened", "Viewed", "Applied", "Interviewing", "Rejected", "Ignore", "Expired"];
 const ACTIVE_STATUSES = ["Unopened", "Viewed", "Applied", "Interviewing"];
 const STATUS_RANK = new Map(JOB_STATUSES.map((status, index) => [status, index]));
+const LIVE_FEED_URL = "data/live-jobs.json";
 const STOP_WORDS = new Set([
   "and", "the", "for", "with", "from", "that", "this", "you", "your", "are", "was", "were", "will", "have", "has", "had",
   "not", "but", "our", "their", "they", "them", "his", "her", "who", "what", "when", "where", "why", "how", "about",
@@ -14,6 +15,8 @@ const STOP_WORDS = new Set([
 
 const state = {
   candidates: [],
+  liveJobs: [],
+  liveMeta: null,
   selectedCandidateId: "",
   checkedSources: new Set(["linkedinJobs", "indeed", "googleFresh", "directAts", "linkedinPosts"]),
   pinnedSources: new Set(["linkedinJobs", "indeed", "googleFresh"]),
@@ -28,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
   hydrateFromUrl();
   bindEvents();
   renderAll();
+  loadLiveJobs();
   saveVault();
 });
 
@@ -59,6 +63,16 @@ function cacheElements() {
     clearResumeButton: document.getElementById("clearResumeButton"),
     saveProfileButton: document.getElementById("saveProfileButton"),
     copySyncButton: document.getElementById("copySyncButton"),
+    liveFeedStatus: document.getElementById("liveFeedStatus"),
+    liveStats: document.getElementById("liveStats"),
+    liveJobGrid: document.getElementById("liveJobGrid"),
+    liveMinScore: document.getElementById("liveMinScore"),
+    liveSourceFilter: document.getElementById("liveSourceFilter"),
+    liveOnlyFresh: document.getElementById("liveOnlyFresh"),
+    reloadLiveJobsButton: document.getElementById("reloadLiveJobsButton"),
+    importTopLiveButton: document.getElementById("importTopLiveButton"),
+    openTopLiveButton: document.getElementById("openTopLiveButton"),
+    copyLiveJobsButton: document.getElementById("copyLiveJobsButton"),
     sourceGrid: document.getElementById("sourceGrid"),
     openTopSearchesButton: document.getElementById("openTopSearchesButton"),
     openSelectedSearchesButton: document.getElementById("openSelectedSearchesButton"),
@@ -135,6 +149,13 @@ function bindEvents() {
   els.copySignalPackButton.addEventListener("click", copySignalSearchPack);
   els.resumeFileInput.addEventListener("change", handleResumeFile);
   els.copySyncButton.addEventListener("click", copySyncLink);
+  els.reloadLiveJobsButton.addEventListener("click", () => loadLiveJobs(true));
+  els.importTopLiveButton.addEventListener("click", () => importTopLiveJobs(10));
+  els.openTopLiveButton.addEventListener("click", () => openTopLiveJobs(10));
+  els.copyLiveJobsButton.addEventListener("click", copyTopLiveJobs);
+  [els.liveMinScore, els.liveSourceFilter, els.liveOnlyFresh].forEach(control => {
+    control.addEventListener("change", renderLiveJobs);
+  });
   els.openTopSearchesButton.addEventListener("click", openTopSearches);
   els.openSelectedSearchesButton.addEventListener("click", openSelectedSearches);
   els.copySearchesButton.addEventListener("click", copyAllSearches);
@@ -296,11 +317,295 @@ function syncVaultStatus(vault = normalizeVault(readJson(STORAGE_KEY))) {
 
 function renderAll() {
   renderResumeInsights();
+  renderLiveJobs();
   renderSources();
   rescoreAll();
   renderResults();
   renderReviewBoard();
   renderPacket();
+}
+
+async function loadLiveJobs(force = false) {
+  if (!els.liveFeedStatus) return;
+  els.liveFeedStatus.textContent = "Loading live jobs...";
+  try {
+    const url = force ? `${LIVE_FEED_URL}?t=${Date.now()}` : LIVE_FEED_URL;
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    const payload = await response.json();
+    state.liveMeta = normalizeLiveMeta(payload);
+    state.liveJobs = (payload.jobs || [])
+      .map(job => normalizeLiveJob(job, payload.generatedAt))
+      .filter(job => job.title && job.company && job.url);
+    updateLiveSourceOptions();
+    renderLiveJobs();
+    const count = state.liveJobs.length;
+    els.liveFeedStatus.textContent = `${count} live jobs loaded`;
+    if (force) showToast(`Reloaded ${count} live jobs`);
+  } catch (error) {
+    state.liveMeta = {
+      generatedAt: "",
+      sourceStatuses: [],
+      errors: [String(error?.message || error)]
+    };
+    state.liveJobs = [];
+    renderLiveJobs();
+    els.liveFeedStatus.textContent = "Live feed unavailable";
+  }
+}
+
+function normalizeLiveMeta(payload = {}) {
+  return {
+    generatedAt: payload.generatedAt || "",
+    profileName: payload.profile?.name || "Taran Mamidala",
+    profileSummary: payload.profile?.summary || "",
+    sourceStatuses: Array.isArray(payload.sourceStatuses) ? payload.sourceStatuses : [],
+    stats: payload.stats || {},
+    errors: Array.isArray(payload.errors) ? payload.errors : []
+  };
+}
+
+function normalizeLiveJob(job, generatedAt) {
+  const candidate = {
+    id: "",
+    title: firstText(job.title, job.role),
+    company: firstText(job.company, job.companyName, job.organization),
+    location: firstText(job.location, job.locations, "United States"),
+    workSetting: normalizeWorkSettingValue(firstText(job.workSetting, job.remote, job.workplace)),
+    posted: normalizePosted(firstText(job.postedLabel, job.postedAt, job.datePosted, job.createdAt)),
+    postedAt: firstText(job.postedAt, job.datePosted, job.createdAt),
+    source: firstText(job.source, job.sourceName, "Live Feed"),
+    sourceType: firstText(job.sourceType, job.type, "live"),
+    compensation: firstText(job.compensation, job.salary, job.pay),
+    industry: firstText(job.industry, job.category, job.department, job.tags),
+    companyWebsite: firstText(job.companyWebsite, job.companyUrl, job.company_url),
+    status: "Unopened",
+    url: firstText(job.url, job.applyUrl, job.apply_url),
+    description: cleanLiveText(firstText(job.description, job.summary, job.snippet)),
+    addedAt: generatedAt || new Date().toISOString(),
+    liveFeedId: firstText(job.id, job.externalId),
+    feedScore: Number(job.score || 0),
+    feedReasons: Array.isArray(job.fitReasons) ? job.fitReasons : [],
+    feedWarnings: Array.isArray(job.warnings) ? job.warnings : []
+  };
+  candidate.id = candidateId(candidate);
+  return candidate;
+}
+
+function updateLiveSourceOptions() {
+  if (!els.liveSourceFilter) return;
+  const current = els.liveSourceFilter.value || "all";
+  const sources = unique(state.liveJobs.map(job => job.source)).sort((a, b) => a.localeCompare(b));
+  els.liveSourceFilter.innerHTML = "";
+  const all = document.createElement("option");
+  all.value = "all";
+  all.textContent = `All live sources (${state.liveJobs.length})`;
+  els.liveSourceFilter.append(all);
+  sources.forEach(source => {
+    const option = document.createElement("option");
+    option.value = source;
+    option.textContent = `${source} (${state.liveJobs.filter(job => job.source === source).length})`;
+    els.liveSourceFilter.append(option);
+  });
+  els.liveSourceFilter.value = sources.includes(current) ? current : "all";
+}
+
+function getScoredLiveJobs() {
+  const profile = getProfile();
+  return state.liveJobs
+    .map(job => scoreCandidate(job, profile))
+    .map(job => ({
+      ...job,
+      feedScore: state.liveJobs.find(item => item.id === job.id)?.feedScore || 0,
+      feedReasons: state.liveJobs.find(item => item.id === job.id)?.feedReasons || [],
+      feedWarnings: state.liveJobs.find(item => item.id === job.id)?.feedWarnings || []
+    }))
+    .sort((a, b) => b.score - a.score || getLiveAgeMs(a) - getLiveAgeMs(b) || b.feedScore - a.feedScore);
+}
+
+function getVisibleLiveJobs() {
+  const minScore = Number(els.liveMinScore?.value || 6);
+  const source = els.liveSourceFilter?.value || "all";
+  return getScoredLiveJobs()
+    .filter(job => job.score >= minScore)
+    .filter(job => source === "all" || job.source === source)
+    .filter(job => !els.liveOnlyFresh?.checked || isFreshLiveJob(job))
+    .slice(0, 80);
+}
+
+function isFreshLiveJob(job) {
+  const age = getLiveAgeMs(job);
+  if (!Number.isFinite(age)) {
+    return ["minutes", "today", "24h"].includes(job.posted);
+  }
+  return age <= 48 * 60 * 60 * 1000;
+}
+
+function getLiveAgeMs(job) {
+  const value = Date.parse(job.postedAt || "");
+  return Number.isFinite(value) ? Date.now() - value : Number.POSITIVE_INFINITY;
+}
+
+function renderLiveJobs() {
+  if (!els.liveJobGrid) return;
+  const visible = getVisibleLiveJobs();
+  const total = state.liveJobs.length;
+  const generated = state.liveMeta?.generatedAt ? formatTime(state.liveMeta.generatedAt) : "not generated yet";
+  const sourceCount = unique(state.liveJobs.map(job => job.source)).length;
+  const errorCount = (state.liveMeta?.errors || []).length + (state.liveMeta?.sourceStatuses || []).filter(item => item.status === "error").length;
+  els.liveStats.textContent = `${visible.length} shown from ${total} collected jobs across ${sourceCount} sources. Feed generated: ${generated}.${errorCount ? ` ${errorCount} source warnings.` : ""}`;
+  els.liveJobGrid.innerHTML = "";
+
+  if (!total) {
+    const empty = document.createElement("article");
+    empty.className = "job-card live-empty-card";
+    empty.innerHTML = "<h3>No live feed yet</h3><p>The scheduled collector will populate this page after the next GitHub Actions run. Use Reload Feed after deployment, or keep using Scout Links meanwhile.</p>";
+    els.liveJobGrid.append(empty);
+    return;
+  }
+
+  if (!visible.length) {
+    const empty = document.createElement("article");
+    empty.className = "job-card live-empty-card";
+    empty.innerHTML = "<h3>No jobs match this live filter</h3><p>Lower the live threshold, show all sources, or turn off the 48-hour preference.</p>";
+    els.liveJobGrid.append(empty);
+    return;
+  }
+
+  visible.forEach(job => {
+    const card = document.createElement("article");
+    card.className = "job-card live-job-card";
+    if (job.decision === "Apply First") card.classList.add("is-apply-first");
+
+    const header = document.createElement("div");
+    header.className = "company-header";
+    header.append(renderCompanyAvatar(job.identity, job.company));
+    const headerText = document.createElement("div");
+    const title = document.createElement("h3");
+    title.textContent = job.title;
+    const company = document.createElement("p");
+    company.textContent = job.company;
+    headerText.append(title, company);
+    header.append(headerText);
+
+    const score = document.createElement("div");
+    score.className = "score-number";
+    score.textContent = `${job.score.toFixed(1)}/10`;
+
+    const summary = document.createElement("p");
+    summary.textContent = `${job.location || "Location unknown"} | ${formatPosted(job.posted)} | ${job.source} | ${job.workSetting || "setting unknown"}`;
+
+    const meta = document.createElement("div");
+    meta.className = "meta-row";
+    meta.append(createPill(job.decision, job.decision === "Apply First" ? "pill-fit" : job.decision === "Review" ? "pill-domain" : "pill-warning"));
+    meta.append(createPill(`Live ${liveAgeLabel(job)}`, "pill-fresh"));
+    meta.append(createPill(job.sourceType || "live", "pill-domain"));
+    meta.append(createPill(`Health ${job.healthScore}`, job.healthScore >= 70 ? "pill-fit" : job.healthScore >= 55 ? "pill-domain" : "pill-warning"));
+    job.skillHits.slice(0, 5).forEach(skill => meta.append(createPill(skill, "pill-domain")));
+    job.gaps.slice(0, 2).forEach(gap => meta.append(createPill(gap, "pill-warning")));
+
+    const reasons = document.createElement("p");
+    reasons.textContent = unique([...job.reasons.slice(0, 3), ...job.feedReasons.slice(0, 2)]).join(" | ");
+
+    const actions = document.createElement("div");
+    actions.className = "card-actions";
+    actions.append(createLink("Open", job.url));
+    actions.append(createButton("Import", () => importLiveJob(job)));
+    actions.append(createButton("Copy Packet", () => copyPacket(job)));
+    actions.append(createButton("Search Company", () => window.open(buildGoogleUrl(`${quote(job.company)} ${quote(job.title)} careers`, "week"), "_blank", "noopener")));
+
+    card.append(header, score, summary, meta, reasons, actions);
+    els.liveJobGrid.append(card);
+  });
+}
+
+function liveAgeLabel(job) {
+  const age = getLiveAgeMs(job);
+  if (!Number.isFinite(age)) return formatPosted(job.posted);
+  const minutes = Math.max(0, Math.round(age / 60000));
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 48) return `${hours}h ago`;
+  return `${Math.round(hours / 24)}d ago`;
+}
+
+function cleanLiveText(value) {
+  return String(value || "")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, "\"")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function importLiveJob(job) {
+  const candidate = scoreCandidate({
+    ...job,
+    status: "Unopened",
+    addedAt: new Date().toISOString()
+  }, getProfile());
+  state.candidates = mergeCandidates(state.candidates, [candidate]);
+  state.selectedCandidateId = candidate.id;
+  saveVault();
+  renderAll();
+  showToast(`Imported ${candidate.company}`);
+}
+
+function importTopLiveJobs(limit = 10) {
+  const jobs = getVisibleLiveJobs().slice(0, limit);
+  if (!jobs.length) {
+    showToast("No live jobs to import");
+    return;
+  }
+  const scored = jobs.map(job => scoreCandidate({
+    ...job,
+    status: "Unopened",
+    addedAt: new Date().toISOString()
+  }, getProfile()));
+  state.candidates = mergeCandidates(state.candidates, scored);
+  state.selectedCandidateId = scored[0]?.id || state.selectedCandidateId;
+  saveVault();
+  renderAll();
+  showToast(`Imported ${scored.length} live jobs`);
+}
+
+function openTopLiveJobs(limit = 10) {
+  const jobs = getVisibleLiveJobs().filter(job => job.url).slice(0, limit);
+  if (!jobs.length) {
+    showToast("No live jobs to open");
+    return;
+  }
+  if (jobs.length > 8 && !window.confirm(`Open ${jobs.length} live job tabs?`)) {
+    return;
+  }
+  jobs.forEach(job => window.open(job.url, "_blank", "noopener"));
+  showToast(`Opened ${jobs.length} live jobs`);
+}
+
+function copyTopLiveJobs() {
+  const jobs = getVisibleLiveJobs().slice(0, 25);
+  if (!jobs.length) {
+    showToast("No live jobs to copy");
+    return;
+  }
+  const lines = [
+    "Taran Live Job Scout - Top Matches",
+    `Feed generated: ${state.liveMeta?.generatedAt || "unknown"}`,
+    "",
+    ...jobs.map((job, index) => [
+      `${index + 1}. ${job.title} - ${job.company}`,
+      `Fit: ${job.score.toFixed(1)}/10 | ${job.decision} | ${job.location || "Unknown"} | ${job.source} | ${liveAgeLabel(job)}`,
+      `Apply: ${job.url}`,
+      `Why: ${unique([...job.reasons.slice(0, 2), ...job.feedReasons.slice(0, 2)]).join(" | ")}`
+    ].join("\n"))
+  ];
+  copyText(lines.join("\n\n"), `Copied ${jobs.length} live jobs`);
 }
 
 function getSourceDefinitions() {

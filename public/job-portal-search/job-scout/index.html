@@ -30,6 +30,7 @@
       <nav class="quick-rail" aria-label="Connected job-search pages">
         <a href="../index.html">Command Center</a>
         <a href="../h1b-intelligence/index.html">H1B Intel</a>
+        <a href="#livePanel">Live Jobs</a>
         <a href="#profilePanel">Profile</a>
         <a href="#resumePanel">Resume Match</a>
         <a href="#searchPanel">Scout Links</a>
@@ -41,9 +42,9 @@
 
       <section class="hero-panel">
         <div>
-          <p class="eyebrow">Personal scout layer</p>
-          <h2>Score every lead before you spend time applying.</h2>
-          <p>Fresh searches, local fit scoring, warning checks, company identity, ranked review, and ATS-safe apply packets for your US OPT search.</p>
+          <p class="eyebrow">Live personal scout layer</p>
+          <h2>Fresh jobs collected for Taran every 30 minutes.</h2>
+          <p>Scheduled GitHub Actions collect public and direct job data, the page ranks it against your backend, data, cloud, and AI profile, then lets you open or import the strongest matches.</p>
         </div>
         <div class="metric-grid">
           <div><strong id="metricLeads">0</strong><span>leads</span></div>
@@ -51,6 +52,45 @@
           <div><strong id="metricReady">0</strong><span>ready to apply</span></div>
           <div><strong id="metricAvg">0.0</strong><span>avg fit</span></div>
         </div>
+      </section>
+
+      <section class="panel live-panel" id="livePanel" aria-labelledby="liveHeading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Automatic live feed</p>
+            <h2 id="liveHeading">Live jobs for Taran</h2>
+          </div>
+          <div class="action-row">
+            <span class="status-pill" id="liveFeedStatus">Loading live jobs</span>
+            <button class="primary-button" type="button" id="importTopLiveButton">Import Top Fits</button>
+            <button class="secondary-button" type="button" id="openTopLiveButton">Open Top 10</button>
+            <button class="secondary-button" type="button" id="copyLiveJobsButton">Copy Top Jobs</button>
+            <button class="secondary-button" type="button" id="reloadLiveJobsButton">Reload Feed</button>
+          </div>
+        </div>
+        <div class="live-control-grid">
+          <label class="field" for="liveMinScore">
+            <span>Live fit threshold</span>
+            <select id="liveMinScore">
+              <option value="5">5+ wider net</option>
+              <option value="6" selected>6+ useful</option>
+              <option value="7">7+ strong</option>
+              <option value="8">8+ excellent</option>
+            </select>
+          </label>
+          <label class="field" for="liveSourceFilter">
+            <span>Live source</span>
+            <select id="liveSourceFilter">
+              <option value="all" selected>All live sources</option>
+            </select>
+          </label>
+          <label class="checkbox-line" for="liveOnlyFresh">
+            <input id="liveOnlyFresh" type="checkbox" checked>
+            <span>Prefer last 48 hours</span>
+          </label>
+          <div class="live-stats" id="liveStats">Waiting for the scheduled feed.</div>
+        </div>
+        <div class="live-job-grid" id="liveJobGrid"></div>
       </section>
 
       <section class="panel" id="profilePanel" aria-labelledby="profileHeading">
@@ -69,34 +109,37 @@
             <span>Target roles</span>
             <textarea id="targetRoles" rows="3">Software Engineer
 Software Developer
-AI Engineer
-Machine Learning Engineer
+Backend Software Engineer
+Java Backend Engineer
+Python Backend Engineer
+API Engineer
 Data Engineer
-Data Analyst
-Analytics Engineer
-Business Intelligence Analyst
+Data Platform Engineer
+Machine Learning Engineer
+AI/ML Engineer
+AI Engineer
 Cloud Engineer
-DevOps Engineer</textarea>
+Cloud Backend Engineer</textarea>
           </label>
           <label class="field field-wide" for="roleVariants">
             <span>Role variants</span>
-            <textarea id="roleVariants" rows="3">backend engineer, full stack developer, frontend developer, application developer, data scientist, ML engineer, AI/ML engineer, BI developer</textarea>
+            <textarea id="roleVariants" rows="3">backend engineer, full stack developer, application developer, platform engineer, data pipeline engineer, ETL developer, AI engineer, ML engineer, software engineer new grad, backend developer, Java developer, Python developer</textarea>
           </label>
           <label class="field field-wide" for="skillTerms">
             <span>Skills</span>
-            <textarea id="skillTerms" rows="3">Python, SQL, JavaScript, TypeScript, React, Node, AWS, Azure, GCP, machine learning, data pipelines, APIs, dashboards, analytics</textarea>
+            <textarea id="skillTerms" rows="3">Java, Python, SQL, Spring Boot, FastAPI, Flask, REST APIs, microservices, PostgreSQL, MySQL, Oracle, MongoDB, DynamoDB, AWS, EC2, S3, Lambda, RDS, API Gateway, Docker, CI/CD, GitHub Actions, Kafka, Spark Structured Streaming, ETL pipelines, SQLAlchemy, Pydantic, Alembic, pytest, PyTorch, scikit-learn, Pandas, NumPy, LangChain, RAG, vector databases</textarea>
           </label>
           <label class="field" for="locationTerms">
             <span>Locations</span>
-            <input id="locationTerms" type="text" value="United States, Remote US, Dallas, Texas, New York, California">
+            <input id="locationTerms" type="text" value="United States, Remote US, New York, Chicago, Buffalo, Dallas, Texas, California, Seattle, Boston, Austin, Raleigh">
           </label>
           <label class="field" for="domainTerms">
             <span>Domains</span>
-            <input id="domainTerms" type="text" value="AI, data, cloud, SaaS, fintech, healthcare, developer tools">
+            <input id="domainTerms" type="text" value="backend services, data platforms, cloud systems, AI, ML, data engineering, SaaS, fintech, healthcare, developer tools, geospatial data">
           </label>
           <label class="field" for="prioritySignals">
             <span>Priority signals</span>
-            <input id="prioritySignals" type="text" value="Python, SQL, React, AWS, APIs, data pipelines, E-Verify, visa sponsorship">
+            <input id="prioritySignals" type="text" value="Java, Python, SQL, Spring Boot, FastAPI, REST APIs, PostgreSQL, AWS, Docker, CI/CD, Kafka, Spark, ETL, data pipelines, backend services, E-Verify, visa sponsorship">
           </label>
           <label class="field" for="levelTerms">
             <span>Level wording</span>
@@ -108,7 +151,7 @@ DevOps Engineer</textarea>
           </label>
           <label class="field" for="titleExcludes">
             <span>Title excludes</span>
-            <input id="titleExcludes" type="text" value="senior, staff, principal, lead, manager, director, architect">
+            <input id="titleExcludes" type="text" value="senior, staff, principal, lead, manager, director, architect, QA, SDET, test engineer, test automation, test infra, quality assurance, security, security engineer, cybersecurity, product analyst, business analyst, systems analyst, Salesforce, project manager">
           </label>
           <label class="field" for="industryExcludes">
             <span>Industry excludes</span>
