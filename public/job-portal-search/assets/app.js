@@ -10,7 +10,7 @@ const DEFAULT_PROFILE_ID = "softwareAiDataEntryOpt";
 const DEFAULT_ROLE_PACK_ID = "all-role-families";
 const CAUTION_EXCLUDE_TERMS = ["unpaid", "commission only", "clearance", "US citizenship required", "must be a US citizen"];
 const MINUTE_SIGNAL_TIMES = new Set(["5minutes", "10minutes", "15minutes", "30minutes", "45minutes"]);
-const COMPANY_LIST_BATCH_SIZE = 60;
+const COMPANY_LIST_BATCH_SIZE = 120;
 
 const CATEGORY_ROWS = [
   ["top", "Top Sources", true],
@@ -12395,7 +12395,8 @@ function renderCompanyOptions(filterText) {
     els.companySelect.value = ALL_COMPANIES_ID;
   }
   const sponsorCount = state.visibleCompanies.filter(company => company.h1bFilings > 0).length;
-  els.companyCount.textContent = `${state.visibleCompanies.length} of ${COMPANIES.length} companies - ${sponsorCount} H1B sponsors`;
+  const filterSummary = getCompanyFilterSummary(normalized);
+  els.companyCount.textContent = `${state.visibleCompanies.length} of ${COMPANIES.length} companies - ${sponsorCount} H1B sponsors${filterSummary ? ` - ${filterSummary}` : ""}`;
 }
 
 function renderFavoriteCompanies() {
@@ -12404,7 +12405,8 @@ function renderFavoriteCompanies() {
     .sort((a, b) => getCompanyRecommendationScore(b) - getCompanyRecommendationScore(a) || a.rank - b.rank);
 
   els.favoriteCompaniesPanel.hidden = favorites.length === 0;
-  els.favoriteCompanyCount.textContent = `${favorites.length} favorite${favorites.length === 1 ? "" : "s"}`;
+  const customFavoriteCount = favorites.filter(company => hasCustomCompanyCareers(company)).length;
+  els.favoriteCompanyCount.textContent = `${favorites.length} favorite${favorites.length === 1 ? "" : "s"}${customFavoriteCount ? ` - ${customFavoriteCount} custom Careers` : ""}`;
   if (!favorites.length) {
     return;
   }
@@ -12425,7 +12427,7 @@ function renderFavoriteCompanies() {
   );
   fragment.appendChild(toolbar);
 
-  favorites.slice(0, 12).forEach(company => {
+  favorites.forEach(company => {
     const card = document.createElement("article");
     card.className = "favorite-company-card";
     const header = createCompanyIdentityHeader(company, {
@@ -12577,6 +12579,34 @@ function companyMatchesFilters(company) {
   return true;
 }
 
+function getCompanyFilterSummary(searchText = "") {
+  const filters = [];
+  if (searchText) {
+    filters.push(`search "${searchText}"`);
+  }
+  if (els.companyCategorySelect.value !== "all") {
+    filters.push(els.companyCategorySelect.value);
+  }
+  if (els.companySponsorTier.value !== "all") {
+    filters.push(FILTER_LABELS.sponsorTier[els.companySponsorTier.value] || els.companySponsorTier.value);
+  }
+  if (els.companyKind.value !== "all") {
+    filters.push(FILTER_LABELS.companyKind[els.companyKind.value] || els.companyKind.value);
+  }
+  return filters.length ? `filters: ${filters.join(", ")}` : "";
+}
+
+function showAllFilteredCompanies() {
+  const total = state.visibleCompanies.length;
+  if (!total) {
+    showToast("No matching companies for these filters");
+    return;
+  }
+  state.companyListLimit = total;
+  renderAllCompanyCard();
+  showToast(`Showing all ${total.toLocaleString()} filtered companies`);
+}
+
 function sortCompaniesForView(companies) {
   const mode = els.companySortSelect.value;
   return [...companies].sort((a, b) => {
@@ -12677,12 +12707,15 @@ function renderAllCompanyCard() {
   const hasRole = Boolean(titleText);
   const context = getCompanyContext();
   const rows = hasRole ? getCompanySearchRows(titleText, context) : state.visibleCompanies.map(company => ({ company, searchUrl: "" }));
+  const visibleRows = rows.slice(0, getCompanyListLimit(rows.length));
+  const favoriteRows = rows.filter(row => state.favoriteCompanies.has(row.company.id)).length;
+  const customCareerRows = rows.filter(row => hasCustomCompanyCareers(row.company)).length;
 
   const title = document.createElement("div");
   title.className = "company-title";
   const name = document.createElement("h3");
   name.textContent = "All companies";
-  const count = createPill(hasRole ? `${rows.length} search links` : `${rows.length} companies`);
+  const count = createPill(hasRole ? `${rows.length} company search rows` : `${rows.length} companies`);
   title.append(name, count);
 
   const meta = document.createElement("div");
@@ -12693,12 +12726,18 @@ function renderAllCompanyCard() {
   meta.append(createPill(FILTER_LABELS.companyKind[els.companyKind.value] || "Direct and vendors"));
   meta.append(createPill(FILTER_LABELS.sponsorTier[els.companySponsorTier.value] || "All sponsor tiers"));
   meta.append(createPill(hasRole ? `Role: ${titleText}` : "Role required"));
+  if (favoriteRows) {
+    meta.append(createPill(`${favoriteRows} favorites kept`, "favorite"));
+  }
+  if (customCareerRows) {
+    meta.append(createPill(`${customCareerRows} custom Careers`, "custom"));
+  }
 
   const note = document.createElement("p");
   note.className = "company-note";
   note.textContent = hasRole
-    ? "Every filtered search link below uses the company search role, location, freshness, authorization, include terms, exclude terms, and sort settings."
-    : "Enter a company search role to create filtered company searches.";
+    ? `Showing ${visibleRows.length.toLocaleString()} of ${rows.length.toLocaleString()} filtered companies in the card. The dropdown still contains every matching company, and saved favorite/custom Careers links are preserved.`
+    : `Showing ${visibleRows.length.toLocaleString()} of ${rows.length.toLocaleString()} filtered companies. Enter a company search role to create filtered company searches.`;
 
   const bulkActions = document.createElement("div");
   bulkActions.className = "company-card-actions company-bulk-actions";
@@ -12707,6 +12746,7 @@ function renderAllCompanyCard() {
     createCompanyActionButton("Copy All Search Links", searchSelectedCompany),
     createCompanyActionButton("Copy Selected Links", copySelectedCompanyLinks),
     createCompanyActionButton("Open Top Packs", openSelectedCompanyLinkPack),
+    createCompanyActionButton("Show All Filtered", showAllFilteredCompanies),
     createCompanyActionButton("Copy Company Sync", copyPortableSyncLink),
     createCompanyActionButton("Open Top Sponsors", openTopSponsorSearches),
     createCompanyActionButton("Reset Company Search", resetCompanySearch)
@@ -12714,7 +12754,7 @@ function renderAllCompanyCard() {
 
   const list = document.createElement("div");
   list.className = "company-link-list";
-  const visibleRows = rows.slice(0, getCompanyListLimit(rows.length));
+  list.setAttribute("aria-label", `Showing ${visibleRows.length} of ${rows.length} filtered companies`);
   visibleRows.forEach(row => {
     const item = document.createElement("article");
     item.className = "company-link-row";
