@@ -6,7 +6,11 @@
     <meta name="description" content="Taran's personal US job search command center - OPT-aware searches for software, AI, data, analytics, and adjacent roles.">
     <title>Taran's Job Command Center</title>
     <link rel="icon" href="assets/portal-scout-mark.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/styles.css">
+    <script src="h1b-intelligence/data.js"></script>
     <script src="assets/app.js" defer></script>
   </head>
   <body>
@@ -22,6 +26,8 @@
       </div>
       <div class="top-actions">
         <span class="status-pill">Static, no scraping</span>
+        <a class="ghost-button" href="job-scout/index.html">Job Scout</a>
+        <a class="ghost-button" href="h1b-intelligence/index.html">H1B Intel</a>
         <button class="ghost-button" type="button" id="themeToggle" aria-label="Toggle color theme">Dark mode</button>
       </div>
     </header>
@@ -34,8 +40,10 @@
         <button type="button" id="fastApplyButton">Fast Apply</button>
         <button type="button" id="quickApplyButton">Quick Apply</button>
         <button type="button" id="freshDirectButton">Fresh ATS</button>
+        <a href="job-scout/index.html">Job Scout</a>
         <a href="#careersHeading">Companies</a>
         <a href="#sponsorsHeading">H1B Sponsors</a>
+        <a href="h1b-intelligence/index.html">H1B Intel</a>
         <a href="#vendorHeading">Vendors</a>
         <a href="#resourcesHeading">Resources</a>
       </nav>
@@ -198,18 +206,19 @@
           </label>
 
           <label class="field" for="customSourceName">
-            <span>Custom source</span>
-            <input id="customSourceName" name="customSourceName" type="text" autocomplete="off" placeholder="My custom link">
+            <span>Custom source label(s)</span>
+            <input id="customSourceName" name="customSourceName" type="text" autocomplete="off" placeholder="My board, Backup board">
           </label>
 
           <label class="field field-wide" for="customSourceUrl">
-            <span>Custom source URL</span>
-            <input id="customSourceUrl" name="customSourceUrl" type="text" autocomplete="off" placeholder="https://example.com/jobs?q={role}&location={location}">
+            <span>Custom source URL(s)</span>
+            <textarea id="customSourceUrl" name="customSourceUrl" rows="3" autocomplete="off" placeholder="Label | https://example.com/jobs?q={role}&location={location}"></textarea>
+            <small>One per line. Tokens: {role}, {query}, {location}, {time}, {source}.</small>
           </label>
 
           <div class="field custom-link-tools">
             <span>Portable link</span>
-            <button class="secondary-button" type="button" id="copyCustomSyncButton">Copy Sync Link</button>
+            <button class="secondary-button" type="button" id="copyCustomSyncButton">Copy Permanent Sync Link</button>
           </div>
 
           <label class="field field-wide" for="excludeTerms">
@@ -445,12 +454,13 @@
             <input id="companyExcludeTerms" type="text" autocomplete="off" placeholder="unpaid, clearance, senior">
           </label>
           <label class="field" for="companyCustomLinkName">
-            <span>Custom company link</span>
-            <input id="companyCustomLinkName" type="text" autocomplete="off" placeholder="My company link">
+            <span>Custom company label(s)</span>
+            <input id="companyCustomLinkName" type="text" autocomplete="off" placeholder="Referral search, Alumni search">
           </label>
           <label class="field company-wide" for="companyCustomLinkUrl">
-            <span>Custom company URL</span>
-            <input id="companyCustomLinkUrl" type="text" autocomplete="off" placeholder="https://example.com/search?company={company}&q={role}">
+            <span>Custom company URL(s)</span>
+            <textarea id="companyCustomLinkUrl" rows="3" autocomplete="off" placeholder="Label | https://example.com/search?company={company}&q={role}"></textarea>
+            <small>Saved instantly in this browser and protected by the vault. For another system, open the Permanent Sync Link or restore a Vault Backup.</small>
           </label>
           <label class="field" for="companySortSelect">
             <span>Company order</span>
@@ -485,24 +495,18 @@
               <option value="vendor">Staffing/vendors</option>
             </select>
           </label>
-          <div class="company-actions">
-            <button class="primary-button" type="button" id="openCompanyButton">Open Careers</button>
-            <button class="secondary-button" type="button" id="searchCompanyButton">Search This Company</button>
-            <button class="secondary-button" type="button" id="companyLinkedInJobsButton">LinkedIn Jobs</button>
-            <button class="secondary-button" type="button" id="companyLinkedInPostsButton">LinkedIn Posts</button>
-            <button class="secondary-button" type="button" id="companyLinkedInRecruitersButton">LinkedIn Recruiters</button>
-            <button class="secondary-button" type="button" id="companyLinkedInPageButton">LinkedIn Company</button>
-            <button class="secondary-button" type="button" id="companyIndeedButton">Indeed/Google</button>
-            <button class="secondary-button" type="button" id="companyGoogleButton">Google Company</button>
-            <button class="secondary-button" type="button" id="copyCompanyLinksButton">Copy Selected Links</button>
-            <button class="secondary-button" type="button" id="openCompanyPackButton">Open Link Pack</button>
-            <button class="secondary-button" type="button" id="copyCompanySyncButton">Copy Company Sync</button>
-            <button class="secondary-button" type="button" id="openTopSponsorButton">Open Top Sponsors</button>
-            <button class="secondary-button" type="button" id="resetCompanySearchButton">Reset Company Search</button>
-            <button class="secondary-button" type="button" id="favoriteCompanyButton">Favorite</button>
+        </div>
+        <div class="company-vault-panel" id="companyVaultPanel">
+          <div>
+            <strong>Company link vault</strong>
+            <span id="companyVaultStatus">Loading saved Careers links and pinned companies...</span>
+          </div>
+          <div class="company-vault-actions">
+            <button class="secondary-button" type="button" id="copyCompanyVaultButton">Copy Vault Backup</button>
+            <button class="secondary-button" type="button" id="restoreCompanyVaultButton">Restore Vault</button>
+            <button class="secondary-button" type="button" id="copyCompanyVaultSyncButton">Copy Permanent Sync Link</button>
           </div>
         </div>
-        <div id="companySuggestions" class="company-suggestions"></div>
         <div class="company-card" id="companyCard"></div>
       </section>
 
@@ -597,5 +601,15 @@
       <p>Taran's personal job-search launcher for the US market. It does not scrape, rank, or store job listings.</p>
       <p>This is job-search tooling, not immigration or legal advice.</p>
     </footer>
+    <dialog id="detailDialog" class="detail-dialog">
+      <div class="dialog-heading">
+        <div>
+          <p class="eyebrow" id="detailSheet">Workbook row</p>
+          <h2 id="detailTitle">Details</h2>
+        </div>
+        <button class="ghost-button" type="button" id="closeDetailButton">Close</button>
+      </div>
+      <div id="detailBody" class="detail-body"></div>
+    </dialog>
   </body>
 </html>
