@@ -5,6 +5,8 @@ dist/
 .env.*
 !.env.example
 qa-screenshots/
+/tmp/
+/output/
 collection of all projects/
 dev-server.log
 dev-server.err.log

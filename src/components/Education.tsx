@@ -118,7 +118,7 @@ export const Education = () => {
             <span className="text-sm text-primary font-medium">Education</span>
           </div>
           <h2 className="font-display text-4xl sm:text-5xl font-bold mb-6">
-            Academic <span className="gradient-text">Foundation</span>
+            Education & <span className="gradient-text">Coursework</span>
           </h2>
           <p className="text-lg text-muted-foreground">
             Graduate study in computer science and engineering, supported by a broad undergraduate foundation in software, data, algorithms, and analytics.

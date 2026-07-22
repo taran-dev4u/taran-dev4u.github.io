@@ -3,6 +3,8 @@ import { TypeWriter } from './TypeWriter';
 import { Button } from './ui/button';
 import { ArrowDown, BrainCircuit, FileText, Github, Linkedin, Mail, MapPin, ServerCog, Sparkles } from 'lucide-react';
 import profileImage from '@/assets/profile-taran.webp';
+import { publicAsset } from '@/lib/assets';
+import { trackResumeAction } from '@/lib/analytics';
 
 export const Hero = () => {
   return (
@@ -19,7 +21,7 @@ export const Hero = () => {
             <div className="inline-block max-w-full px-4 py-2 rounded-full bg-secondary/50 border border-border/50 mb-4">
               <span className="inline-flex flex-wrap items-center justify-center gap-2 text-center text-sm text-muted-foreground">
                 <Sparkles size={15} className="text-primary shrink-0" />
-                Absolute learner - software, data, and AI engineering
+                Software Engineer | Data & AI
               </span>
             </div>
 
@@ -28,7 +30,7 @@ export const Hero = () => {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
               </span>
-              Open to opportunities.
+              Open to full-time opportunities
             </div>
 
             <h1 className="font-display text-3xl sm:text-5xl lg:text-6xl font-bold mb-4 leading-tight text-balance">
@@ -83,8 +85,13 @@ export const Hero = () => {
               </Button>
 
               <Button asChild variant="outline" size="lg" className="btn-secondary">
-                <a href="#resume">
-                  Read Resume
+                <a
+                  href={publicAsset('Taran_Mamidala_Resume.pdf')}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackResumeAction('resume_view', 'hero')}
+                >
+                  Resume
                   <FileText className="ml-2" size={18} />
                 </a>
               </Button>

@@ -1,8 +1,7 @@
-import { useRef, useState, useEffect } from 'react';
-import { ArrowUp, Menu, Moon, Music2, Sun, VolumeX, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowUp, Menu, Moon, Sun, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import themeMusicUrl from '@/assets/tunetank-vlog-beat-background-349853.mp3';
 
 const navLinks = [
   { href: '#hero', label: 'Home' },
@@ -20,8 +19,6 @@ export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  const [musicEnabled, setMusicEnabled] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const storedTheme = localStorage.getItem('portfolio-theme');
@@ -65,36 +62,7 @@ export const Navbar = () => {
     document.documentElement.classList.toggle('dark', nextTheme === 'dark');
   };
 
-  useEffect(() => {
-    return () => {
-      audioRef.current?.pause();
-    };
-  }, []);
-
-  const toggleMusic = async () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (musicEnabled) {
-      audio.pause();
-      setMusicEnabled(false);
-      return;
-    }
-
-    audio.loop = true;
-    audio.muted = false;
-    audio.volume = 0.18;
-
-    try {
-      await audio.play();
-      setMusicEnabled(true);
-    } catch {
-      setMusicEnabled(false);
-    }
-  };
-
   const themeLabel = `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`;
-  const musicLabel = musicEnabled ? 'Turn music off' : 'Turn theme music on';
 
   return (
     <nav className={cn(
@@ -164,33 +132,11 @@ export const Navbar = () => {
           </div>
         </div>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className={cn("music-cd-button", musicEnabled && "is-playing")}
-          onClick={toggleMusic}
-          aria-label={musicLabel}
-          title={musicLabel}
-        >
-          <span className="music-cd-button__disc" />
-          <span className="music-cd-button__icon">
-            {musicEnabled ? <VolumeX size={18} /> : <Music2 size={18} />}
-          </span>
-        </Button>
-        <audio
-          ref={audioRef}
-          src={themeMusicUrl}
-          loop
-          preload="none"
-          onPlay={() => setMusicEnabled(true)}
-          onPause={() => setMusicEnabled(false)}
-        />
-
         {isScrolled && (
           <Button
             variant="ghost"
             size="icon"
-            className="floating-glass-control fixed bottom-20 right-5 z-50 h-11 w-11"
+            className="floating-glass-control fixed bottom-20 right-5 z-50 hidden h-11 w-11 sm:inline-flex"
             onClick={() => scrollToSection('#hero')}
             aria-label="Back to top"
             title="Back to top"

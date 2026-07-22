@@ -87,10 +87,10 @@ export const Contact = () => {
           className="max-w-3xl mx-auto text-center mb-16"
         >
           <div className="inline-block glass-card px-4 py-2 mb-4">
-            <span className="text-sm text-primary font-medium">Get In Touch</span>
+            <span className="text-sm text-primary font-medium">Contact</span>
           </div>
           <h2 className="font-display text-4xl sm:text-5xl font-bold mb-6">
-            Let's Build The Next <span className="gradient-text">Useful Thing</span>
+            Let's <span className="gradient-text">Connect</span>
           </h2>
           <p className="text-lg text-muted-foreground">
             I am open to opportunities where software, data, and AI work together to solve real problems.

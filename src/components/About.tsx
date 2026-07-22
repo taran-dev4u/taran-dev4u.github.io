@@ -1,6 +1,7 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { Brain, Code2, Database, Handshake, Network, ShieldCheck } from 'lucide-react';
+import { getExperienceDuration } from '@/lib/experience';
 
 const strengths = [
   {
@@ -36,8 +37,8 @@ const strengths = [
 ];
 
 const stats = [
-  { value: '25mo', label: 'Software Role' },
-  { value: '3+', label: 'Years Experience' },
+  { value: '25 mo', label: 'iVinGo Tenure' },
+  { value: getExperienceDuration().label, label: 'Experience' },
   { value: '2M+', label: 'Research Records' },
   { value: '1', label: 'Peer-Reviewed Paper' },
 ];
@@ -59,12 +60,12 @@ export const About = () => {
             <span className="text-sm text-primary font-medium">About Me</span>
           </div>
           <h2 className="font-display text-4xl sm:text-5xl font-bold mb-6">
-            Building With <span className="gradient-text">Curiosity, Evidence, and Useful Systems</span>
+            Engineer. Researcher. <span className="gradient-text">Always Learning.</span>
           </h2>
           <p className="text-lg text-muted-foreground leading-relaxed">
-            I like learning that turns into working systems. My path moves through professional software engineering,
-            research data pipelines, graduate AI/ML study, and public projects where the goal is not just to try a tool,
-            but to understand the problem well enough to build something useful.
+            I am a software, data, and AI engineer with experience across backend development, data platforms,
+            applied research, and machine learning. I enjoy learning new domains and turning that understanding into
+            reliable systems that people can use.
           </p>
         </motion.div>
 
@@ -78,8 +79,8 @@ export const About = () => {
             <h3 className="font-display text-2xl font-bold mb-6 text-primary">How I Work</h3>
             <div className="space-y-5 text-muted-foreground leading-relaxed">
               <p>
-                I call myself an Absolute learner because I care about the full loop: ask better questions, learn the domain,
-                build the first version, validate it, explain it clearly, and keep improving until the work is useful.
+                I think of myself as an Absolute learner: curious enough to ask better questions and disciplined enough
+                to test, document, and improve the answer.
               </p>
               <p>
                 My strongest work sits at the intersection of backend systems, data pipelines, machine learning,
@@ -87,9 +88,9 @@ export const About = () => {
                 technical tradeoffs without hiding behind jargon.
               </p>
               <p>
-                That mindset shows up in production web/data work, current software engineering, UB research collaboration,
+                That mindset shows up in production web/data work, current nonprofit technology work, UB research collaboration,
                 and NRSC/ISRO climate-data research that grew into a peer-reviewed publication. I bring curiosity, but I also
-                bring the discipline to turn curiosity into shipped, documented, interview-ready work.
+                bring the ownership to turn it into clear, maintainable work.
               </p>
             </div>
 

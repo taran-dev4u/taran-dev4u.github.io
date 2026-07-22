@@ -1,23 +1,25 @@
 import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
-import { BriefcaseBusiness, Code2, Database, GraduationCap, Mail, MapPin, Phone, ScrollText, Sparkles } from 'lucide-react';
+import { useRef, type MouseEvent } from 'react';
+import { BriefcaseBusiness, Code2, Database, Download, ExternalLink, Github, GraduationCap, Linkedin, Mail, MapPin, Phone, ScrollText, Sparkles } from 'lucide-react';
+import { publicAsset } from '@/lib/assets';
+import { trackResumeAction } from '@/lib/analytics';
 
 const contactItems = [
-  'Buffalo, New York',
-  'mtaran014@gmail.com',
-  '+1 (716) 784-7027',
-  'linkedin.com/in/taranmamidala',
-  'github.com/taran-dev4u',
+  { text: 'Buffalo, New York', icon: MapPin },
+  { text: 'mtaran014@gmail.com', icon: Mail },
+  { text: '+1 (716) 784-7027', icon: Phone },
+  { text: 'linkedin.com/in/taranmamidala', icon: Linkedin },
+  { text: 'github.com/taran-dev4u', icon: Github },
 ];
 
 const experience = [
   {
-    role: 'Software Engineer',
+    role: 'Software / Data Analytics Intern',
     company: 'Rebecca Everlene Trust Company',
     period: 'Mar 2026 - Present',
     points: [
-      'Build full-stack applications, internal tools, REST APIs, and database-backed workflows for program and operations needs.',
-      'Work with Python, Java, PostgreSQL, MongoDB, Docker, CI/CD practices, documentation, and stakeholder-driven delivery.',
+      'Support internal tools, structured data workflows, reporting, validation, and process automation.',
+      'Apply Python and related tools to analysis, documentation, and maintainable operational improvements.',
       'Support analytics, reporting, data cleaning, validation, structuring, and visualization workflows.',
     ],
   },
@@ -26,9 +28,9 @@ const experience = [
     company: 'University at Buffalo',
     period: 'Jan 2025 - Jan 2026',
     points: [
-      'Build reproducible Python workflows, analysis tooling, and ML/statistical experiments for academic research.',
-      'Document methods, assumptions, and results so research workflows can be reviewed, repeated, and extended.',
-      'Create visual explanations and maintain version-controlled code for technical and non-technical audiences.',
+      'Built reproducible Python workflows, analysis tooling, and ML/statistical experiments for academic research.',
+      'Documented methods, assumptions, and results so research workflows could be reviewed, repeated, and extended.',
+      'Created visual explanations and maintained version-controlled code for technical and non-technical audiences.',
     ],
   },
   {
@@ -106,6 +108,30 @@ const projects = [
 export const ResumePreview = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const resumeUrl = publicAsset('Taran_Mamidala_Resume.pdf');
+
+  const handleResumeDownload = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    let downloadStarted = false;
+
+    const startDownload = () => {
+      if (downloadStarted) return;
+      downloadStarted = true;
+
+      const link = document.createElement('a');
+      link.href = resumeUrl;
+      link.download = 'Taran_Mamidala_Resume.pdf';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    };
+
+    const fallback = window.setTimeout(startDownload, 1200);
+    trackResumeAction('resume_download', 'resume_section', () => {
+      window.clearTimeout(fallback);
+      startDownload();
+    });
+  };
 
   return (
     <section id="resume" className="py-24 relative" ref={ref}>
@@ -120,11 +146,33 @@ export const ResumePreview = () => {
             <span className="text-sm text-primary font-medium">Resume</span>
           </div>
           <h2 className="font-display text-4xl sm:text-5xl font-bold mb-6">
-            Read-Only <span className="gradient-text">Resume Snapshot</span>
+            <span className="gradient-text">Resume</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            A recruiter-friendly version of my resume embedded directly in the portfolio for quick reading.
+            Review the highlights below, open the full resume in your browser, or download a PDF copy.
           </p>
+
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <a
+              href={resumeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary inline-flex items-center justify-center gap-2"
+              onClick={() => trackResumeAction('resume_view', 'resume_section')}
+            >
+              <ExternalLink size={18} />
+              View Resume
+            </a>
+            <a
+              href={resumeUrl}
+              download="Taran_Mamidala_Resume.pdf"
+              className="btn-secondary inline-flex items-center justify-center gap-2"
+              onClick={handleResumeDownload}
+            >
+              <Download size={18} />
+              Download PDF
+            </a>
+          </div>
         </motion.div>
 
         <motion.article
@@ -144,16 +192,16 @@ export const ResumePreview = () => {
                   Software, Data, ML, and AI Engineer
                 </h3>
                 <p className="mt-4 leading-relaxed text-muted-foreground">
-                  Absolute learner building backend systems, data platforms, ML workflows, and AI products with a practical engineering mindset.
-                  Experienced across production software, research data pipelines, geospatial climate modeling, full-stack tools, and cloud-ready architecture.
+                  Software, data, and AI engineer with experience across backend systems, data platforms, ML workflows,
+                  geospatial research, and production-facing software.
                 </p>
               </div>
 
               <div className="mb-8 grid gap-3 text-sm text-muted-foreground">
                 {contactItems.map((item) => (
-                  <div key={item} className="flex items-center gap-3">
-                    {item.includes('@') ? <Mail size={16} className="text-primary" /> : item.includes('716') ? <Phone size={16} className="text-primary" /> : <MapPin size={16} className="text-primary" />}
-                    <span>{item}</span>
+                  <div key={item.text} className="flex items-center gap-3">
+                    <item.icon size={16} className="text-primary" />
+                    <span>{item.text}</span>
                   </div>
                 ))}
               </div>

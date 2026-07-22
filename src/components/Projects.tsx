@@ -911,10 +911,10 @@ export const Projects = () => {
             <span className="text-sm text-primary font-medium">Projects</span>
           </div>
           <h2 className="font-display text-4xl sm:text-5xl font-bold mb-6">
-            Selected <span className="gradient-text">Engineering Work</span>
+            Selected <span className="gradient-text">Projects</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Selected work across research data pipelines, backend systems, AI products, MLOps, databases, computer vision, analytics, and security.
+            A selection of research, software, data, and AI projects that show how I approach real technical problems.
           </p>
         </motion.div>
 

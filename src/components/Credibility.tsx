@@ -277,13 +277,13 @@ export const Credibility = () => {
           className="max-w-3xl mx-auto text-center mb-16"
         >
           <div className="inline-block glass-card px-4 py-2 mb-4">
-            <span className="text-sm text-primary font-medium">Credibility & Awards</span>
+            <span className="text-sm text-primary font-medium">Recognition</span>
           </div>
           <h2 className="font-display text-4xl sm:text-5xl font-bold mb-6">
-            Work Beyond <span className="gradient-text">Coursework</span>
+            Research, Awards & <span className="gradient-text">Service</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Hackathons, certification work, research, and leadership experiences that shaped how I collaborate and deliver.
+            Research, hackathons, leadership, and community work that reflect how I learn, collaborate, and contribute.
           </p>
         </motion.div>
 

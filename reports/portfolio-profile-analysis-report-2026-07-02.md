@@ -4,6 +4,20 @@ Generated on: 2026-07-02
 Source folder analyzed: `E:\Absolute learning\profile_Analysis`  
 Portfolio workspace: `E:\Absolute learning\taran-portfolio`
 
+## July 21, 2026 Implementation Update
+
+The recruiter-facing implementation was reviewed again against the canonical experience file and resume sources. The following corrections are now part of the portfolio:
+
+- Replaced promotional or AI-sounding section headlines with familiar portfolio language.
+- Calculated `3 yrs 5 mos` of non-overlapping experience as of July 21, 2026: 25 months at iVinGo, 12 months at University at Buffalo, and 4 completed months in the current role. Concurrent NRSC/ISRO research and LTIMindtree training are shown in the timeline but are not double-counted.
+- Aligned the current Rebecca Everlene Trust Company title to the evidence-supported `Software / Data Analytics Intern` wording and removed unsupported production-stack claims.
+- Replaced the `Read Resume` and `Read-Only Resume Snapshot` language with standard `Resume`, `View Resume`, and `Download PDF` actions.
+- Generated a one-page PDF resume with corrected dates, conservative evidence-backed bullets, selectable text, and working contact/publication links.
+- Added separate aggregate analytics events for `resume_view` and `resume_download`, including source labels for the hero and resume section.
+- Connected the portfolio to the existing GA4 stream `G-RSV4E83S9P`, with Google Signals and ad-personalization signals disabled and no custom visitor-context event.
+- Added an optional first-party tracking endpoint with local retry queuing and event IDs for server-side deduplication. Client-side analytics remains best-effort because browsers, blockers, network failures, and missing provider configuration can prevent delivery.
+- Removed the decorative music control to keep the first impression focused on recruiter evaluation.
+
 ## 1. Executive Summary
 
 This report consolidates the strongest profile evidence found in `profile_Analysis` and maps it into a portfolio-ready narrative. The current portfolio already has a strong visual foundation, a broad project inventory, an interactive Ask Taran AI feature, and a useful section structure. The main issue is that the live story underrepresents the strongest professional proof.

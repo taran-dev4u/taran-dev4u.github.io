@@ -34,13 +34,13 @@ export const Growth = () => {
           className="max-w-3xl mx-auto text-center mb-16"
         >
           <div className="inline-block glass-card px-4 py-2 mb-4">
-            <span className="text-sm text-primary font-medium">Growth</span>
+            <span className="text-sm text-primary font-medium">Currently Exploring</span>
           </div>
           <h2 className="font-display text-4xl sm:text-5xl font-bold mb-6">
-            The <span className="gradient-text">Absolute Learning Loop</span>
+            What I'm <span className="gradient-text">Learning Now</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            I keep learning by turning questions into prototypes, prototypes into systems, and systems into evidence I can explain.
+            Areas I am actively studying and applying through focused projects and experiments.
           </p>
         </motion.div>
 
@@ -76,7 +76,7 @@ export const Growth = () => {
         >
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h3 className="font-display text-2xl font-bold mb-2">Continuous Learning</h3>
+              <h3 className="font-display text-2xl font-bold mb-2">How I Learn</h3>
               <p className="max-w-3xl text-muted-foreground leading-relaxed">
                 I stay curious, but I try to make curiosity useful: cleaner data, clearer APIs, more reliable models,
                 better documentation, and stronger judgment about when a tool actually solves the problem.

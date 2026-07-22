@@ -34,7 +34,7 @@ export const portfolioKnowledge: PortfolioKnowledgeItem[] = [
     details: [
       'His work connects production APIs, research-grade data pipelines, geospatial climate modeling, full-stack tools, and cloud-ready architecture.',
       'He describes himself as an Absolute learner: curious, practical, and focused on turning complex topics into useful systems.',
-      'His profile includes 3+ years of experience, a 25-month software role, 2M+ satellite research records, and a peer-reviewed publication.',
+      'As of July 2026, his non-overlapping software and research timeline totals 3 years and 5 months, including a 25-month software role, 2M+ satellite research records, and a peer-reviewed publication.',
       'He is based in Buffalo, NY and is open to relocation and meaningful opportunities.',
     ],
     href: '#about',
@@ -68,15 +68,15 @@ export const portfolioKnowledge: PortfolioKnowledgeItem[] = [
   },
   {
     id: 'experience-rebecca-everlene',
-    title: 'Software Engineer at Rebecca Everlene Trust Company',
+    title: 'Software / Data Analytics Intern at Rebecca Everlene Trust Company',
     section: 'experience',
-    roleTags: ['Software Engineer', 'Backend Engineer', 'Full Stack Developer', 'Data Engineer'],
-    skillTags: ['Python', 'Java', 'PostgreSQL', 'MongoDB', 'Docker', 'REST APIs', 'CI/CD', 'data analytics'],
+    roleTags: ['Software Engineer', 'Data Analyst', 'Data Engineer'],
+    skillTags: ['Python', 'data analytics', 'data validation', 'reporting', 'automation'],
     summary:
-      'At Rebecca Everlene Trust Company, Taran builds full-stack applications, internal tools, backend services, and data-aware workflows for program and operations needs.',
+      'At Rebecca Everlene Trust Company, Taran supports software, automation, analytics, reporting, and structured data workflows for program and operations needs.',
     details: [
-      'The portfolio lists this role as Software Engineer from Mar 2026 to Present.',
-      'He works with Python, Java, PostgreSQL, MongoDB, Docker, REST APIs, documentation, stakeholder translation, and data analytics/reporting workflows.',
+      'The portfolio lists this evidence-aligned role as Software / Data Analytics Intern from Mar 2026 to Present.',
+      'He applies Python and related tooling to structured data, validation, reporting, documentation, and process automation.',
       'This role supports the portfolio story that Taran is currently building professional software, not only coursework projects.',
     ],
     href: '#experience',
@@ -145,17 +145,17 @@ export const portfolioKnowledge: PortfolioKnowledgeItem[] = [
     href: '#experience',
   },
   {
-    id: 'resume-readable-snapshot',
-    title: 'Read-only resume snapshot',
+    id: 'resume-access',
+    title: 'Resume access',
     section: 'resume',
     roleTags: ['Recruiter', 'Hiring Manager', 'Software Engineer', 'Data Engineer', 'AI Engineer'],
-    skillTags: ['resume', 'experience', 'skills', 'projects', 'education', 'read-only'],
+    skillTags: ['resume', 'experience', 'skills', 'projects', 'education', 'PDF'],
     summary:
-      'The portfolio includes an embedded read-only resume snapshot so recruiters can review Taran\'s resume content directly on the site without an obvious download link.',
+      'The portfolio includes resume highlights for quick review plus links to open or download the complete PDF resume.',
     details: [
       'The resume section summarizes contact details, education, experience, selected skills, selected projects, and the NRSC / ISRO publication proof.',
-      'The hero Resume button points to #resume inside the portfolio instead of an external Drive or PDF download URL.',
-      'Browser content can still be copied or screenshotted by visitors, but the portfolio does not present a direct resume download action.',
+      'The hero Resume button opens the PDF in a new browser tab.',
+      'The resume section provides separate View Resume and Download PDF actions.',
     ],
     href: '#resume',
   },
@@ -548,12 +548,12 @@ export const portfolioKnowledge: PortfolioKnowledgeItem[] = [
   },
   {
     id: 'growth-ai',
-    title: 'The Absolute Learning Loop',
+    title: 'What Taran is learning now',
     section: 'growth',
     roleTags: ['AI Engineer', 'Machine Learning Engineer'],
     skillTags: ['RAG', 'vector databases', 'AI agents', 'LLMOps', 'evaluation', 'AI security', 'reproducibility'],
     summary:
-      'Taran keeps learning by turning questions into prototypes, prototypes into systems, and systems into evidence he can explain.',
+      'Taran is actively studying practical RAG systems, AI agents, evaluation, reproducibility, and AI security.',
     details: [
       'Growth topics include hybrid retrieval, reranking, citations, vector databases, planning, tool calling, memory, validation loops, evaluation harnesses, observability, regression tests, reproducible pipelines, cost, latency, privacy, and prompt-injection awareness.',
     ],
@@ -584,7 +584,7 @@ export const portfolioKnowledge: PortfolioKnowledgeItem[] = [
     summary:
       'The contact section invites recruiters and collaborators to discuss software, backend, data, ML, AI, full-stack, research, and product opportunities.',
     details: [
-      'The heading says Let\'s Build The Next Useful Thing.',
+      'The heading says Let\'s Connect.',
       'The copy says Taran is open to opportunities where software, data, and AI work together to solve real problems.',
       'Primary contact email is mtaran014@gmail.com.',
     ],

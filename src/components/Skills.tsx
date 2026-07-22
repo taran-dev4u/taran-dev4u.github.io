@@ -204,13 +204,13 @@ export const Skills = () => {
           className="max-w-3xl mx-auto text-center mb-16"
         >
           <div className="inline-block glass-card px-4 py-2 mb-4">
-            <span className="text-sm text-primary font-medium">Technical Expertise</span>
+            <span className="text-sm text-primary font-medium">Skills</span>
           </div>
           <h2 className="font-display text-4xl sm:text-5xl font-bold mb-6">
-            Tools I Use To <span className="gradient-text">Turn Learning Into Systems</span>
+            Skills & <span className="gradient-text">Technologies</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            A practical stack across backend services, data engineering, scientific computing, AI products, cloud delivery, and testing.
+            Technologies I have used across professional work, research, coursework, and independent projects.
           </p>
         </motion.div>
 

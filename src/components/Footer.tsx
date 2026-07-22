@@ -47,6 +47,7 @@ export const Footer = () => {
           <div className="text-center text-sm text-muted-foreground">
             <p>Copyright {new Date().getFullYear()} Taran Mamidala. All rights reserved.</p>
             <p className="mt-1">Machine Learning Engineer | Software Engineer | Data Engineer</p>
+            <p className="mt-3 text-xs">Limited analytics measure page and resume interactions.</p>
           </div>
         </div>
       </div>

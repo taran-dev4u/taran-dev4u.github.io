@@ -21,7 +21,7 @@ import {
   SiStreamlit,
   SiTypescript,
 } from 'react-icons/si';
-import { FaAws, FaJava } from 'react-icons/fa';
+import { FaJava } from 'react-icons/fa';
 
 type Tech = {
   name: string;
@@ -45,30 +45,27 @@ type ExperienceItem = {
 
 const experiences: ExperienceItem[] = [
   {
-    title: 'Software Engineer',
+    title: 'Software / Data Analytics Intern',
     company: 'Rebecca Everlene Trust Company',
     mark: 'RET',
     tag: 'Current',
     location: 'United States / Remote',
     period: 'Mar 2026 - Present',
     description:
-      'Building full-stack applications, internal tools, backend services, and data-aware workflows for program and operations needs.',
+      'Contributing software, automation, analytics, and reporting support for a mission-driven nonprofit organization.',
     keyWork: [
-      'Develop full-stack features, internal tools, REST APIs, and database-backed workflows.',
-      'Translate stakeholder needs into documented, tested, maintainable product improvements.',
+      'Support internal tools, data workflows, reporting, validation, and process automation.',
+      'Translate program needs into documented and maintainable technical improvements.',
     ],
     details: [
-      'Build backend services with Python and Java while working with PostgreSQL and MongoDB data models.',
+      'Apply Python and related tools to structured data, analysis, reporting, and automation tasks.',
       'Support data analytics, reporting, cleaning, validation, structuring, and visualization workflows.',
-      'Use Docker and CI/CD practices to keep development and delivery repeatable.',
+      'Document workflows and collaborate asynchronously with a distributed team.',
       'Collaborate in a remote, async environment with careful attention to confidentiality and data handling.',
     ],
     technologies: [
       { name: 'Python', icon: SiPython, color: '#3776AB' },
-      { name: 'Java', icon: FaJava, color: '#E76F00' },
-      { name: 'PostgreSQL', icon: SiPostgresql, color: '#4169E1' },
-      { name: 'MongoDB', icon: SiMongodb, color: '#47A248' },
-      { name: 'Docker', icon: SiDocker, color: '#2496ED' },
+      { name: 'Pandas', icon: SiPandas, color: '#150458' },
       { name: 'Git', icon: SiGit, color: '#F05032' },
     ],
   },
@@ -94,8 +91,6 @@ const experiences: ExperienceItem[] = [
       { name: 'Python', icon: SiPython, color: '#3776AB' },
       { name: 'Pandas', icon: SiPandas, color: '#150458' },
       { name: 'NumPy', icon: SiNumpy, color: '#013243' },
-      { name: 'PostgreSQL', icon: SiPostgresql, color: '#4169E1' },
-      { name: 'AWS', icon: FaAws, color: '#FF9900' },
       { name: 'Git', icon: SiGit, color: '#F05032' },
     ],
   },
@@ -219,10 +214,10 @@ export const Experience = () => {
             <span className="text-sm text-primary font-medium">Experience</span>
           </div>
           <h2 className="font-display text-4xl sm:text-5xl font-bold mb-6">
-            Professional <span className="gradient-text">Track Record</span>
+            Professional <span className="gradient-text">Experience</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Professional software, research, backend, data, and enterprise training experience across production tools, reproducible analysis, and applied AI/ML workflows.
+            Software engineering, data, research, and technical training experience across industry, nonprofit, university, and government research environments.
           </p>
         </motion.div>
 
