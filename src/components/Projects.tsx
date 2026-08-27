@@ -69,10 +69,12 @@ const projectCoverImages = {
   systems: remoteCover('photo-1518779578993-ec3579fee39f'),
   vision: remoteCover('photo-1535378917042-10a22c95931a'),
   web: remoteCover('photo-1461749280684-dccba630e2f6'),
+  opensource: remoteCover('photo-1618401471353-b98afee0b2eb'),
 };
 
 const roles = [
   'All Projects',
+  'Open Source',
   'Software Developer',
   'Data Engineer',
   'Full Stack Developer',
@@ -90,6 +92,7 @@ const getProjectCoverSrc = (project: Project) => {
 
   const haystack = `${project.title} ${project.role} ${project.subject || ''} ${project.context}`.toLowerCase();
 
+  if (haystack.includes('automodel') || haystack.includes('nemo') || haystack.includes('nvidia') || haystack.includes('flexmeasures') || haystack.includes('timely-beliefs') || haystack.includes('aquascope') || haystack.includes('open source')) return projectCoverImages.opensource;
   if (haystack.includes('co2') || haystack.includes('climate') || haystack.includes('satellite')) return projectCoverImages.climate;
   if (haystack.includes('inpainting') || haystack.includes('vision') || haystack.includes('face') || haystack.includes('image')) return projectCoverImages.vision;
   if (haystack.includes('aviation')) return projectCoverImages.aviation;
@@ -108,6 +111,120 @@ const getProjectCoverSrc = (project: Project) => {
 };
 
 const projects: Project[] = [
+  {
+    title: 'Career Job Monitor — Automated SWE & AI Opportunity Engine',
+    role: 'Software Developer',
+    status: 'Live',
+    context: 'Automated Multi-Source Opportunity Engine · 30-Min Schedule',
+    subject: 'Automation & Systems',
+    overview:
+      'Production automated job monitoring pipeline tracking SWE, Data, and AI openings across leading technology portals every 30 minutes with multi-criteria experience, visa sponsorship, and skill matching.',
+    technologies: ['Node.js', 'GitHub Actions', 'JavaScript', 'REST APIs', 'CI/CD', 'Automation', 'Data Pipelines'],
+    keyFeatures: [
+      'Engineered automated Cron workflow executing every 30 minutes to discover active job requisitions across top enterprise portals.',
+      'Implemented automated multi-layer qualification filters for experience levels, new grad roles, and sponsorship availability.',
+      'Maintains deterministic historical state tracking, decision records, and Markdown summary dashboards.',
+      'Automated candidate alerting and structured JSON data feeds for live client dashboard integration.',
+    ],
+    outcome:
+      'Eliminated manual job board hunting with automated real-time discovery, qualification, and structured reporting.',
+    icon: Workflow,
+    githubUrl: 'https://github.com/taran-dev4u/career-job-monitor',
+  },
+  {
+    title: 'Django-CRM — Multi-Tenant Lead Enrichment & Engine Architecture',
+    role: 'Open Source',
+    status: 'Completed',
+    context: 'Django-CRM (1,000+ Stars) · Production Open Source Contributions',
+    overview:
+      'Open-source engineering contributions to Django-CRM implementing multi-tenant REST API architecture, duplicate lead detection algorithms, and cloud attachment pipelines.',
+    technologies: ['Python', 'Django', 'Django REST Framework', 'PostgreSQL', 'Multi-Tenancy', 'pytest', 'Docker'],
+    keyFeatures: [
+      'Engineered high-performance lead deduplication algorithms across contact accounts and business opportunities.',
+      'Optimized multi-tenant schema isolation boundaries and query execution plans for enterprise scalability.',
+      'Authored comprehensive unit and integration test coverage validating tenant data boundaries.',
+      'Documented API schemas and contribution guidelines for 1,000+ open-source deployments.',
+    ],
+    outcome:
+      'Enhanced CRM data integrity, deduplication accuracy, and multi-tenant performance for large-scale enterprise deployments.',
+    icon: ServerCog,
+    githubUrl: 'https://github.com/taran-dev4u/django-crm-lead-enrichment',
+  },
+  {
+    title: 'NVIDIA NeMo Automodel — VLM Processor Artifact Serialization',
+    role: 'Open Source',
+    status: 'Completed',
+    context: 'NVIDIA-NeMo/Automodel (867+ Stars) · Merged Upstream PR #3379',
+    overview:
+      'Production open-source contribution to NVIDIA NeMo Automodel adding robust artifact serialization for Vision-Language Model (VLM) processors with tokenizer fallback mechanisms when merging LoRA adapter weights.',
+    technologies: ['Python', 'PyTorch', 'Hugging Face', 'Transformers', 'LoRA', 'VLM', 'pytest', 'CI/CD'],
+    keyFeatures: [
+      'Implemented automated VLM processor artifact saving during standalone LoRA merging in tools/merge_lora.py.',
+      'Engineered fallback detection for AutoProcessor and AutoTokenizer for seamless backward compatibility.',
+      'Authored dependency-safe mock unit test suite validating AutoProcessor.from_pretrained and save_pretrained invocations.',
+      'Passed full repository test suites, DCO sign-off, Ruff linting, and maintainer review by the NVIDIA NeMo team.',
+    ],
+    outcome:
+      'Eliminated runtime processor mismatch errors for multimodal models post-LoRA merge in enterprise production environments.',
+    icon: BrainCircuit,
+    githubUrl: 'https://github.com/NVIDIA-NeMo/Automodel/pull/3379',
+  },
+  {
+    title: 'FlexMeasures — Multi-Tenant Account Role Filtering',
+    role: 'Open Source',
+    status: 'Completed',
+    context: 'FlexMeasures/flexmeasures (206+ Stars) · Merged Upstream PR #2353',
+    overview:
+      'Full-stack open-source feature implementation adding authorization-bounded account role filtering to the FlexMeasures REST API and access-scoped management UI.',
+    technologies: ['Python', 'Flask', 'SQLAlchemy', 'Marshmallow', 'OpenAPI', 'Jinja2', 'pytest'],
+    keyFeatures: [
+      'Added secure multi-tenant role filtering queries to backend Accounts API endpoints with explicit security boundaries.',
+      'Built responsive, access-scoped UI selector component for tenant administrators.',
+      'Implemented comprehensive test coverage covering tenant isolation, multi-role users, and pagination boundaries.',
+      'Generated updated OpenAPI specifications and user-facing changelog documentation.',
+    ],
+    outcome:
+      'Streamlined user role governance for energy asset operators while strictly enforcing multi-tenant isolation boundaries.',
+    icon: ServerCog,
+    githubUrl: 'https://github.com/FlexMeasures/flexmeasures/pull/2353',
+  },
+  {
+    title: 'timely-beliefs — BeliefSource Strict Total Ordering',
+    role: 'Open Source',
+    status: 'Completed',
+    context: 'SeitaBV/timely-beliefs · Merged Upstream PR #245',
+    overview:
+      'Fixed a core data-integrity bug by enforcing strict total ordering on BeliefSource to prevent silent NaN value generation during Pandas MultiIndex alignment.',
+    technologies: ['Python', 'Pandas', 'SQLAlchemy', 'MultiIndex', 'Data Modeling', 'pytest'],
+    keyFeatures: [
+      'Implemented strict total ordering on BeliefSource via __lt__ using a stable tiebreaker while preserving SQLAlchemy identity hashing.',
+      'Prevented non-deterministic sorting issues that caused silent NaNs when aligning time-series BeliefsDataFrames.',
+      'Added comprehensive regression unit tests verifying total ordering, sort stability, and Pandas index alignment.',
+    ],
+    outcome:
+      'Restored deterministic time-series alignment for multi-source probabilistic sensor data across downstream analytics pipelines.',
+    icon: Database,
+    githubUrl: 'https://github.com/SeitaBV/timely-beliefs/pull/245',
+  },
+  {
+    title: 'AquaScope — Extreme Value Theory & Hydrology Intelligence Platform',
+    role: 'Open Source',
+    status: 'Live',
+    context: 'Rekin226/aquascope · 9 Merged Upstream PRs',
+    overview:
+      'Engineered core scientific and statistical modules for AquaScope, including Extreme Value Theory flood frequency bounds, Mann-Kendall trend tests, Sen’s slope, and live catchment data collectors.',
+    technologies: ['Python', 'NumPy', 'SciPy', 'Extreme Value Theory', 'Streamlit', 'GeoJSON', 'GitHub Actions'],
+    keyFeatures: [
+      'Seeded MLE GEV distribution fitting with L-moments and enforced shape constraints to prevent return-period quantile explosions on 40-year records (PR #154).',
+      'Vectorized pure SciPy/NumPy implementations of Mann-Kendall statistical trend detection and Sen’s slope estimator (PR #147).',
+      'Shipped CAMELS-BR data collector parsing 897 Brazilian catchments into standardized OGC GeoJSON schemas (PR #140).',
+      'Built standalone CI GitHub Action verifying PR changelog requirements with custom unit test guards (PR #150).',
+    ],
+    outcome:
+      'Strengthened AquaScope’s hydrological modeling accuracy, statistical rigor, and CI quality gates across 27+ live international water sources.',
+    icon: Layers3,
+    githubUrl: 'https://github.com/Rekin226/aquascope/pulls?q=is%3Apr+author%3Ataran-dev4u',
+  },
   {
     title: 'Atmospheric CO2 and LULC Modeling Pipeline',
     role: 'Machine Learning Engineer',
@@ -596,7 +713,7 @@ const projects: Project[] = [
     outcome:
       'Improved frontend implementation practice with a concrete browser-based utility project.',
     icon: ShieldCheck,
-    githubUrl: 'https://github.com/taran-dev4u/WebDev-Projects',
+    githubUrl: 'https://github.com/taran-dev4u/WebDev-Works',
   },
   {
     title: 'Competitive Programming Lab Archive',
@@ -830,10 +947,15 @@ const getProjectTags = (project: Project) => {
 };
 
 const priorityProjectTitles = [
+  'NVIDIA NeMo Automodel — VLM Processor Artifact Serialization',
+  'AquaScope — Extreme Value Theory & Hydrology Intelligence Platform',
+  'Career Job Monitor — Automated SWE & AI Opportunity Engine',
+  'Django-CRM — Multi-Tenant Lead Enrichment & Engine Architecture',
+  'FlexMeasures — Multi-Tenant Account Role Filtering',
   'Atmospheric CO2 and LULC Modeling Pipeline',
-  'Real-Time Streaming Data Pipeline',
-  'Enterprise RAG Knowledge System',
-  'End-to-End MLOps Pipeline',
+  'Enhanced Image Inpainting With Transformer-GAN',
+  'Aviation Accident Analysis: Trends, Causes, and Safety Measures',
+  'timely-beliefs — BeliefSource Strict Total Ordering',
   'Pintos User Programs and System Calls',
   'Stock Market Database for Real-Time Analysis',
 ];

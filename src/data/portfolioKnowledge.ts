@@ -24,6 +24,37 @@ export type PortfolioKnowledgeItem = {
 
 export const portfolioKnowledge: PortfolioKnowledgeItem[] = [
   {
+    id: 'project-career-job-monitor',
+    title: 'Career Job Monitor — Automated SWE & AI Opportunity Engine',
+    section: 'projects',
+    roleTags: ['Software Engineer', 'Data Engineer', 'Backend Developer'],
+    skillTags: ['Node.js', 'GitHub Actions', 'JavaScript', 'REST APIs', 'Automation', 'CI/CD', 'data pipelines'],
+    summary:
+      'An automated production job monitoring system running every 30 minutes to track SWE, Data, and AI openings across major enterprise portals with experience and sponsorship filtering.',
+    details: [
+      'Executes scheduled 30-minute GitHub Actions workflows to scrape and parse corporate career portals.',
+      'Applies multi-criteria qualification for new grad, mid, and senior levels along with visa sponsorship flags.',
+      'Maintains deterministic historical state, decision history, and auto-generated Markdown dashboards.',
+    ],
+    href: '#projects',
+  },
+  {
+    id: 'project-django-crm',
+    title: 'Django-CRM Multi-Tenant Lead Enrichment & Engine',
+    section: 'projects',
+    roleTags: ['Open Source', 'Software Engineer', 'Backend Developer', 'Full Stack Developer'],
+    skillTags: ['Python', 'Django', 'Django REST Framework', 'PostgreSQL', 'Multi-Tenancy', 'pytest', 'Docker'],
+    summary:
+      'Core open-source contributions to Django-CRM (1,000+ Stars) adding multi-tenant REST APIs, duplicate lead detection, and cloud attachment pipelines.',
+    details: [
+      'Implemented duplicate lead detection algorithms across contacts and opportunities.',
+      'Strengthened multi-tenant database isolation boundaries and query performance.',
+      'Authored unit and integration test suites validating tenant isolation and API contracts.',
+    ],
+    href: '#projects',
+  },
+
+  {
     id: 'profile-overview',
     title: 'Taran Mamidala profile overview',
     section: 'about',
@@ -51,6 +82,22 @@ export const portfolioKnowledge: PortfolioKnowledgeItem[] = [
       'Contact options include email, GitHub, and LinkedIn.',
     ],
     href: '#hero',
+  },
+  {
+    id: 'open-source-contributions',
+    title: 'Open Source Engineering & Upstream Contributions',
+    section: 'projects',
+    roleTags: ['Open Source', 'Software Engineer', 'AI Engineer', 'Data Engineer', 'Backend Developer'],
+    skillTags: ['Open Source', 'PyTorch', 'Hugging Face', 'Transformers', 'LoRA', 'Flask', 'SQLAlchemy', 'Pandas', 'NumPy', 'SciPy', 'Streamlit', 'GitHub Actions', 'pytest'],
+    summary:
+      'Taran is an active open-source contributor with merged pull requests across premier enterprise and scientific open-source ecosystems including NVIDIA NeMo, FlexMeasures, timely-beliefs, and AquaScope.',
+    details: [
+      'NVIDIA-NeMo/Automodel (867+ Stars): Merged PR #3379 adding mock test coverage and artifact serialization logic for VLM processors with tokenizer fallbacks during LoRA adapter weight merges.',
+      'FlexMeasures/flexmeasures (206+ Stars): Merged PR #2353 implementing authorization-bounded multi-tenant account role filtering in the REST API and access-scoped management UI.',
+      'SeitaBV/timely-beliefs: Merged PR #245 enforcing strict total ordering on BeliefSource to eliminate silent NaN values during Pandas MultiIndex alignment.',
+      'Rekin226/aquascope: 9 merged PRs (#154, #150, #148, #147, #145, #140, #137, #132, #131) and 1 active PR (#269) engineering Extreme Value Theory flood frequency bounds with L-moments, vectorized Mann-Kendall trend tests, Sen’s slope, CAMELS-BR 897-catchment collector, and CI changelog automation.',
+    ],
+    href: '#projects',
   },
   {
     id: 'skills-technical-expertise',
