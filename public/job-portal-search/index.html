@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/styles.css">
-    <script src="h1b-intelligence/data.js"></script>
+    <script src="h1b-intelligence/data.js" onerror="this.onerror=null; this.src='../_portal_pages_publish/public/job-portal-search/h1b-intelligence/data.js';"></script>
     <script src="assets/app.js" defer></script>
   </head>
   <body>
@@ -26,8 +26,6 @@
       </div>
       <div class="top-actions">
         <span class="status-pill">Static, no scraping</span>
-        <a class="ghost-button" href="job-scout/index.html">Job Scout</a>
-        <a class="ghost-button" href="h1b-intelligence/index.html">H1B Intel</a>
         <button class="ghost-button" type="button" id="themeToggle" aria-label="Toggle color theme">Dark mode</button>
       </div>
     </header>
@@ -40,10 +38,9 @@
         <button type="button" id="fastApplyButton">Fast Apply</button>
         <button type="button" id="quickApplyButton">Quick Apply</button>
         <button type="button" id="freshDirectButton">Fresh ATS</button>
-        <a href="job-scout/index.html">Job Scout</a>
         <a href="#careersHeading">Companies</a>
         <a href="#sponsorsHeading">H1B Sponsors</a>
-        <a href="h1b-intelligence/index.html">H1B Intel</a>
+        <a href="h1b-intelligence/">H1B Intel</a>
         <a href="#vendorHeading">Vendors</a>
         <a href="#resourcesHeading">Resources</a>
       </nav>
@@ -206,19 +203,18 @@
           </label>
 
           <label class="field" for="customSourceName">
-            <span>Custom source label(s)</span>
-            <input id="customSourceName" name="customSourceName" type="text" autocomplete="off" placeholder="My board, Backup board">
+            <span>Custom source</span>
+            <input id="customSourceName" name="customSourceName" type="text" autocomplete="off" placeholder="My custom link">
           </label>
 
           <label class="field field-wide" for="customSourceUrl">
-            <span>Custom source URL(s)</span>
-            <textarea id="customSourceUrl" name="customSourceUrl" rows="3" autocomplete="off" placeholder="Label | https://example.com/jobs?q={role}&location={location}"></textarea>
-            <small>One per line. Tokens: {role}, {query}, {location}, {time}, {source}.</small>
+            <span>Custom source URL</span>
+            <input id="customSourceUrl" name="customSourceUrl" type="text" autocomplete="off" placeholder="https://example.com/jobs?q={role}&location={location}">
           </label>
 
           <div class="field custom-link-tools">
             <span>Portable link</span>
-            <button class="secondary-button" type="button" id="copyCustomSyncButton">Copy Permanent Sync Link</button>
+            <button class="secondary-button" type="button" id="copyCustomSyncButton">Copy Sync Link</button>
           </div>
 
           <label class="field field-wide" for="excludeTerms">
@@ -454,13 +450,12 @@
             <input id="companyExcludeTerms" type="text" autocomplete="off" placeholder="unpaid, clearance, senior">
           </label>
           <label class="field" for="companyCustomLinkName">
-            <span>Custom company label(s)</span>
-            <input id="companyCustomLinkName" type="text" autocomplete="off" placeholder="Referral search, Alumni search">
+            <span>Custom company link</span>
+            <input id="companyCustomLinkName" type="text" autocomplete="off" placeholder="My company link">
           </label>
           <label class="field company-wide" for="companyCustomLinkUrl">
-            <span>Custom company URL(s)</span>
-            <textarea id="companyCustomLinkUrl" rows="3" autocomplete="off" placeholder="Label | https://example.com/search?company={company}&q={role}"></textarea>
-            <small>Saved instantly in this browser and protected by the vault. For another system, open the Permanent Sync Link or restore a Vault Backup.</small>
+            <span>Custom company URL</span>
+            <input id="companyCustomLinkUrl" type="text" autocomplete="off" placeholder="https://example.com/search?company={company}&q={role}">
           </label>
           <label class="field" for="companySortSelect">
             <span>Company order</span>
@@ -495,17 +490,6 @@
               <option value="vendor">Staffing/vendors</option>
             </select>
           </label>
-        </div>
-        <div class="company-vault-panel" id="companyVaultPanel">
-          <div>
-            <strong>Company link vault</strong>
-            <span id="companyVaultStatus">Loading saved Careers links and pinned companies...</span>
-          </div>
-          <div class="company-vault-actions">
-            <button class="secondary-button" type="button" id="copyCompanyVaultButton">Copy Vault Backup</button>
-            <button class="secondary-button" type="button" id="restoreCompanyVaultButton">Restore Vault</button>
-            <button class="secondary-button" type="button" id="copyCompanyVaultSyncButton">Copy Permanent Sync Link</button>
-          </div>
         </div>
         <div class="company-card" id="companyCard"></div>
       </section>
